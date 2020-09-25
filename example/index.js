@@ -1,3 +1,6 @@
+const Moleculer = require('../dist/moleculer.umd')
+console.log(Moleculer)
+
 const { ServiceBroker } = require('../dist/moleculer.umd')
 
 const broker = window.broker = new ServiceBroker({

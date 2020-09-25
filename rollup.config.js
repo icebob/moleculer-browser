@@ -16,10 +16,6 @@ import { normalizePath } from './src/utils'
 
 import pkg from './package.json'
 
-function norm (p) {
-  return p.split(path.sep).join('/')
-}
-
 const isProduction = process.env.NODE_ENV === 'production'
 
 const moleculerSrcPath = 'node_modules/moleculer/src/**'
@@ -47,6 +43,13 @@ const config = async () => {
         include: moleculerSrcPath,
         'nodejs': 'type: "browser"',
         delimiters: ['type: "', '"']
+      }),
+      replace({
+        include: moleculerSrcPath,
+        'v8': 'null',
+        'gc-stats': 'null',
+        'event-loop-stats': 'null',
+        delimiters: ['require("', '")']
       }),
       // For some reason injecting `process` breaks the sourcemap so we have to replace the `process` keyword.
       replace({
