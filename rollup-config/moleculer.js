@@ -2,8 +2,10 @@ import path from 'path'
 
 import { aliasResolve } from './module-resolver'
 
+import { normalizePath } from '../src/utils'
+
 const moleculerModules = (paths, namespace = '') => {
-  const fullPaths = paths.map(pathname => path.resolve(`node_modules/moleculer/src/${namespace}/${pathname}`))
+  const fullPaths = paths.map(pathname => normalizePath(path.resolve(`node_modules/moleculer/src/${namespace}/${pathname}`)))
   return [
     ...paths,
     ...fullPaths
@@ -52,8 +54,8 @@ aliasModules = aliasResolve([
   ...serializers
 ], 'src/fallback/unloaded-serializer.js', aliasModules)
 
-aliasModules['./cpu-usage'] = path.resolve('src/cpu-usage.js')
-aliasModules['./logger'] = path.resolve('src/logger.js')
+aliasModules['./cpu-usage'] = normalizePath(path.resolve('src/cpu-usage.js'))
+aliasModules['./logger'] = normalizePath(path.resolve('src/logger.js'))
 
 export {
   aliasModules,

@@ -6,14 +6,19 @@ import commonjs from 'rollup-plugin-commonjs'
 import alias from 'rollup-plugin-alias'
 import inject from 'rollup-plugin-inject'
 import analyze from 'rollup-plugin-analyzer'
-import replace from 'rollup-plugin-replace'
+import replace from '@rollup/plugin-replace'
 import visualizer from 'rollup-plugin-visualizer'
 import { terser } from 'rollup-plugin-terser'
 
 import { externalResolve } from './rollup-config/module-resolver'
 import { aliasModules, builtInModules } from './rollup-config/moleculer'
+import { normalizePath } from './src/utils'
 
 import pkg from './package.json'
+
+function norm (p) {
+  return p.split(path.sep).join('/')
+}
 
 const isProduction = process.env.NODE_ENV === 'production'
 
@@ -34,7 +39,7 @@ const config = async () => {
       replace({
         include: moleculerSrcPath,
         'os.cpus': 'require("cpus")',
-        'os.loadavg': `require("${path.resolve('src/cpu-usage')}").loadavg`,
+        'os.loadavg': `require("${normalizePath(path.resolve('src/cpu-usage.js'))}").loadavg`,
         'os.totalmem': '(() => performance ? performance.memory.totalJSHeapSize : 0)',
         'os.freemem': '(() => performance ? performance.memory.totalJSHeapSize - performance.memory.usedJSHeapSize : 0)'
       }),
@@ -46,7 +51,7 @@ const config = async () => {
       // For some reason injecting `process` breaks the sourcemap so we have to replace the `process` keyword.
       replace({
         include: moleculerSrcPath,
-        'process': `require('${path.resolve('src/shims/process.js')}').`,
+        'process': `require('${normalizePath(path.resolve('src/shims/process.js'))}').`,
         delimiters: ['', '.']
       }),
       alias(aliasModules),
@@ -59,8 +64,8 @@ const config = async () => {
       inject({
         include: moleculerSrcPath,
         modules: {
-          setTimeout: path.resolve('src/shims/timeout.js'),
-          setInterval: path.resolve('src/shims/interval.js')
+          setTimeout: normalizePath(path.resolve('src/shims/timeout.js')),
+          setInterval: normalizePath(path.resolve('src/shims/interval.js'))
         }
       }),
       isProduction && terser(),
