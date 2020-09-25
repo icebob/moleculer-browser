@@ -12,7 +12,11 @@ const broker = window.broker = new ServiceBroker({
       colors: false
     }
   },
-  logLevel: 'debug'
+  logLevel: 'debug',
+  metrics: {
+    enabled: true,
+    reporter: 'Console'
+  }
 })
 
 broker.createService({

@@ -57,6 +57,7 @@ const config = async () => {
       // For some reason injecting `process` breaks the sourcemap so we have to replace the `process` keyword.
       replace({
         include: moleculerSrcPath,
+        exclude: 'node_modules/moleculer/src/metrics/constants.js',
         'process': `require('${normalizePath(path.resolve('src/shims/process.js'))}').`,
         delimiters: ['', '.']
       }),

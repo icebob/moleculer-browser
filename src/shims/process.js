@@ -53,4 +53,11 @@ _process.uptime = () => {
 
 _process.pid = 0
 
+_process._getActiveHandles = function () {
+  return []
+}
+_process._getActiveRequests = function () {
+  return []
+}
+
 export default _process
