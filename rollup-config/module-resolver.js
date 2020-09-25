@@ -2,12 +2,13 @@ import path from 'path'
 import { promises as fs } from 'fs'
 
 import fg from 'fast-glob'
+import { normalizePath } from '../src/utils'
 
 const getNodeModules = async () => {
   let packages = await fg('**/package.json', { dot: true, cwd: 'node_modules' })
 
   packages = await Promise.all(packages
-    .map(pathname => path.resolve(path.join('node_modules', pathname)))
+    .map(pathname => normalizePath(path.resolve(path.join('node_modules', pathname))))
     .map(pathname => fs.readFile(pathname)))
 
   return packages
@@ -17,7 +18,7 @@ const getNodeModules = async () => {
 
 export function aliasResolve (modules, into, result = {}) {
   return modules.reduce((curr, next) => {
-    curr[next] = path.resolve(into)
+    curr[next] = normalizePath(path.resolve(into))
     return curr
   }, result)
 }
