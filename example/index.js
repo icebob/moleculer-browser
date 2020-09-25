@@ -14,8 +14,12 @@ const broker = window.broker = new ServiceBroker({
   },
   logLevel: 'debug',
   metrics: {
-    enabled: true,
+    enabled: false,
     reporter: 'Console'
+  },
+  tracing: {
+    enabled: true,
+    exporter: 'Console'
   }
 })
 
