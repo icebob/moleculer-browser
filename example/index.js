@@ -27,5 +27,8 @@ broker.createService({
 broker.start()
 // Call service
   .then(() => broker.call('math.add', { a: 5, b: 3 }))
-  .then(res => console.log('5 + 3 =', res))
+  .then(res => console.log('Call local service: 5 + 3 =', res))
+  .catch(err => console.error(`Error occured! ${err.message}`))
+  .then(() => broker.call('posts.list'))
+  .then(res => console.log('Call backend service: posts.list', res))
   .catch(err => console.error(`Error occured! ${err.message}`))
