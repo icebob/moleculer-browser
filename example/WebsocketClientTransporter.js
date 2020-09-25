@@ -17,17 +17,22 @@ class WebsocketServerTransporter extends BaseTransporter {
 
   async connect () {
     const loc = window.location
-    this.socket = IO(`ws://${loc.hostname}:${this.opts.port}/`)
+    const addr = `${loc.protocol.replace('http', 'ws')}//${loc.hostname}:${this.opts.port}/`
+    this.logger.info(`Connecting to '${addr}'...`)
+    this.socket = IO(addr)
 
     // Add a connect listener
     this.socket.on('connect', () => {
       this.logger.info(`Websocket client connected.`)
-
-      this.socket.on('disconnect', () => {
-        this.logger.info(`Websocket client disconnected`)
-      })
-
       this.onConnected()
+    })
+
+    this.socket.on('disconnect', () => {
+      this.logger.info(`Websocket client disconnected`)
+    })
+
+    this.socket.on('reconnect', () => {
+      this.logger.info(`Websocket client reconnected.`)
     })
   }
 
@@ -57,10 +62,12 @@ class WebsocketServerTransporter extends BaseTransporter {
   async subscribe (cmd, nodeID) {
     const t = this.getTopicName(cmd, nodeID)
 
-    this.socket.on(t, data => {
-      const msg = this.arrayBufferToString(data)
-      this.receive(cmd, msg)
-    })
+    if (!this.socket.hasListeners(t)) {
+      this.socket.on(t, data => {
+        const msg = this.arrayBufferToString(data)
+        this.receive(cmd, msg)
+      })
+    }
   }
 
   /**
