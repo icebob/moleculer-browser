@@ -1,6 +1,6 @@
 import 'regenerator-runtime/runtime'
 
-const { ServiceBroker } = require('../dist/moleculer.umd')
+const { ServiceBroker } = require('../../dist/moleculer.umd')
 const WebsocketClientTransporter = require('./WebsocketClientTransporter')
 
 const broker = window.broker = new ServiceBroker({
@@ -12,7 +12,7 @@ const broker = window.broker = new ServiceBroker({
       colors: false
     }
   },
-  logLevel: 'debug',
+  logLevel: 'info',
   metrics: {
     enabled: false,
     reporter: 'Console'

@@ -16,8 +16,9 @@
     "lint": "eslint --ignore-path .gitignore \"**/*.js\"",
     "version": "chan release ${npm_package_version} && git add .",
     "prepublishOnly": "npm test && npm run build",
-    "example": "npm run build && parcel example/index.html --no-cache -d example/dist",
-    "example:prod": "npm run build && parcel build example/index.html --no-cache -d example/build"
+    "example": "npm run build && parcel examples/simple/index.html --no-cache -d examples/simple/dist",
+    "example:full:client": "npm run build && parcel examples/fullstack/index.html --no-cache -d examples/fullstack/dist",
+    "example:full:server": "node examples/fullstack/server.js"
   },
   "dependencies": {
     "browser-process-hrtime": "^1.0.0",
@@ -65,7 +66,8 @@
     "rollup-plugin-terser": "^5.0.0",
     "rollup-plugin-visualizer": "^2.4.4",
     "socket.io": "2.3.0",
-    "socket.io-client": "2.3.0"
+    "socket.io-client": "2.3.0",
+    "webpack": "^4.44.2"
   },
   "jest": {
     "preset": "jest-puppeteer",

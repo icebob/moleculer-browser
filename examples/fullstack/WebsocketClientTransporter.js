@@ -1,6 +1,6 @@
 import IO from 'socket.io-client'
 
-const BaseTransporter = require('../dist/moleculer.umd').Transporters.Base
+const BaseTransporter = require('../../dist/moleculer.umd').Transporters.Base
 
 class WebsocketServerTransporter extends BaseTransporter {
   constructor (opts) {
