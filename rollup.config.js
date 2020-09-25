@@ -53,15 +53,16 @@ const config = async () => {
         v8: 'null',
         'gc-stats': 'null',
         'event-loop-stats': 'null',
+        kleur: `require("${normalizePath(path.resolve('src/kleur.js'))}")`,
         delimiters: ['require("', '")']
       }),
       // For some reason injecting `process` breaks the sourcemap so we have to replace the `process` keyword.
-      replace({
+      /* replace({
         include: moleculerSrcPath,
         exclude: 'node_modules/moleculer/src/metrics/constants.js',
         process: `require('${normalizePath(path.resolve('src/shims/process.js'))}').`,
         delimiters: ['', '.']
-      }),
+      }), */
       alias({ entries: aliasModules }),
       json(),
       resolve({
@@ -72,6 +73,7 @@ const config = async () => {
       inject({
         include: moleculerSrcPath,
         modules: {
+          process: normalizePath(path.resolve('src/shims/process.js')),
           setTimeout: normalizePath(path.resolve('src/shims/timeout.js')),
           setInterval: normalizePath(path.resolve('src/shims/interval.js'))
         }
