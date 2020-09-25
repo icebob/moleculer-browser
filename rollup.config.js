@@ -1,10 +1,11 @@
 import path from 'path'
 
-import json from 'rollup-plugin-json'
+import json from '@rollup/plugin-json'
+// import resolve from '@rollup/plugin-node-resolve'
 import resolve from 'rollup-plugin-node-resolve'
-import commonjs from 'rollup-plugin-commonjs'
-import alias from 'rollup-plugin-alias'
-import inject from 'rollup-plugin-inject'
+import commonjs from '@rollup/plugin-commonjs'
+import alias from '@rollup/plugin-alias'
+import inject from '@rollup/plugin-inject'
 import analyze from 'rollup-plugin-analyzer'
 import replace from '@rollup/plugin-replace'
 import visualizer from 'rollup-plugin-visualizer'
@@ -44,12 +45,12 @@ const config = async () => {
       }),
       replace({
         include: moleculerSrcPath,
-        'nodejs': 'type: "browser"',
+        nodejs: 'type: "browser"',
         delimiters: ['type: "', '"']
       }),
       replace({
         include: moleculerSrcPath,
-        'v8': 'null',
+        v8: 'null',
         'gc-stats': 'null',
         'event-loop-stats': 'null',
         delimiters: ['require("', '")']
@@ -58,14 +59,14 @@ const config = async () => {
       replace({
         include: moleculerSrcPath,
         exclude: 'node_modules/moleculer/src/metrics/constants.js',
-        'process': `require('${normalizePath(path.resolve('src/shims/process.js'))}').`,
+        process: `require('${normalizePath(path.resolve('src/shims/process.js'))}').`,
         delimiters: ['', '.']
       }),
-      alias(aliasModules),
+      alias({ entries: aliasModules }),
       json(),
       resolve({
         preferBuiltins: true,
-        only: ['moleculer']
+        resolveOnly: ['moleculer']
       }),
       commonjs(),
       inject({

@@ -91,7 +91,7 @@ let aliasModules = aliasResolve([
   ...TracingExporters,
   ...Middlewares,
   './src/runner',
-  normalizePath(path.resolve(`node_modules/moleculer/src/runner.js`)),
+  normalizePath(path.resolve('node_modules/moleculer/src/runner.js')),
   'moleculer-repl'
 ], 'src/fallback/non-compatible.js')
 
