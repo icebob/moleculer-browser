@@ -9,6 +9,7 @@ import analyze from 'rollup-plugin-analyzer'
 import replace from '@rollup/plugin-replace'
 import visualizer from 'rollup-plugin-visualizer'
 import { terser } from 'rollup-plugin-terser'
+// import builtins from 'rollup-plugin-node-builtins'
 
 import { externalResolve } from './rollup-config/module-resolver'
 import { aliasModules, builtInModules } from './rollup-config/moleculer'
@@ -32,6 +33,8 @@ const config = async () => {
       sourcemap: true
     },
     plugins: [
+      // builtins(),
+
       replace({
         include: moleculerSrcPath,
         'os.cpus': 'require("cpus")',

@@ -102,7 +102,7 @@ aliasModules = aliasResolve([
 aliasModules['./cpu-usage'] = normalizePath(path.resolve('src/cpu-usage.js'))
 // aliasModules['./logger'] = normalizePath(path.resolve('src/logger.js'))
 
-console.log('Alias modules', aliasModules)
+// console.log('Alias modules', aliasModules)
 
 export {
   aliasModules,
