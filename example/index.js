@@ -1,17 +1,18 @@
-const Moleculer = require('../dist/moleculer.umd')
-console.log(Moleculer)
+import 'regenerator-runtime/runtime'
 
 const { ServiceBroker } = require('../dist/moleculer.umd')
+const WebsocketClientTransporter = require('./WebsocketClientTransporter')
 
 const broker = window.broker = new ServiceBroker({
-  transporter: { type: 'fake' },
-  serializer: 'Json',
+  nodeID: 'frontend',
+  transporter: new WebsocketClientTransporter(),
   logger: {
     type: 'Console',
     options: {
       colors: false
     }
-  }
+  },
+  logLevel: 'debug'
 })
 
 broker.createService({
