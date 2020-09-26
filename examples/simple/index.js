@@ -1,13 +1,9 @@
-const { ServiceBroker } = require('../../dist/moleculer.umd')
+import Moleculer, { ServiceBroker } from '../../dist/moleculer.umd'
+console.log('Moleculer', Moleculer)
 
 const broker = window.broker = new ServiceBroker({
   transporter: 'Fake',
-  logger: {
-    type: 'Console',
-    options: {
-      colors: false
-    }
-  }
+  logger: 'Console'
 })
 
 broker.createService({

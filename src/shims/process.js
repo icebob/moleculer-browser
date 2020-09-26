@@ -21,7 +21,7 @@ if (!_process.versions) {
 }
 
 if (!_process.versions.node) {
-  _process.versions.node = '11.9.0'
+  _process.versions.node = '12.18.4'
 }
 
 // memoryUsage
@@ -52,6 +52,8 @@ _process.uptime = () => {
 }
 
 _process.pid = 0
+
+_process.cwd = () => '/'
 
 _process._getActiveHandles = function () {
   return []

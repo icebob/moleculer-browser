@@ -1,15 +1,14 @@
 import path from 'path'
 
-import json from 'rollup-plugin-json'
-import resolve from 'rollup-plugin-node-resolve'
-import commonjs from 'rollup-plugin-commonjs'
-import alias from 'rollup-plugin-alias'
-import inject from 'rollup-plugin-inject'
+import json from '@rollup/plugin-json'
+import resolve from '@rollup/plugin-node-resolve' // works only with v7.0.0
+import commonjs from '@rollup/plugin-commonjs'
+import alias from '@rollup/plugin-alias'
+import inject from '@rollup/plugin-inject'
 import analyze from 'rollup-plugin-analyzer'
 import replace from '@rollup/plugin-replace'
 import visualizer from 'rollup-plugin-visualizer'
 import { terser } from 'rollup-plugin-terser'
-// import builtins from 'rollup-plugin-node-builtins'
 
 import { externalResolve } from './rollup-config/module-resolver'
 import { aliasModules, builtInModules } from './rollup-config/moleculer'
@@ -23,6 +22,7 @@ const moleculerSrcPath = 'node_modules/moleculer/src/**'
 
 const config = async () => {
   const external = await externalResolve(builtInModules)
+  console.log('resolve', resolve)
 
   return {
     input: 'src/index.js',
@@ -30,7 +30,9 @@ const config = async () => {
       name: 'Moleculer',
       file: pkg.main,
       format: 'umd',
-      sourcemap: true
+      sourcemap: true,
+      interop: 'auto',
+      externalLiveBindings: false
     },
     plugins: [
       // builtins(),
@@ -44,30 +46,33 @@ const config = async () => {
       }),
       replace({
         include: moleculerSrcPath,
-        'nodejs': 'type: "browser"',
+        nodejs: 'type: "browser"',
         delimiters: ['type: "', '"']
       }),
       replace({
         include: moleculerSrcPath,
-        'v8': 'null',
+        v8: 'null',
         'gc-stats': 'null',
         'event-loop-stats': 'null',
+        kleur: `require("${normalizePath(path.resolve('src/kleur.js'))}")`,
         delimiters: ['require("', '")']
       }),
       // For some reason injecting `process` breaks the sourcemap so we have to replace the `process` keyword.
       /* replace({
         include: moleculerSrcPath,
         exclude: 'node_modules/moleculer/src/metrics/constants.js',
-        'process': `require('${normalizePath(path.resolve('src/shims/process.js'))}').`,
+        process: `require('${normalizePath(path.resolve('src/shims/process.js'))}').`,
         delimiters: ['', '.']
       }), */
-      alias(aliasModules),
+      alias({ entries: aliasModules }),
       json(),
       resolve({
         preferBuiltins: true,
-        only: ['moleculer']
+        resolveOnly: ['moleculer']
       }),
-      commonjs(),
+      commonjs({
+        requireReturnsDefault: 'auto'
+      }),
       inject({
         include: moleculerSrcPath,
         modules: {
