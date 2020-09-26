@@ -1,17 +1,14 @@
 import path from 'path'
 
 import json from '@rollup/plugin-json'
-// import resolve from '@rollup/plugin-node-resolve'
-import resolve from 'rollup-plugin-node-resolve'
+import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
-// import commonjs from 'rollup-plugin-commonjs'
 import alias from '@rollup/plugin-alias'
 import inject from '@rollup/plugin-inject'
 import analyze from 'rollup-plugin-analyzer'
 import replace from '@rollup/plugin-replace'
 import visualizer from 'rollup-plugin-visualizer'
 import { terser } from 'rollup-plugin-terser'
-// import builtins from 'rollup-plugin-node-builtins'
 
 import { externalResolve } from './rollup-config/module-resolver'
 import { aliasModules, builtInModules } from './rollup-config/moleculer'
@@ -25,6 +22,7 @@ const moleculerSrcPath = 'node_modules/moleculer/src/**'
 
 const config = async () => {
   const external = await externalResolve(builtInModules)
+  console.log('resolve', resolve)
 
   return {
     input: 'src/index.js',
