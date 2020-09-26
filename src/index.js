@@ -1,1 +1,1 @@
-export * from 'moleculer'
+module.exports = require('moleculer')

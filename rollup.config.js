@@ -4,6 +4,7 @@ import json from '@rollup/plugin-json'
 // import resolve from '@rollup/plugin-node-resolve'
 import resolve from 'rollup-plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
+// import commonjs from 'rollup-plugin-commonjs'
 import alias from '@rollup/plugin-alias'
 import inject from '@rollup/plugin-inject'
 import analyze from 'rollup-plugin-analyzer'
@@ -31,7 +32,9 @@ const config = async () => {
       name: 'Moleculer',
       file: pkg.main,
       format: 'umd',
-      sourcemap: true
+      sourcemap: true,
+      interop: 'auto',
+      externalLiveBindings: false
     },
     plugins: [
       // builtins(),
@@ -69,7 +72,9 @@ const config = async () => {
         preferBuiltins: true,
         resolveOnly: ['moleculer']
       }),
-      commonjs(),
+      commonjs({
+        requireReturnsDefault: 'auto'
+      }),
       inject({
         include: moleculerSrcPath,
         modules: {
