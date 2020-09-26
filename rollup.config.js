@@ -22,7 +22,6 @@ const moleculerSrcPath = 'node_modules/moleculer/src/**'
 
 const config = async () => {
   const external = await externalResolve(builtInModules)
-  console.log('resolve', resolve)
 
   return {
     input: 'src/index.js',
