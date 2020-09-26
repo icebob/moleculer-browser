@@ -5,7 +5,11 @@ const WebsocketServerTransporter = require('./WebsocketServerTransporter')
 const broker = new ServiceBroker({
   nodeID: 'backend',
   logLevel: 'debug',
-  transporter: new WebsocketServerTransporter()
+  transporter: new WebsocketServerTransporter(),
+  tracing: {
+    enabled: true,
+    exporter: 'Console'
+  }
 })
 
 broker.createService({

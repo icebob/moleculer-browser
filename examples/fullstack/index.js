@@ -1,7 +1,7 @@
 import 'regenerator-runtime/runtime'
 
 import { ServiceBroker } from '../../dist/moleculer.umd'
-const WebsocketClientTransporter = require('./WebsocketClientTransporter')
+import WebsocketClientTransporter from './WebsocketClientTransporter'
 
 const broker = window.broker = new ServiceBroker({
   nodeID: 'frontend',

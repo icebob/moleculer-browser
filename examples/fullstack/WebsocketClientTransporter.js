@@ -23,16 +23,16 @@ class WebsocketServerTransporter extends BaseTransporter {
 
     // Add a connect listener
     this.socket.on('connect', () => {
-      this.logger.info(`Websocket client connected.`)
+      this.logger.info('Websocket client connected.')
       this.onConnected()
     })
 
     this.socket.on('disconnect', () => {
-      this.logger.info(`Websocket client disconnected`)
+      this.logger.info('Websocket client disconnected')
     })
 
     this.socket.on('reconnect', () => {
-      this.logger.info(`Websocket client reconnected.`)
+      this.logger.info('Websocket client reconnected.')
     })
   }
 
@@ -84,4 +84,4 @@ class WebsocketServerTransporter extends BaseTransporter {
   }
 };
 
-module.exports = WebsocketServerTransporter
+export default WebsocketServerTransporter
