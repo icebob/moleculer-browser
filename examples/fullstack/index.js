@@ -1,6 +1,6 @@
 import 'regenerator-runtime/runtime'
 
-const { ServiceBroker } = require('../../dist/moleculer.umd')
+import { ServiceBroker } from '../../dist/moleculer.umd'
 const WebsocketClientTransporter = require('./WebsocketClientTransporter')
 
 const broker = window.broker = new ServiceBroker({
