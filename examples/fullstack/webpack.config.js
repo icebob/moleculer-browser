@@ -1,3 +1,4 @@
+const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const path = require('path')
 
@@ -5,9 +6,7 @@ module.exports = {
   mode: 'development',
   devtool: 'cheap-module-source-map',
 
-  entry: {
-    index: path.join(__dirname, 'index.js')
-  },
+  entry: path.join(__dirname, 'index.js'),
 
   output: {
     path: path.join(__dirname, 'dist'),
@@ -28,6 +27,21 @@ module.exports = {
         }
       }
     }]
+  },
+
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        vendors: {
+          test: /[\\/]node_modules[\\/]/,
+          chunks: 'all'
+        },
+        moleculer: {
+          test: /moleculer.umd/,
+          chunks: 'all'
+        }
+      }
+    }
   },
 
   plugins: [

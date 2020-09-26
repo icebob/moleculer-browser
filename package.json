@@ -19,6 +19,7 @@
     "example": "npm run build && parcel examples/simple/index.html --no-cache -d examples/simple/dist",
     "example:full:client": "npm run build && cd examples/fullstack && webpack-dev-server --progress --mode development",
     "example:full:client:build": "npm run build && cd examples/fullstack && webpack --progress --mode production",
+    "stat": "cd examples/fullstack && webpack --json > stats.json",
     "example:full:server": "node examples/fullstack/server.js"
   },
   "dependencies": {
