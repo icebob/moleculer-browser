@@ -1,7 +1,7 @@
 import path from 'path'
 
 import json from '@rollup/plugin-json'
-import resolve from '@rollup/plugin-node-resolve'
+import resolve from '@rollup/plugin-node-resolve' // works only with v7.0.0
 import commonjs from '@rollup/plugin-commonjs'
 import alias from '@rollup/plugin-alias'
 import inject from '@rollup/plugin-inject'
