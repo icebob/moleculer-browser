@@ -17,8 +17,8 @@
     "version": "chan release ${npm_package_version} && git add .",
     "prepublishOnly": "npm test && npm run build",
     "example": "npm run build && parcel examples/simple/index.html --no-cache -d examples/simple/dist",
-    "__example:full:client": "npm run build && parcel examples/fullstack/index.html --no-cache -d examples/fullstack/dist",
     "example:full:client": "npm run build && cd examples/fullstack && webpack-dev-server --progress --mode development",
+    "example:full:client:build": "npm run build && cd examples/fullstack && webpack --progress --mode production",
     "example:full:server": "node examples/fullstack/server.js"
   },
   "dependencies": {
