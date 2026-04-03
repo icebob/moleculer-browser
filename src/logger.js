@@ -109,7 +109,7 @@ function createDefaultLogger (baseLogger, bindings, logLevel, logFormatter, logO
       if (format === 'simple') {
         message = getType(type) + ' -'
       } else if (format === 'short') {
-        message = grey(`[${new Date().toISOString().substr(11)}]`) + ' ' + getType(type) + ' ' + grey(mod + ':')
+        message = grey(`[${new Date().toISOString().slice(11)}]`) + ' ' + getType(type) + ' ' + grey(mod + ':')
       } else {
         message = grey(`[${new Date().toISOString()}]`) + ' ' + getType(type) + ' ' + grey(moduleName + ':')
       }

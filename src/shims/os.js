@@ -8,8 +8,8 @@ module.exports = {
   arch: () => 'browser',
   release: () => '0.0.0',
   uptime: () => 0,
-  cpus: cpus,
-  loadavg: loadavg,
+  cpus,
+  loadavg,
   totalmem: () => typeof performance !== 'undefined' && performance.memory ? performance.memory.totalJSHeapSize : 0,
   freemem: () => typeof performance !== 'undefined' && performance.memory ? performance.memory.totalJSHeapSize - performance.memory.usedJSHeapSize : 0,
   networkInterfaces: () => ({})

@@ -1,7 +1,6 @@
 // Provide browser-compatible shims for Node.js globals and modules
 // that moleculer-browser's UMD bundle expects at runtime.
 
-/* global globalThis */
 if (typeof globalThis.process === 'undefined') {
   globalThis.process = {
     env: {},
@@ -10,9 +9,9 @@ if (typeof globalThis.process === 'undefined') {
     versions: { node: '20.0.0' },
     cwd: function () { return '/' },
     hrtime: function (prev) {
-      var now = performance.now() * 1e-3
-      var sec = Math.floor(now)
-      var nsec = Math.floor((now % 1) * 1e9)
+      const now = performance.now() * 1e-3
+      let sec = Math.floor(now)
+      let nsec = Math.floor((now % 1) * 1e9)
       if (prev) { sec -= prev[0]; nsec -= prev[1]; if (nsec < 0) { sec--; nsec += 1e9 } }
       return [sec, nsec]
     },
