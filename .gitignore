@@ -88,3 +88,7 @@ typings/
 .dynamodb/
 
 stats.html
+
+# Generated test bundles
+test/test-bundle.js
+tests/server/dist/
