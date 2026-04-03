@@ -43,8 +43,8 @@ class WebsocketServerTransporter extends BaseTransporter {
   }
 
   arrayBufferToString (buffer) {
-    var arr = new Uint8Array(buffer)
-    var str = String.fromCharCode.apply(String, arr)
+    const arr = new Uint8Array(buffer)
+    const str = String.fromCharCode.apply(String, arr)
     if (/[\u0080-\uffff]/.test(str)) {
       throw new Error('this string seems to contain (still encoded) multibytes')
     }

@@ -1,8 +1,8 @@
 import path from 'path'
 
-import { aliasResolve } from './module-resolver'
+import { aliasResolve } from './module-resolver.mjs'
 
-import { normalizePath } from '../src/utils'
+import { normalizePath } from '../src/utils.js'
 
 const moleculerModules = (paths, namespace = '') => {
   const fullPaths = paths.map(pathname => normalizePath(path.resolve(`node_modules/moleculer/src/${namespace}/${pathname}`)))
@@ -14,7 +14,10 @@ const moleculerModules = (paths, namespace = '') => {
 
 const builtInModules = [
   'moleculer',
-  'moleculer-repl'
+  'moleculer-repl',
+  'eventemitter2',
+  'lru-cache',
+  'fastest-validator'
 ]
 
 const transporters = moleculerModules([
@@ -24,7 +27,6 @@ const transporters = moleculerModules([
   './mqtt',
   './nats',
   './redis',
-  './stan',
   './tcp'
 ], 'transporters')
 
@@ -42,12 +44,9 @@ const strategies = moleculerModules([
 ], 'strategies')
 
 const serializers = moleculerModules([
-  // serializers
-  './avro',
   './msgpack',
   './notepack',
-  './protobuf',
-  './thrift'
+  './cbor'
 ], 'serializers')
 
 const MetricReporters = moleculerModules([
@@ -68,7 +67,9 @@ const TracingExporters = moleculerModules([
 const Middlewares = moleculerModules([
   './hot-reload',
   './transmit/compression',
-  './transmit/encryption'
+  './transmit/encryption',
+  './debugging/action-logger',
+  './debugging/transit-logger'
 ], 'middlewares')
 
 const Loggers = moleculerModules([
@@ -100,7 +101,11 @@ aliasModules = aliasResolve([
 ], 'src/fallback/unloaded-serializer.js', aliasModules)
 
 aliasModules['./cpu-usage'] = normalizePath(path.resolve('src/cpu-usage.js'))
-// aliasModules['./logger'] = normalizePath(path.resolve('src/logger.js'))
+
+// Browser shims for Node.js built-in modules
+aliasModules['os'] = normalizePath(path.resolve('src/shims/os.js'))
+aliasModules['perf_hooks'] = normalizePath(path.resolve('src/shims/perf_hooks.js'))
+aliasModules['glob'] = normalizePath(path.resolve('src/fallback/non-compatible.js'))
 
 // console.log('Alias modules', aliasModules)
 

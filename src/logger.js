@@ -17,9 +17,9 @@ function extend (logger) {
     let method = logger[type]
     if (!method) {
       switch (type) {
-        case 'fatal':method = logger['error'] || logger['info']; break
-        case 'trace': method = logger['debug'] || logger['info']; break
-        default: method = logger['info']
+        case 'fatal':method = logger.error || logger.info; break
+        case 'trace': method = logger.debug || logger.info; break
+        default: method = logger.info
       }
       logger[type] = method.bind(logger)
     }
@@ -67,7 +67,7 @@ function createDefaultLogger (baseLogger, bindings, logLevel, logFormatter, logO
     if (customLevel == null || customLevel === false) { levelIdx = -1 } else { levelIdx = LOG_LEVELS.indexOf(customLevel) }
   }
 
-  let logger = {}
+  const logger = {}
   LOG_LEVELS.forEach((type, i) => {
     if (!baseLogger || (i > levelIdx)) {
       logger[type] = noop
@@ -81,9 +81,9 @@ function createDefaultLogger (baseLogger, bindings, logLevel, logFormatter, logO
 
     if (!method) {
       switch (type) {
-        case 'fatal':method = baseLogger['error'] || baseLogger['info']; break
-        case 'trace': method = baseLogger['debug'] || baseLogger['info']; break
-        default: method = baseLogger['info']
+        case 'fatal':method = baseLogger.error || baseLogger.info; break
+        case 'trace': method = baseLogger.debug || baseLogger.info; break
+        default: method = baseLogger.info
       }
     }
 
@@ -100,7 +100,7 @@ function createDefaultLogger (baseLogger, bindings, logLevel, logFormatter, logO
       })
 
       // Format arguments (inspect & colorize the objects & array)
-      let pargs = args.map(p => {
+      const pargs = args.map(p => {
         if (_.isObject(p) || _.isArray(p)) { return _.isFunction(logObjectPrinter) ? logObjectPrinter(p) : defaultLogObjectPrinter(p) }
         return p
       })
@@ -109,7 +109,7 @@ function createDefaultLogger (baseLogger, bindings, logLevel, logFormatter, logO
       if (format === 'simple') {
         message = getType(type) + ' -'
       } else if (format === 'short') {
-        message = grey(`[${new Date().toISOString().substr(11)}]`) + ' ' + getType(type) + ' ' + grey(mod + ':')
+        message = grey(`[${new Date().toISOString().slice(11)}]`) + ' ' + getType(type) + ' ' + grey(mod + ':')
       } else {
         message = grey(`[${new Date().toISOString()}]`) + ' ' + getType(type) + ' ' + grey(moduleName + ':')
       }
