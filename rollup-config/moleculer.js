@@ -1,8 +1,8 @@
 import path from 'path'
 
-import { aliasResolve } from './module-resolver'
+import { aliasResolve } from './module-resolver.js'
 
-import { normalizePath } from '../src/utils'
+import { normalizePath } from '../src/utils.js'
 
 const moleculerModules = (paths, namespace = '') => {
   const fullPaths = paths.map(pathname => normalizePath(path.resolve(`node_modules/moleculer/src/${namespace}/${pathname}`)))
@@ -102,10 +102,10 @@ aliasModules = aliasResolve([
 ], 'src/fallback/unloaded-serializer.js', aliasModules)
 
 aliasModules['./cpu-usage'] = normalizePath(path.resolve('src/cpu-usage.js'))
-// aliasModules['./logger'] = normalizePath(path.resolve('src/logger.js'))
 
-// Force lru-cache to use the top-level v7 (Rollup 2.x can't parse v11's private class fields)
-aliasModules['lru-cache'] = normalizePath(path.resolve('node_modules/lru-cache/index.js'))
+// Browser shims for Node.js built-in modules
+aliasModules['perf_hooks'] = normalizePath(path.resolve('src/shims/perf_hooks.js'))
+aliasModules['glob'] = normalizePath(path.resolve('src/fallback/non-compatible.js'))
 
 // console.log('Alias modules', aliasModules)
 

@@ -2,7 +2,7 @@ import path from 'path'
 import { promises as fs } from 'fs'
 
 import fg from 'fast-glob'
-import { normalizePath } from '../src/utils'
+import { normalizePath } from '../src/utils.js'
 
 const getNodeModules = async () => {
   let packages = await fg('**/package.json', { dot: true, cwd: 'node_modules' })
@@ -27,11 +27,18 @@ export const externalResolve = async (builtInModules) => {
   const nodeModules = await getNodeModules()
 
   return (id) => {
+    // Local/absolute paths are always bundled
+    if (id.startsWith('/') || id.startsWith('.')) {
+      return false
+    }
+
+    // Built-in modules (moleculer + its browser deps) are bundled
     if (builtInModules.find(module => id.includes(module))) {
       return false
     }
 
-    if (nodeModules.find(module => module.includes(id))) {
+    // npm packages found in node_modules are external
+    if (nodeModules.find(module => module === id || id.startsWith(module + '/'))) {
       return true
     }
 
