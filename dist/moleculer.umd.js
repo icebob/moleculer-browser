@@ -2938,17 +2938,17 @@
 		const { loadavg } = getCpuUsage;
 
 		os = {
-			hostname: () => 'browser',
-			type: () => 'Browser',
-			platform: () => 'browser',
-			arch: () => 'browser',
-			release: () => '0.0.0',
-			uptime: () => 0,
-			cpus: cpus,
-			loadavg: loadavg,
-			totalmem: () => typeof performance !== 'undefined' && performance.memory ? performance.memory.totalJSHeapSize : 0,
-			freemem: () => typeof performance !== 'undefined' && performance.memory ? performance.memory.totalJSHeapSize - performance.memory.usedJSHeapSize : 0,
-			networkInterfaces: () => ({})
+		  hostname: () => 'browser',
+		  type: () => 'Browser',
+		  platform: () => 'browser',
+		  arch: () => 'browser',
+		  release: () => '0.0.0',
+		  uptime: () => 0,
+		  cpus,
+		  loadavg,
+		  totalmem: () => typeof performance !== 'undefined' && performance.memory ? performance.memory.totalJSHeapSize : 0,
+		  freemem: () => typeof performance !== 'undefined' && performance.memory ? performance.memory.totalJSHeapSize - performance.memory.usedJSHeapSize : 0,
+		  networkInterfaces: () => ({})
 		};
 		return os;
 	}
@@ -20742,7 +20742,7 @@
 		if (hasRequiredPerf_hooks) return perf_hooks;
 		hasRequiredPerf_hooks = 1;
 		perf_hooks = {
-			performance: typeof performance !== 'undefined' ? performance : Date
+		  performance: typeof performance !== 'undefined' ? performance : Date
 		};
 		return perf_hooks;
 	}
