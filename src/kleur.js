@@ -1,5 +1,6 @@
 // TODO: https://github.com/xpl/ansicolor#chrome-devtools-compatibility
 
+/* eslint-disable prefer-const */
 let kleur
 
 function noop (txt) { return arguments.length > 0 ? arguments[0] : kleur };

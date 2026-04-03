@@ -1,3 +1,3 @@
 module.exports = {
-	performance: typeof performance !== 'undefined' ? performance : Date
+  performance: typeof performance !== 'undefined' ? performance : Date
 }

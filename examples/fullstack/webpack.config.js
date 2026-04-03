@@ -1,4 +1,4 @@
-const webpack = require('webpack')
+const webpack = require('webpack') // eslint-disable-line no-unused-vars
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const path = require('path')
 

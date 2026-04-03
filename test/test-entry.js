@@ -2,12 +2,12 @@ require('./node-shims.js')
 const Moleculer = require('../dist/moleculer.umd.js')
 
 const log = document.getElementById('log')
-function print(msg) {
+function print (msg) {
   log.textContent += msg + '\n'
   console.log(msg)
 }
 
-async function runTests() {
+async function runTests () {
   try {
     // 1. Check Moleculer loaded
     if (!Moleculer || !Moleculer.ServiceBroker) throw new Error('Moleculer not loaded')
@@ -29,8 +29,8 @@ async function runTests() {
     broker.createService({
       name: 'math',
       actions: {
-        add(ctx) { return Number(ctx.params.a) + Number(ctx.params.b) },
-        multiply(ctx) { return Number(ctx.params.a) * Number(ctx.params.b) }
+        add (ctx) { return Number(ctx.params.a) + Number(ctx.params.b) },
+        multiply (ctx) { return Number(ctx.params.a) * Number(ctx.params.b) }
       }
     })
     print('4. Service created OK')
@@ -54,13 +54,13 @@ async function runTests() {
     broker.createService({
       name: 'listener',
       events: {
-        'test.event'(ctx) { eventData = ctx.params }
+        'test.event' (ctx) { eventData = ctx.params }
       }
     })
     // Wait for service registry to update
-    await new Promise(r => setTimeout(r, 500))
+    await new Promise(function (resolve) { setTimeout(resolve, 500) })
     broker.broadcastLocal('test.event', { foo: 'bar' })
-    await new Promise(r => setTimeout(r, 500))
+    await new Promise(function (resolve) { setTimeout(resolve, 500) })
     print('8. Event data: ' + JSON.stringify(eventData))
     if (!eventData || eventData.foo !== 'bar') {
       print('   (event delivery might need more time in browser, skipping)')
@@ -74,11 +74,11 @@ async function runTests() {
       actions: {
         greet: {
           params: { name: 'string' },
-          handler(ctx) { return 'Hello ' + ctx.params.name }
+          handler (ctx) { return 'Hello ' + ctx.params.name }
         }
       }
     })
-    await new Promise(r => setTimeout(r, 500))
+    await new Promise(function (resolve) { setTimeout(resolve, 500) })
     const greeting = await broker.call('validated.greet', { name: 'World' })
     print('9. Validation: ' + greeting)
     if (greeting !== 'Hello World') throw new Error('Validation failed')
@@ -89,7 +89,7 @@ async function runTests() {
 
     print('\n=== ALL TESTS PASSED ===')
     document.title = 'PASSED'
-  } catch(err) {
+  } catch (err) {
     print('\nFAILED: ' + err.message)
     document.title = 'FAILED: ' + err.message
     console.error(err)
