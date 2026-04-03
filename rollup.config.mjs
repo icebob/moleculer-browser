@@ -11,8 +11,8 @@ import replace from '@rollup/plugin-replace'
 import terser from '@rollup/plugin-terser'
 import { visualizer } from 'rollup-plugin-visualizer'
 
-import { externalResolve } from './rollup-config/module-resolver.js'
-import { aliasModules, builtInModules } from './rollup-config/moleculer.js'
+import { externalResolve } from './rollup-config/module-resolver.mjs'
+import { aliasModules, builtInModules } from './rollup-config/moleculer.mjs'
 import { normalizePath } from './src/utils.js'
 
 const require = createRequire(import.meta.url)
@@ -20,7 +20,10 @@ const pkg = require('./package.json')
 
 const isProduction = process.env.NODE_ENV === 'production'
 
-const moleculerSrcPath = 'node_modules/moleculer/src/**'
+const moleculerSrcPath = [
+  'node_modules/moleculer/src/**',
+  normalizePath(path.resolve('node_modules/moleculer/src')) + '/**'
+]
 
 const config = async () => {
   const external = await externalResolve(builtInModules)
@@ -36,14 +39,7 @@ const config = async () => {
       externalLiveBindings: false
     },
     plugins: [
-      replace({
-        include: moleculerSrcPath,
-        preventAssignment: true,
-        'os.cpus': 'require("cpus")',
-        'os.loadavg': `require("${normalizePath(path.resolve('src/cpu-usage.js'))}").loadavg`,
-        'os.totalmem': '(() => performance ? performance.memory.totalJSHeapSize : 0)',
-        'os.freemem': '(() => performance ? performance.memory.totalJSHeapSize - performance.memory.usedJSHeapSize : 0)'
-      }),
+      // Note: os.* replacements handled by the os shim module (src/shims/os.js) via alias
       replace({
         include: moleculerSrcPath,
         preventAssignment: true,

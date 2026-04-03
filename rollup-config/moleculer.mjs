@@ -1,6 +1,6 @@
 import path from 'path'
 
-import { aliasResolve } from './module-resolver.js'
+import { aliasResolve } from './module-resolver.mjs'
 
 import { normalizePath } from '../src/utils.js'
 
@@ -77,7 +77,6 @@ const Loggers = moleculerModules([
   './datadog',
   './debug',
   './file',
-  './formatted',
   './log4js',
   './pino',
   './winston'
@@ -104,6 +103,7 @@ aliasModules = aliasResolve([
 aliasModules['./cpu-usage'] = normalizePath(path.resolve('src/cpu-usage.js'))
 
 // Browser shims for Node.js built-in modules
+aliasModules['os'] = normalizePath(path.resolve('src/shims/os.js'))
 aliasModules['perf_hooks'] = normalizePath(path.resolve('src/shims/perf_hooks.js'))
 aliasModules['glob'] = normalizePath(path.resolve('src/fallback/non-compatible.js'))
 

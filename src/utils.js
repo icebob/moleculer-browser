@@ -1,5 +1,7 @@
-import path from 'path'
+const path = require('path')
 
-export function normalizePath (p) {
+function normalizePath (p) {
   return p.split(path.sep).join('/')
 }
+
+module.exports = { normalizePath }

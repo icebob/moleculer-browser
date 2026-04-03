@@ -1,23 +1,22 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('events'), require('browser-process-hrtime'), require('timers-browserify'), require('lodash'), require('glob'), require('path'), require('util'), require('stream'), require('kleur'), require('os'), require('fs'), require('cpus'), require('raf-perf'), require('crypto')) :
-	typeof define === 'function' && define.amd ? define(['events', 'browser-process-hrtime', 'timers-browserify', 'lodash', 'glob', 'path', 'util', 'stream', 'kleur', 'os', 'fs', 'cpus', 'raf-perf', 'crypto'], factory) :
-	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.Moleculer = factory(global.events, global.hrtime, global.timersBrowserify, global.require$$0$1, global.require$$2$3, global.require$$2, global.require$$1$1, global.require$$2$1, global.require$$1, global.require$$0, global.require$$3, global.cpus, global.RafPerf, global.require$$2$2));
-})(this, (function (events, hrtime, timersBrowserify, require$$0$1, require$$2$3, require$$2, require$$1$1, require$$2$1, require$$1, require$$0, require$$3, cpus, RafPerf, require$$2$2) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('events'), require('browser-process-hrtime'), require('timers-browserify'), require('lodash'), require('glob'), require('path'), require('util'), require('stream'), require('kleur'), require('cpus'), require('raf-perf'), require('fs'), require('crypto')) :
+	typeof define === 'function' && define.amd ? define(['events', 'browser-process-hrtime', 'timers-browserify', 'lodash', 'glob', 'path', 'util', 'stream', 'kleur', 'cpus', 'raf-perf', 'fs', 'crypto'], factory) :
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.Moleculer = factory(global.events, global.hrtime, global.timersBrowserify, global.require$$0, global.require$$2$4, global.require$$2, global.require$$3$1, global.require$$2$2, global.require$$2$1, global.cpus, global.RafPerf, global.require$$3, global.require$$2$3));
+})(this, (function (events, hrtime, timersBrowserify, require$$0, require$$2$4, require$$2, require$$3$1, require$$2$2, require$$2$1, cpus, RafPerf, require$$3, require$$2$3) { 'use strict';
 
 	function _interopDefault (e) { return e && e.__esModule ? e.default : e; }
 
 	var hrtime__default = /*#__PURE__*/_interopDefault(hrtime);
-	var require$$0__default$1 = /*#__PURE__*/_interopDefault(require$$0$1);
-	var require$$2__default$3 = /*#__PURE__*/_interopDefault(require$$2$3);
-	var require$$2__default = /*#__PURE__*/_interopDefault(require$$2);
-	var require$$1__default$1 = /*#__PURE__*/_interopDefault(require$$1$1);
-	var require$$2__default$1 = /*#__PURE__*/_interopDefault(require$$2$1);
-	var require$$1__default = /*#__PURE__*/_interopDefault(require$$1);
 	var require$$0__default = /*#__PURE__*/_interopDefault(require$$0);
-	var require$$3__default = /*#__PURE__*/_interopDefault(require$$3);
+	var require$$2__default$4 = /*#__PURE__*/_interopDefault(require$$2$4);
+	var require$$2__default = /*#__PURE__*/_interopDefault(require$$2);
+	var require$$3__default$1 = /*#__PURE__*/_interopDefault(require$$3$1);
+	var require$$2__default$2 = /*#__PURE__*/_interopDefault(require$$2$2);
+	var require$$2__default$1 = /*#__PURE__*/_interopDefault(require$$2$1);
 	var cpus__default = /*#__PURE__*/_interopDefault(cpus);
 	var RafPerf__default = /*#__PURE__*/_interopDefault(RafPerf);
-	var require$$2__default$2 = /*#__PURE__*/_interopDefault(require$$2$2);
+	var require$$3__default = /*#__PURE__*/_interopDefault(require$$3);
+	var require$$2__default$3 = /*#__PURE__*/_interopDefault(require$$2$3);
 
 	var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -2838,6 +2837,122 @@
 
 	var utils = {exports: {}};
 
+	// Simulate https://nodejs.org/api/os.html#os_os_loadavg
+	const _osLoadAvg = [
+	  // 1 minute
+	  {
+	    time: Math.floor(Date.now() / 1000),
+	    init: false,
+	    avg: 0
+	  },
+
+	  // 5 minutes
+	  {
+	    time: Math.floor(Date.now() / 1000),
+	    avg: 0
+	  },
+
+	  // 15 minutes
+	  {
+	    time: Math.floor(Date.now() / 1000),
+	    avg: 0
+	  }
+	];
+
+	function updateLoadAvg (avg) {
+	  const currentTime = Math.floor(Date.now() / 1000);
+	  if (!_osLoadAvg[0].init || (currentTime - _osLoadAvg[0].time) > 60) {
+	    _osLoadAvg[0].init = true;
+	    _osLoadAvg[0].time = currentTime;
+	    _osLoadAvg[0].avg = avg;
+	  }
+
+	  if ((currentTime - _osLoadAvg[1].time) > 60 * 5) {
+	    _osLoadAvg[1].time = currentTime;
+	    _osLoadAvg[1].avg = avg;
+	  }
+
+	  if ((currentTime - _osLoadAvg[2].time) > 60 * 15) {
+	    _osLoadAvg[2].time = currentTime;
+	    _osLoadAvg[2].avg = avg;
+	  }
+	}
+
+	function loadavg () {
+	  return _osLoadAvg.map(value => value.avg)
+	}
+
+	/**
+	 * getCpuUsage
+	 *
+	 * Simulate cpuUsage of the browser based on the FPS performance.
+	 *
+	 * rate 1 (60fps) -> 0% usage
+	 * rate 0.5 (30fps) -> 50% usage
+	 * rate 0 (0fps) -> 100% usage
+	 *
+	 * @param {Boolean=100} sampleTime
+	 * @returns {Promise<Result>}
+	 */
+	function getCpuUsage (sampleTime = 100) {
+	  const engine = new RafPerf__default({
+	    performances: {
+	      enabled: true,
+	      samplesCount: 3,
+	      sampleDuration: sampleTime
+	    }
+	  });
+
+	  return new Promise((resolve, reject) => {
+	    engine.once('perf', ratio => {
+	      engine.stop();
+
+	      if (!ratio) {
+	        return reject(new Error('CpuUsage: ratio perf not found.'))
+	      }
+
+	      const avg = 100 - (ratio * 100);
+	      const avgByCpu = avg / cpus__default().length;
+
+	      updateLoadAvg(avg);
+
+	      resolve({
+	        avg,
+	        usages: cpus__default().map(cpu => avgByCpu)
+	      });
+	    });
+
+	    engine.start();
+	  })
+	}
+
+	getCpuUsage.loadavg = loadavg;
+
+	var os;
+	var hasRequiredOs;
+
+	function requireOs () {
+		if (hasRequiredOs) return os;
+		hasRequiredOs = 1;
+		const cpus = cpus__default;
+		const { loadavg } = getCpuUsage;
+
+		os = {
+			hostname: () => 'browser',
+			type: () => 'Browser',
+			platform: () => 'browser',
+			arch: () => 'browser',
+			release: () => '0.0.0',
+			uptime: () => 0,
+			cpus: cpus,
+			loadavg: loadavg,
+			totalmem: () => typeof performance !== 'undefined' && performance.memory ? performance.memory.totalJSHeapSize : 0,
+			freemem: () => typeof performance !== 'undefined' && performance.memory ? performance.memory.totalJSHeapSize - performance.memory.usedJSHeapSize : 0,
+			networkInterfaces: () => ({})
+		};
+		return os;
+	}
+
 	var hasRequiredUtils;
 
 	function requireUtils () {
@@ -2845,8 +2960,8 @@
 		hasRequiredUtils = 1;
 		(function (module) {
 
-			const kleur = require$$1__default;
-			const os = require$$0__default;
+			const kleur = require$$2__default$1;
+			const os = requireOs();
 			const path = require$$2__default;
 			const fs = require$$3__default;
 			const { TimeoutError } = requireErrors();
@@ -3669,7 +3784,7 @@
 		if (hasRequiredGauge) return gauge;
 		hasRequiredGauge = 1;
 
-		const { pick } = require$$0__default$1;
+		const { pick } = require$$0__default;
 		const BaseMetric = requireBase$9();
 		const METRIC = requireConstants();
 		const MetricRate = requireRates();
@@ -3895,7 +4010,7 @@
 		hasRequiredHistogram = 1;
 
 		const BaseMetric = requireBase$9();
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 		const METRIC = requireConstants();
 		const MetricRate = requireRates();
 		const { isPlainObject } = requireUtils();
@@ -4332,7 +4447,7 @@
 		if (hasRequiredInfo) return info;
 		hasRequiredInfo = 1;
 
-		const { pick } = require$$0__default$1;
+		const { pick } = require$$0__default;
 		const BaseMetric = requireBase$9();
 		const METRIC = requireConstants();
 
@@ -4531,7 +4646,7 @@
 
 		/* eslint-disable no-unused-vars */
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 		const { match, isString } = requireUtils();
 
 		/**
@@ -4667,8 +4782,8 @@
 		hasRequiredConsole$2 = 1;
 
 		const BaseReporter = requireBase$8();
-		const _ = require$$0__default$1;
-		const kleur = require$$1__default;
+		const _ = require$$0__default;
+		const kleur = require$$2__default$1;
 		const METRIC = requireConstants();
 		const { isFunction } = requireUtils();
 
@@ -4908,7 +5023,7 @@
 		hasRequiredEvent$1 = 1;
 
 		const BaseReporter = requireBase$8();
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 
 		/**
 		 * Import types
@@ -5083,17 +5198,24 @@
 		if (hasRequiredCpuUsage) return cpuUsage;
 		hasRequiredCpuUsage = 1;
 
+		/**
+		 * CPU usage measure.
+		 *
+		 * Based on: https://github.com/icebob/cpu
+		 */
+		const os = requireOs();
+
 		/* istanbul ignore next */
 		cpuUsage = function getCpuUsage(sampleTime = 100) {
 			return new Promise((resolve, reject) => {
 				try {
-					const first = require("cpus")().map(cpu => cpu.times);
+					const first = os.cpus().map(cpu => cpu.times);
 					timersBrowserify.setTimeout(() => {
 						try {
-							const second = require("cpus")().map(cpu => cpu.times);
+							const second = os.cpus().map(cpu => cpu.times);
 							timersBrowserify.setTimeout(() => {
 								try {
-									const third = require("cpus")().map(cpu => cpu.times);
+									const third = os.cpus().map(cpu => cpu.times);
 
 									const usages = [];
 									for (let i = 0; i < first.length; i++) {
@@ -5146,97 +5268,6 @@
 		return cpuUsage;
 	}
 
-	// Simulate https://nodejs.org/api/os.html#os_os_loadavg
-	const _osLoadAvg = [
-	  // 1 minute
-	  {
-	    time: Math.floor(Date.now() / 1000),
-	    init: false,
-	    avg: 0
-	  },
-
-	  // 5 minutes
-	  {
-	    time: Math.floor(Date.now() / 1000),
-	    avg: 0
-	  },
-
-	  // 15 minutes
-	  {
-	    time: Math.floor(Date.now() / 1000),
-	    avg: 0
-	  }
-	];
-
-	function updateLoadAvg (avg) {
-	  const currentTime = Math.floor(Date.now() / 1000);
-	  if (!_osLoadAvg[0].init || (currentTime - _osLoadAvg[0].time) > 60) {
-	    _osLoadAvg[0].init = true;
-	    _osLoadAvg[0].time = currentTime;
-	    _osLoadAvg[0].avg = avg;
-	  }
-
-	  if ((currentTime - _osLoadAvg[1].time) > 60 * 5) {
-	    _osLoadAvg[1].time = currentTime;
-	    _osLoadAvg[1].avg = avg;
-	  }
-
-	  if ((currentTime - _osLoadAvg[2].time) > 60 * 15) {
-	    _osLoadAvg[2].time = currentTime;
-	    _osLoadAvg[2].avg = avg;
-	  }
-	}
-
-	function loadavg () {
-	  return _osLoadAvg.map(value => value.avg)
-	}
-
-	/**
-	 * getCpuUsage
-	 *
-	 * Simulate cpuUsage of the browser based on the FPS performance.
-	 *
-	 * rate 1 (60fps) -> 0% usage
-	 * rate 0.5 (30fps) -> 50% usage
-	 * rate 0 (0fps) -> 100% usage
-	 *
-	 * @param {Boolean=100} sampleTime
-	 * @returns {Promise<Result>}
-	 */
-	function getCpuUsage (sampleTime = 100) {
-	  const engine = new RafPerf__default({
-	    performances: {
-	      enabled: true,
-	      samplesCount: 3,
-	      sampleDuration: sampleTime
-	    }
-	  });
-
-	  return new Promise((resolve, reject) => {
-	    engine.once('perf', ratio => {
-	      engine.stop();
-
-	      if (!ratio) {
-	        return reject(new Error('CpuUsage: ratio perf not found.'))
-	      }
-
-	      const avg = 100 - (ratio * 100);
-	      const avgByCpu = avg / cpus__default().length;
-
-	      updateLoadAvg(avg);
-
-	      resolve({
-	        avg,
-	        usages: cpus__default().map(cpu => avgByCpu)
-	      });
-	    });
-
-	    engine.start();
-	  })
-	}
-
-	getCpuUsage.loadavg = loadavg;
-
 	var commons;
 	var hasRequiredCommons;
 
@@ -5244,7 +5275,7 @@
 		if (hasRequiredCommons) return commons;
 		hasRequiredCommons = 1;
 
-		const os = require$$0__default;
+		const os = requireOs();
 		const METRIC = requireConstants();
 		const cpuUsage = requireCpuUsage();
 
@@ -5639,8 +5670,8 @@
 
 			// --- OS METRICS ---
 
-			const freeMem = (() => performance ? performance.memory.totalJSHeapSize - performance.memory.usedJSHeapSize : 0)();
-			const totalMem = (() => performance ? performance.memory.totalJSHeapSize : 0)();
+			const freeMem = os.freemem();
+			const totalMem = os.totalmem();
 			const usedMem = totalMem - freeMem;
 			this.set(METRIC.OS_MEMORY_FREE, freeMem);
 			this.set(METRIC.OS_MEMORY_USED, usedMem);
@@ -5683,7 +5714,7 @@
 			this.set(METRIC.OS_DATETIME_UTC, d.toUTCString());
 			this.set(METRIC.OS_DATETIME_TZ_OFFSET, d.getTimezoneOffset());
 
-			const load = getCpuUsage.loadavg();
+			const load = os.loadavg();
 			this.set(METRIC.OS_CPU_LOAD_1, load[0]);
 			this.set(METRIC.OS_CPU_LOAD_5, load[1]);
 			this.set(METRIC.OS_CPU_LOAD_15, load[2]);
@@ -5697,7 +5728,7 @@
 						this.set(METRIC.OS_CPU_UTILIZATION, res.avg);
 
 						try {
-							const cpus = require("cpus")();
+							const cpus = os.cpus();
 							this.set(METRIC.OS_CPU_TOTAL, cpus.length);
 							this.set(
 								METRIC.OS_CPU_USER,
@@ -5770,7 +5801,7 @@
 		if (hasRequiredRegistry$2) return registry$2;
 		hasRequiredRegistry$2 = 1;
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 		const { match, isFunction, isPlainObject, isString } = requireUtils();
 		const METRIC = requireConstants();
 		const Types = requireTypes();
@@ -6258,7 +6289,7 @@
 		const { Packet } = requirePackets();
 		const E = requireErrors();
 
-		const { Transform } = require$$2__default$1;
+		const { Transform } = require$$2__default$2;
 		const { METRIC } = requireMetrics$1();
 		const C = requireConstants$1();
 
@@ -7887,7 +7918,7 @@
 		if (hasRequiredRandom) return random_1;
 		hasRequiredRandom = 1;
 
-		const { random } = require$$0__default$1;
+		const { random } = require$$0__default;
 		const BaseStrategy = requireBase$7();
 
 		/**
@@ -7929,9 +7960,9 @@
 		if (hasRequiredLatency) return latency;
 		hasRequiredLatency = 1;
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 
-		const { random } = require$$0__default$1;
+		const { random } = require$$0__default;
 		const BaseStrategy = requireBase$7();
 
 		/**
@@ -8210,9 +8241,9 @@
 		if (hasRequiredShard) return shard;
 		hasRequiredShard = 1;
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 		const BaseStrategy = requireBase$7();
-		const crypto = require$$2__default$2;
+		const crypto = require$$2__default$3;
 		const { LRUCache } = /*@__PURE__*/ requireIndex_min();
 		const { isFunction, randomInt } = requireUtils();
 
@@ -8457,7 +8488,7 @@
 		if (hasRequiredBase$6) return base$6;
 		hasRequiredBase$6 = 1;
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 
 		/**
 		 * Import types
@@ -9072,8 +9103,8 @@
 		if (hasRequiredNodeCatalog) return nodeCatalog;
 		hasRequiredNodeCatalog = 1;
 
-		const _ = require$$0__default$1;
-		const os = require$$0__default;
+		const _ = require$$0__default;
+		const os = requireOs();
 		const Node = requireNode();
 		const { getIpList } = requireUtils();
 
@@ -9423,7 +9454,7 @@
 		if (hasRequiredServiceCatalog) return serviceCatalog;
 		hasRequiredServiceCatalog = 1;
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 		const ServiceItem = requireServiceItem();
 		const { removeFromArray } = requireUtils();
 
@@ -9676,7 +9707,7 @@
 		if (hasRequiredEndpointList) return endpointList;
 		hasRequiredEndpointList = 1;
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 		const { MoleculerServerError } = requireErrors();
 
 		/**
@@ -10101,7 +10132,7 @@
 		if (hasRequiredEventCatalog) return eventCatalog;
 		hasRequiredEventCatalog = 1;
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 		const utils = requireUtils();
 		const Strategies = requireStrategies();
 		const EndpointList = requireEndpointList();
@@ -10489,7 +10520,7 @@
 		if (hasRequiredActionCatalog) return actionCatalog;
 		hasRequiredActionCatalog = 1;
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 		const Strategies = requireStrategies();
 		const EndpointList = requireEndpointList();
 		const ActionEndpoint = requireEndpointAction();
@@ -10690,7 +10721,7 @@
 		if (hasRequiredRegistry$1) return registry$1;
 		hasRequiredRegistry$1 = 1;
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 
 		const utils = requireUtils();
 		const Strategies = requireStrategies();
@@ -11331,7 +11362,7 @@
 		if (hasRequiredBase$5) return base$5;
 		hasRequiredBase$5 = 1;
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 		const { match, isObject, isString } = requireUtils();
 
 		const LEVELS = ["fatal", "error", "warn", "info", "debug", "trace"];
@@ -11426,6 +11457,258 @@
 	 * MIT Licensed
 	 */
 
+	var formatted;
+	var hasRequiredFormatted;
+
+	function requireFormatted () {
+		if (hasRequiredFormatted) return formatted;
+		hasRequiredFormatted = 1;
+
+		const BaseLogger = requireBase$5();
+		const _ = require$$0__default;
+		const kleur = require$$2__default$1;
+		const util = require$$3__default$1;
+		const { isObject, isFunction } = requireUtils();
+
+		/**
+		 * Import types
+		 *
+		 * @typedef {import("../logger-factory")} LoggerFactory
+		 * @typedef {import("../logger-factory").LoggerBindings} LoggerBindings
+		 * @typedef {import("./formatted").FormattedLoggerOptions} FormattedLoggerOptions
+		 * @typedef {import("./formatted")} FormattedLoggerClass
+		 */
+
+		function getColor(type) {
+			switch (type) {
+				case "fatal":
+					return kleur.red().inverse;
+				case "error":
+					return kleur.red;
+				case "warn":
+					return kleur.yellow;
+				case "debug":
+					return kleur.magenta;
+				case "trace":
+					return kleur.gray;
+				default:
+					return kleur.green;
+			}
+		}
+
+		/**
+		 * Formatted abstract logger for Moleculer
+		 *
+		 * @class FormattedLogger
+		 * @implements {FormattedLoggerClass}
+		 * @extends {BaseLogger<FormattedLoggerOptions>}
+		 */
+		class FormattedLogger extends BaseLogger {
+			/**
+			 * Creates an instance of FormattedLogger.
+			 * @param {FormattedLoggerOptions} opts
+			 * @memberof FormattedLogger
+			 */
+			constructor(opts) {
+				super(opts);
+
+				/** @type {FormattedLoggerOptions} */
+				this.opts = _.defaultsDeep(this.opts, {
+					colors: true,
+					moduleColors: false,
+					formatter: "full",
+					objectPrinter: null,
+					autoPadding: false
+				});
+
+				this.maxPrefixLength = 0;
+			}
+
+			init(loggerFactory) {
+				super.init(loggerFactory);
+
+				if (!this.opts.colors) kleur.enabled = false;
+
+				this.objectPrinter = this.opts.objectPrinter
+					? this.opts.objectPrinter
+					: o =>
+							util.inspect(o, {
+								showHidden: false,
+								depth: 2,
+								colors: kleur.enabled,
+								breakLength: Number.POSITIVE_INFINITY
+							});
+
+				// Generate colorful log level names
+				this.levelColorStr = BaseLogger.LEVELS.reduce((a, level) => {
+					a[level] = getColor(level)(_.padEnd(level.toUpperCase(), 5));
+					return a;
+				}, {});
+
+				if (this.opts.colors && this.opts.moduleColors === true) {
+					this.opts.moduleColors = [
+						"yellow",
+						"bold.yellow",
+						"cyan",
+						"bold.cyan",
+						"green",
+						"bold.green",
+						"magenta",
+						"bold.magenta",
+						"blue",
+						"bold.blue"
+						/*"red",*/
+						/*"grey",*/
+						/*"white,"*/
+					];
+				}
+			}
+
+			/**
+			 * Get a color for the module name.
+			 */
+			getNextColor(mod) {
+				if (this.opts.colors && Array.isArray(this.opts.moduleColors)) {
+					// Credits: "visionmedia/debug" https://github.com/visionmedia/debug/blob/master/src/common.js#L45
+					let hash = 0;
+
+					for (let i = 0; i < mod.length; i++) {
+						hash = (hash << 5) - hash + mod.charCodeAt(i);
+						hash |= 0; // Convert to 32bit integer
+					}
+
+					return this.opts.moduleColors[Math.abs(hash) % this.opts.moduleColors.length];
+				}
+
+				return "grey";
+			}
+
+			padLeft(len) {
+				if (this.opts.autoPadding) return " ".repeat(this.maxPrefixLength - len);
+
+				return "";
+			}
+
+			/**
+			 *
+			 * @param {LoggerBindings} bindings
+			 */
+			getFormatter(bindings) {
+				const formatter = this.opts.formatter;
+
+				const mod = bindings && bindings.mod ? bindings.mod.toUpperCase() : "";
+				const c = this.getNextColor(mod);
+				const modColorName = c.split(".").reduce((a, b) => {
+					// @ts-ignore
+					return a[b] || a()[b];
+				}, kleur)(mod);
+				const moduleColorName = bindings ? kleur.grey(bindings.nodeID + "/") + modColorName : "";
+
+				const printArgs = args => {
+					return args.map(p => {
+						if (isObject(p) || Array.isArray(p)) return this.objectPrinter(p);
+						return p;
+					});
+				};
+
+				if (isFunction(formatter)) {
+					return (type, args) => formatter.call(this, type, args, bindings, { printArgs });
+				} else if (formatter == "json") {
+					// {"ts":1581243299731,"level":"info","msg":"Moleculer v0.14.0-rc2 is starting...","nodeID":"console","ns":"","mod":"broker"}
+					kleur.enabled = false;
+					return (type, args) => [
+						JSON.stringify({
+							ts: Date.now(),
+							level: type,
+							msg: printArgs(args).join(" "),
+							...bindings
+						})
+					];
+				} else if (formatter == "jsonext") {
+					// {"time":"2020-02-09T10:44:35.285Z","level":"info","message":"Moleculer v0.14.0-rc2 is starting...","nodeID":"console","ns":"","mod":"broker"}
+					kleur.enabled = false;
+					return (type, args) => {
+						const res = {
+							time: new Date().toISOString(),
+							level: type,
+							message: "",
+							...bindings
+						};
+						if (args.length > 0) {
+							if (typeof args[0] == "object" /* && !(args[0] instanceof Error)*/) {
+								Object.assign(res, args[0]);
+								res.message = printArgs(args.slice(1)).join(" ");
+							} else {
+								res.message = printArgs(args).join(" ");
+							}
+						}
+						return [JSON.stringify(res)];
+					};
+				} else if (formatter == "simple") {
+					// INFO  - Moleculer v0.14.0-beta3 is starting...
+					return (type, args) => [this.levelColorStr[type], "-", ...printArgs(args)];
+				} else if (formatter == "short") {
+					// [08:42:12.973Z] INFO  BROKER: Moleculer v0.14.0-beta3 is starting...
+					const prefixLen = 23 + bindings.mod.length;
+					this.maxPrefixLength = Math.max(prefixLen, this.maxPrefixLength);
+					return (type, args) => [
+						kleur.grey(`[${new Date().toISOString().substring(11)}]`),
+						this.levelColorStr[type],
+						modColorName + this.padLeft(prefixLen) + kleur.grey(":"),
+						...printArgs(args)
+					];
+				} else if (formatter == "full") {
+					// [2019-08-31T08:40:53.481Z] INFO  bobcsi-pc-7100/BROKER: Moleculer v0.14.0-beta3 is starting...
+					const prefixLen = 35 + bindings.nodeID.length + bindings.mod.length;
+					this.maxPrefixLength = Math.max(prefixLen, this.maxPrefixLength);
+					return (type, args) => [
+						kleur.grey(`[${new Date().toISOString()}]`),
+						this.levelColorStr[type],
+						moduleColorName + this.padLeft(prefixLen) + kleur.grey(":"),
+						...printArgs(args)
+					];
+				} else {
+					// [{timestamp}] {level} {nodeID}/{mod}: {msg}
+
+					return (type, args) => {
+						const timestamp = new Date().toISOString();
+						return [
+							this.render(formatter, {
+								timestamp: kleur.grey(timestamp),
+								time: kleur.grey(timestamp.substring(11)),
+
+								level: this.levelColorStr[type],
+								nodeID: kleur.grey(bindings.nodeID),
+								mod: modColorName,
+								msg: printArgs(args).join(" ")
+							})
+						];
+					};
+				}
+			}
+
+			/**
+			 * Interpolate a text.
+			 *
+			 * @param {String} str
+			 * @param {Object} obj
+			 * @returns {String}
+			 */
+			render(str, obj) {
+				return str.replace(/\{\s?(\w+)\s?\}/g, (match, v) => obj[v] || "");
+			}
+		}
+
+		formatted = FormattedLogger;
+		return formatted;
+	}
+
+	/*
+	 * moleculer
+	 * Copyright (c) 2023 MoleculerJS (https://github.com/moleculerjs/moleculer)
+	 * MIT Licensed
+	 */
+
 	var console_1;
 	var hasRequiredConsole$1;
 
@@ -11433,8 +11716,8 @@
 		if (hasRequiredConsole$1) return console_1;
 		hasRequiredConsole$1 = 1;
 
-		const FormattedLogger = require$$19;
-		const kleur = require$$1__default;
+		const FormattedLogger = requireFormatted();
+		const kleur = require$$2__default$1;
 
 		/**
 		 * Import types
@@ -11527,7 +11810,7 @@
 
 		const Loggers = {
 			Base,
-			Formatted: require$$19,
+			Formatted: requireFormatted(),
 
 			Bunyan: require$$19,
 			Console: requireConsole$1(),
@@ -11588,7 +11871,7 @@
 		if (hasRequiredLoggerFactory) return loggerFactory;
 		hasRequiredLoggerFactory = 1;
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 		const { isPlainObject, isString } = requireUtils();
 		const Loggers = requireLoggers();
 
@@ -11777,7 +12060,7 @@
 		hasRequiredBase$4 = 1;
 
 		const { ValidationError } = requireErrors();
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 
 		/**
 		 * Import types
@@ -14320,7 +14603,7 @@
 		const Validator = requireFastestValidator();
 		const { ValidationError } = requireErrors();
 		const BaseValidator = requireBase$4();
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 
 		/**
 		 * Import types
@@ -14481,8 +14764,8 @@
 		if (hasRequiredBase$3) return base$3;
 		hasRequiredBase$3 = 1;
 
-		const _ = require$$0__default$1;
-		const crypto = require$$2__default$2;
+		const _ = require$$0__default;
+		const crypto = require$$2__default$3;
 		const { METRIC } = requireMetrics$1();
 		const { isObject, isFunction, isDate } = requireUtils();
 
@@ -15074,7 +15357,7 @@
 		if (hasRequiredMemory) return memory;
 		hasRequiredMemory = 1;
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 		const utils = requireUtils();
 		const BaseCacher = requireBase$3();
 		const { METRIC } = requireMetrics$1();
@@ -15368,7 +15651,7 @@
 		if (hasRequiredMemoryLru) return memoryLru;
 		hasRequiredMemoryLru = 1;
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 		const { isObject } = requireUtils();
 		const utilsMatch = requireUtils().match;
 		const BaseCacher = requireBase$3();
@@ -15724,7 +16007,7 @@
 		if (hasRequiredBase$2) return base$2;
 		hasRequiredBase$2 = 1;
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 		const P = requirePackets();
 		const { flatten } = requireUtils();
 		const { BrokerDisconnectedError } = requireErrors();
@@ -16633,7 +16916,7 @@
 
 		const BaseSerializer = requireBase$1();
 		//const { isDate } = require("../utils");
-		const { isDate, isRegExp, isMap, isSet } = require$$1__default$1.types;
+		const { isDate, isRegExp, isMap, isSet } = require$$3__default$1.types;
 
 		const PREFIX_BIGINT = "[[BI]]";
 		const PREFIX_MAP = "[[MP]]";
@@ -16878,7 +17161,7 @@
 		if (hasRequiredHealth) return health;
 		hasRequiredHealth = 1;
 
-		const os = require$$0__default;
+		const os = requireOs();
 		const { getIpList } = requireUtils();
 		const MOLECULER_VERSION = require$$24.version;
 
@@ -16897,9 +17180,9 @@
 		};
 
 		const getCpuInfo = () => {
-			const cpus = cpus__default();
-			const load = getCpuUsage.loadavg();
-			const cores = Array.isArray(cpus) ? cpus__default().length : null;
+			const cpus = os.cpus();
+			const load = os.loadavg();
+			const cores = Array.isArray(cpus) ? os.cpus().length : null;
 			const cpu = {
 				load1: load[0],
 				load5: load[1],
@@ -16913,8 +17196,8 @@
 
 		const getMemoryInfo = () => {
 			const mem = {
-				free: (() => performance ? performance.memory.totalJSHeapSize - performance.memory.usedJSHeapSize : 0)(),
-				total: (() => performance ? performance.memory.totalJSHeapSize : 0)(),
+				free: os.freemem(),
+				total: os.totalmem(),
 				percent: null
 			};
 			mem.percent = (mem.free * 100) / mem.total;
@@ -17015,7 +17298,7 @@
 		 * @typedef {import("../service")} Service
 		 */
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 		const { isFunction, isString, match } = requireUtils();
 
 		actionHook = function actionHookMiddleware(broker) {
@@ -18103,7 +18386,7 @@
 		hasRequiredTimeout = 1;
 
 		const { TimeoutError, RequestTimeoutError } = requireErrors();
-		const { Stream } = require$$2__default$1;
+		const { Stream } = require$$2__default$2;
 		const { METRIC } = requireMetrics$1();
 
 		timeout = function (broker) {
@@ -18949,7 +19232,7 @@
 		if (hasRequiredTracing$1) return tracing$1;
 		hasRequiredTracing$1 = 1;
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 		const { isFunction, isPlainObject, safetyObject } = requireUtils();
 
 		tracing$1 = function TracingMiddleware(broker) {
@@ -19348,7 +19631,7 @@
 		if (hasRequiredMiddleware) return middleware;
 		hasRequiredMiddleware = 1;
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 		const Middlewares = requireMiddlewares();
 		const { BrokerOptionsError } = requireErrors();
 		const { isObject, isFunction, isString } = requireUtils();
@@ -19696,7 +19979,7 @@
 
 		/* eslint-disable no-unused-vars */
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 		const { isObject, safetyObject } = requireUtils();
 
 		/**
@@ -19838,9 +20121,9 @@
 		if (hasRequiredConsole) return console$1;
 		hasRequiredConsole = 1;
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 		const r = _.repeat;
-		const kleur = require$$1__default;
+		const kleur = require$$2__default$1;
 		const { humanize, isFunction } = requireUtils();
 
 		const BaseTraceExporter = requireBase();
@@ -20167,7 +20450,7 @@
 		if (hasRequiredEvent) return event;
 		hasRequiredEvent = 1;
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 		const BaseTraceExporter = requireBase();
 		const { isFunction } = requireUtils();
 
@@ -20401,7 +20684,7 @@
 		if (hasRequiredRateLimiter) return rateLimiter;
 		hasRequiredRateLimiter = 1;
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 
 		/**
 		 * Import types
@@ -20719,7 +21002,7 @@
 		if (hasRequiredTracer) return tracer;
 		hasRequiredTracer = 1;
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 		const Exporters = requireExporters();
 		//const AsyncStorage = require("../async-storage");
 		const RateLimiter = requireRateLimiter();
@@ -21086,7 +21369,7 @@
 		if (hasRequiredService) return service;
 		hasRequiredService = 1;
 
-		const _ = require$$0__default$1;
+		const _ = require$$0__default;
 		const { ServiceSchemaError, MoleculerError } = requireErrors();
 		const { isObject, isFunction, flatten, uniq } = requireUtils();
 
@@ -21908,8 +22191,8 @@
 		if (hasRequiredContext) return context;
 		hasRequiredContext = 1;
 
-		const util = require$$1__default$1;
-		const { pick } = require$$0__default$1;
+		const util = require$$3__default$1;
+		const { pick } = require$$0__default;
 		const { RequestSkippedError, MaxCallLevelError } = requireErrors();
 
 		/**
@@ -22647,10 +22930,10 @@
 		hasRequiredServiceBroker = 1;
 
 		const EventEmitter2 = requireEventemitter2().EventEmitter2;
-		const _ = require$$0__default$1;
-		const { globSync } = require$$2__default$3;
+		const _ = require$$0__default;
+		const { globSync } = require$$2__default$4;
 		const path = require$$2__default;
-		const { format } = require$$1__default$1;
+		const { format } = require$$3__default$1;
 
 		const Transit = requireTransit();
 		const Registry = requireRegistry();
