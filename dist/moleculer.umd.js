@@ -1,42 +1,92 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('events'), require('browser-process-hrtime'), require('timers-browserify'), require('eventemitter2'), require('lodash'), require('glob'), require('path'), require('es6-error'), require('stream'), require('os'), require('fs'), require('cpus'), require('raf-perf'), require('crypto'), require('lru-cache'), require('util'), require('fastest-validator'), require('fn-args')) :
-	typeof define === 'function' && define.amd ? define(['events', 'browser-process-hrtime', 'timers-browserify', 'eventemitter2', 'lodash', 'glob', 'path', 'es6-error', 'stream', 'os', 'fs', 'cpus', 'raf-perf', 'crypto', 'lru-cache', 'util', 'fastest-validator', 'fn-args'], factory) :
-	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.Moleculer = factory(global.events, global.hrtime, global.timersBrowserify, global.require$$0$2, global._, global.glob, global.path, global.ExtendableError, global.require$$0$1, global.os, global.fs, global.require$$0, global.RafPerf, global.crypto, global.LRU, global.util, global.Validator, global.functionArguments));
-}(this, (function (events, hrtime, timersBrowserify, require$$0$2, _, glob, path, ExtendableError, require$$0$1, os, fs, require$$0, RafPerf, crypto, LRU, util, Validator, functionArguments) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('events'), require('browser-process-hrtime'), require('timers-browserify'), require('lodash'), require('path'), require('util'), require('stream'), require('os'), require('fs'), require('cpus'), require('raf-perf'), require('crypto')) :
+	typeof define === 'function' && define.amd ? define(['events', 'browser-process-hrtime', 'timers-browserify', 'lodash', 'path', 'util', 'stream', 'os', 'fs', 'cpus', 'raf-perf', 'crypto'], factory) :
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.Moleculer = factory(global.events, global.hrtime, global.timersBrowserify, global._, global.path, global.util, global.require$$0$1, global.os, global.fs, global.require$$0, global.RafPerf, global.crypto));
+}(this, (function (events, hrtime, timersBrowserify, _, path, util, require$$0$1, os, fs, require$$0, RafPerf, crypto) { 'use strict';
 
 	function _interopDefault (e) { return e && e.__esModule ? e['default'] : e; }
 
 	var hrtime__default = /*#__PURE__*/_interopDefault(hrtime);
-	var require$$0__default$2 = /*#__PURE__*/_interopDefault(require$$0$2);
 	var ___default = /*#__PURE__*/_interopDefault(_);
-	var glob__default = /*#__PURE__*/_interopDefault(glob);
 	var path__default = /*#__PURE__*/_interopDefault(path);
-	var ExtendableError__default = /*#__PURE__*/_interopDefault(ExtendableError);
+	var util__default = /*#__PURE__*/_interopDefault(util);
 	var require$$0__default$1 = /*#__PURE__*/_interopDefault(require$$0$1);
 	var os__default = /*#__PURE__*/_interopDefault(os);
 	var fs__default = /*#__PURE__*/_interopDefault(fs);
 	var require$$0__default = /*#__PURE__*/_interopDefault(require$$0);
 	var RafPerf__default = /*#__PURE__*/_interopDefault(RafPerf);
 	var crypto__default = /*#__PURE__*/_interopDefault(crypto);
-	var LRU__default = /*#__PURE__*/_interopDefault(LRU);
-	var util__default = /*#__PURE__*/_interopDefault(util);
-	var Validator__default = /*#__PURE__*/_interopDefault(Validator);
-	var functionArguments__default = /*#__PURE__*/_interopDefault(functionArguments);
 
 	/*
 	 * moleculer
-	 * Copyright (c) 2018 MoleculerJS (https://github.com/moleculerjs/moleculer)
+	 * Copyright (c) 2023 MoleculerJS (https://github.com/moleculerjs/moleculer)
 	 * MIT Licensed
 	 */
 
 	var constants = {
-
 		// Circuit-breaker states
-		CIRCUIT_CLOSE: 				"close",
-		CIRCUIT_HALF_OPEN: 			"half_open",
-		CIRCUIT_HALF_OPEN_WAIT: 	"half_open_wait",
-		CIRCUIT_OPEN: 				"open"
+		CIRCUIT_CLOSE: "close",
+		CIRCUIT_HALF_OPEN: "half_open",
+		CIRCUIT_HALF_OPEN_WAIT: "half_open_wait",
+		CIRCUIT_OPEN: "open",
 
+		// Error list in core modules
+		/** @type {String} Emitted when transit fails to process the packet*/
+		FAILED_PROCESSING_PACKET: "failedProcessingPacket",
+		/** @type {String} Emitted when transit fails to send request packet*/
+		FAILED_SEND_REQUEST_PACKET: "failedSendRequestPacket",
+		/** @type {String} Emitted when transit fails to send event packet*/
+		FAILED_SEND_EVENT_PACKET: "failedSendEventPacket",
+		/** @type {String} Emitted when transit fails to send response packet*/
+		FAILED_SEND_RESPONSE_PACKET: "failedSendResponsePacket",
+		/** @type {String} Emitted when transit fails to discover multiple nodes*/
+		FAILED_NODES_DISCOVERY: "failedNodesDiscovery",
+		/** @type {String} Emitted when transit fails to discover a single nodes*/
+		FAILED_NODE_DISCOVERY: "failedNodeDiscovery",
+		/** @type {String} Emitted when transit fails to send an INFO packet*/
+		FAILED_SEND_INFO_PACKET: "failedSendInfoPacket",
+		/** @type {String} Emitted when transit fails to send a PING packet*/
+		FAILED_SEND_PING_PACKET: "failedSendPingPacket",
+		/** @type {String} Emitted when transit fails to send a PONG packet*/
+		FAILED_SEND_PONG_PACKET: "failedSendPongPacket",
+		/** @type {String} Emitted when transit fails to send a HEARTBEAT packet*/
+		FAILED_SEND_HEARTBEAT_PACKET: "failedSendHeartbeatPacket",
+		/** @type {String} Emitted when broker fails to stop all services*/
+		FAILED_STOPPING_SERVICES: "failedServicesStop",
+		/** @type {String} Emitted when broker fails to stop all services*/
+		FAILED_LOAD_SERVICE: "failedServiceLoad",
+		/** @type {String} Emitted when broker fails to stop all services*/
+		FAILED_RESTART_SERVICE: "failedServiceRestart",
+		/** @type {String} Emitted when broker fails to stop all services*/
+		FAILED_DESTRUCTION_SERVICE: "failedServiceDestruction",
+		/** @type {String} Emitted when CACHER/DISCOVERER/TRANSPORTER client receives an error*/
+		CLIENT_ERROR: "clientError",
+		/** @type {String} Emitted when Redis client fails during while pinging the server*/
+		FAILED_SEND_PING: "failedSendPing",
+		/** @type {String} Emitted when etcd3 discoverer fails to collect the keys*/
+		FAILED_COLLECT_KEYS: "failedCollectKeys",
+		/** @type {String} Emitted when etcd3 discoverer fails to send INFO packet*/
+		FAILED_SEND_INFO: "failedSendInfo",
+		/** @type {String} Emitted when Redis discoverer fails to scan the keys*/
+		FAILED_KEY_SCAN: "failedKeyScan",
+		/** @type {String} Emitted when Redis publisher fails for some reason*/
+		FAILED_PUBLISHER_ERROR: "publisherError",
+		/** @type {String} Emitted when Redis consumer fails for some reason*/
+		FAILED_CONSUMER_ERROR: "consumerError",
+		/** @type {String} Emitted when Kafka fails to create topics*/
+		FAILED_TOPIC_CREATION: "failedTopicCreation",
+		/** @type {String} Emitted when AMQP fails to connect*/
+		FAILED_CONNECTION_ERROR: "failedConnection",
+		/** @type {String} Emitted when AMQP fails to connect*/
+		FAILED_CHANNEL_ERROR: "failedChannel",
+		/** @type {String} Emitted when AMQP fails ACK packet*/
+		FAILED_REQUEST_ACK: "requestAck",
+		/** @type {String} Emitted when AMQP fails for some reason and disconnects*/
+		FAILED_DISCONNECTION: "failedDisconnection",
+		/** @type {String} Emitted when AMQP fails to publish balanced event*/
+		FAILED_PUBLISH_BALANCED_EVENT: "failedPublishBalancedEvent",
+		/** @type {String} Emitted when AMQP fails to publish balanced request*/
+		FAILED_PUBLISH_BALANCED_REQUEST: "publishBalancedRequest"
 	};
 
 	const _process = process || require('process');
@@ -116,27 +166,1654 @@
 		throw new Error('Dynamic requires are not currently supported by @rollup/plugin-commonjs');
 	}
 
+	var eventemitter2 = createCommonjsModule(function (module, exports) {
+	!function(undefined$1) {
+	  var hasOwnProperty= Object.hasOwnProperty;
+	  var isArray = Array.isArray ? Array.isArray : function _isArray(obj) {
+	    return Object.prototype.toString.call(obj) === "[object Array]";
+	  };
+	  var defaultMaxListeners = 10;
+	  var nextTickSupported= typeof process=='object' && typeof process.nextTick=='function';
+	  var symbolsSupported= typeof Symbol==='function';
+	  var reflectSupported= typeof Reflect === 'object';
+	  var setImmediateSupported= typeof setImmediate === 'function';
+	  var _setImmediate= setImmediateSupported ? setImmediate : setTimeout;
+	  var ownKeys= symbolsSupported? (reflectSupported && typeof Reflect.ownKeys==='function'? Reflect.ownKeys : function(obj){
+	    var arr= Object.getOwnPropertyNames(obj);
+	    arr.push.apply(arr, Object.getOwnPropertySymbols(obj));
+	    return arr;
+	  }) : Object.keys;
+
+	  function init() {
+	    this._events = {};
+	    if (this._conf) {
+	      configure.call(this, this._conf);
+	    }
+	  }
+
+	  function configure(conf) {
+	    if (conf) {
+	      this._conf = conf;
+
+	      conf.delimiter && (this.delimiter = conf.delimiter);
+
+	      if(conf.maxListeners!==undefined$1){
+	          this._maxListeners= conf.maxListeners;
+	      }
+
+	      conf.wildcard && (this.wildcard = conf.wildcard);
+	      conf.newListener && (this._newListener = conf.newListener);
+	      conf.removeListener && (this._removeListener = conf.removeListener);
+	      conf.verboseMemoryLeak && (this.verboseMemoryLeak = conf.verboseMemoryLeak);
+	      conf.ignoreErrors && (this.ignoreErrors = conf.ignoreErrors);
+
+	      if (this.wildcard) {
+	        this.listenerTree = {};
+	      }
+	    }
+	  }
+
+	  function logPossibleMemoryLeak(count, eventName) {
+	    var errorMsg = '(node) warning: possible EventEmitter memory ' +
+	        'leak detected. ' + count + ' listeners added. ' +
+	        'Use emitter.setMaxListeners() to increase limit.';
+
+	    if(this.verboseMemoryLeak){
+	      errorMsg += ' Event name: ' + eventName + '.';
+	    }
+
+	    if(typeof process !== 'undefined' && process.emitWarning){
+	      var e = new Error(errorMsg);
+	      e.name = 'MaxListenersExceededWarning';
+	      e.emitter = this;
+	      e.count = count;
+	      process.emitWarning(e);
+	    } else {
+	      console.error(errorMsg);
+
+	      if (console.trace){
+	        console.trace();
+	      }
+	    }
+	  }
+
+	  var toArray = function (a, b, c) {
+	    var n = arguments.length;
+	    switch (n) {
+	      case 0:
+	        return [];
+	      case 1:
+	        return [a];
+	      case 2:
+	        return [a, b];
+	      case 3:
+	        return [a, b, c];
+	      default:
+	        var arr = new Array(n);
+	        while (n--) {
+	          arr[n] = arguments[n];
+	        }
+	        return arr;
+	    }
+	  };
+
+	  function toObject(keys, values) {
+	    var obj = {};
+	    var key;
+	    var len = keys.length;
+	    var valuesCount = values ? values.length : 0;
+	    for (var i = 0; i < len; i++) {
+	      key = keys[i];
+	      obj[key] = i < valuesCount ? values[i] : undefined$1;
+	    }
+	    return obj;
+	  }
+
+	  function TargetObserver(emitter, target, options) {
+	    this._emitter = emitter;
+	    this._target = target;
+	    this._listeners = {};
+	    this._listenersCount = 0;
+
+	    var on, off;
+
+	    if (options.on || options.off) {
+	      on = options.on;
+	      off = options.off;
+	    }
+
+	    if (target.addEventListener) {
+	      on = target.addEventListener;
+	      off = target.removeEventListener;
+	    } else if (target.addListener) {
+	      on = target.addListener;
+	      off = target.removeListener;
+	    } else if (target.on) {
+	      on = target.on;
+	      off = target.off;
+	    }
+
+	    if (!on && !off) {
+	      throw Error('target does not implement any known event API');
+	    }
+
+	    if (typeof on !== 'function') {
+	      throw TypeError('on method must be a function');
+	    }
+
+	    if (typeof off !== 'function') {
+	      throw TypeError('off method must be a function');
+	    }
+
+	    this._on = on;
+	    this._off = off;
+
+	    var _observers= emitter._observers;
+	    if(_observers){
+	      _observers.push(this);
+	    }else {
+	      emitter._observers= [this];
+	    }
+	  }
+
+	  Object.assign(TargetObserver.prototype, {
+	    subscribe: function(event, localEvent, reducer){
+	      var observer= this;
+	      var target= this._target;
+	      var emitter= this._emitter;
+	      var listeners= this._listeners;
+	      var handler= function(){
+	        var args= toArray.apply(null, arguments);
+	        var eventObj= {
+	          data: args,
+	          name: localEvent,
+	          original: event
+	        };
+	        if(reducer){
+	          var result= reducer.call(target, eventObj);
+	          if(result!==false){
+	            emitter.emit.apply(emitter, [eventObj.name].concat(args));
+	          }
+	          return;
+	        }
+	        emitter.emit.apply(emitter, [localEvent].concat(args));
+	      };
+
+
+	      if(listeners[event]){
+	        throw Error('Event \'' + event + '\' is already listening');
+	      }
+
+	      this._listenersCount++;
+
+	      if(emitter._newListener && emitter._removeListener && !observer._onNewListener){
+
+	        this._onNewListener = function (_event) {
+	          if (_event === localEvent && listeners[event] === null) {
+	            listeners[event] = handler;
+	            observer._on.call(target, event, handler);
+	          }
+	        };
+
+	        emitter.on('newListener', this._onNewListener);
+
+	        this._onRemoveListener= function(_event){
+	          if(_event === localEvent && !emitter.hasListeners(_event) && listeners[event]){
+	            listeners[event]= null;
+	            observer._off.call(target, event, handler);
+	          }
+	        };
+
+	        listeners[event]= null;
+
+	        emitter.on('removeListener', this._onRemoveListener);
+	      }else {
+	        listeners[event]= handler;
+	        observer._on.call(target, event, handler);
+	      }
+	    },
+
+	    unsubscribe: function(event){
+	      var observer= this;
+	      var listeners= this._listeners;
+	      var emitter= this._emitter;
+	      var handler;
+	      var events;
+	      var off= this._off;
+	      var target= this._target;
+	      var i;
+
+	      if(event && typeof event!=='string'){
+	        throw TypeError('event must be a string');
+	      }
+
+	      function clearRefs(){
+	        if(observer._onNewListener){
+	          emitter.off('newListener', observer._onNewListener);
+	          emitter.off('removeListener', observer._onRemoveListener);
+	          observer._onNewListener= null;
+	          observer._onRemoveListener= null;
+	        }
+	        var index= findTargetIndex.call(emitter, observer);
+	        emitter._observers.splice(index, 1);
+	      }
+
+	      if(event){
+	        handler= listeners[event];
+	        if(!handler) return;
+	        off.call(target, event, handler);
+	        delete listeners[event];
+	        if(!--this._listenersCount){
+	          clearRefs();
+	        }
+	      }else {
+	        events= ownKeys(listeners);
+	        i= events.length;
+	        while(i-->0){
+	          event= events[i];
+	          off.call(target, event, listeners[event]);
+	        }
+	        this._listeners= {};
+	        this._listenersCount= 0;
+	        clearRefs();
+	      }
+	    }
+	  });
+
+	  function resolveOptions(options, schema, reducers, allowUnknown) {
+	    var computedOptions = Object.assign({}, schema);
+
+	    if (!options) return computedOptions;
+
+	    if (typeof options !== 'object') {
+	      throw TypeError('options must be an object')
+	    }
+
+	    var keys = Object.keys(options);
+	    var length = keys.length;
+	    var option, value;
+	    var reducer;
+
+	    function reject(reason) {
+	      throw Error('Invalid "' + option + '" option value' + (reason ? '. Reason: ' + reason : ''))
+	    }
+
+	    for (var i = 0; i < length; i++) {
+	      option = keys[i];
+	      if (!allowUnknown && !hasOwnProperty.call(schema, option)) {
+	        throw Error('Unknown "' + option + '" option');
+	      }
+	      value = options[option];
+	      if (value !== undefined$1) {
+	        reducer = reducers[option];
+	        computedOptions[option] = reducer ? reducer(value, reject) : value;
+	      }
+	    }
+	    return computedOptions;
+	  }
+
+	  function constructorReducer(value, reject) {
+	    if (typeof value !== 'function' || !value.hasOwnProperty('prototype')) {
+	      reject('value must be a constructor');
+	    }
+	    return value;
+	  }
+
+	  function makeTypeReducer(types) {
+	    var message= 'value must be type of ' + types.join('|');
+	    var len= types.length;
+	    var firstType= types[0];
+	    var secondType= types[1];
+
+	    if (len === 1) {
+	      return function (v, reject) {
+	        if (typeof v === firstType) {
+	          return v;
+	        }
+	        reject(message);
+	      }
+	    }
+
+	    if (len === 2) {
+	      return function (v, reject) {
+	        var kind= typeof v;
+	        if (kind === firstType || kind === secondType) return v;
+	        reject(message);
+	      }
+	    }
+
+	    return function (v, reject) {
+	      var kind = typeof v;
+	      var i = len;
+	      while (i-- > 0) {
+	        if (kind === types[i]) return v;
+	      }
+	      reject(message);
+	    }
+	  }
+
+	  var functionReducer= makeTypeReducer(['function']);
+
+	  var objectFunctionReducer= makeTypeReducer(['object', 'function']);
+
+	  function makeCancelablePromise(Promise, executor, options) {
+	    var isCancelable;
+	    var callbacks;
+	    var timer= 0;
+	    var subscriptionClosed;
+
+	    var promise = new Promise(function (resolve, reject, onCancel) {
+	      options= resolveOptions(options, {
+	        timeout: 0,
+	        overload: false
+	      }, {
+	        timeout: function(value, reject){
+	          value*= 1;
+	          if (typeof value !== 'number' || value < 0 || !Number.isFinite(value)) {
+	            reject('timeout must be a positive number');
+	          }
+	          return value;
+	        }
+	      });
+
+	      isCancelable = !options.overload && typeof Promise.prototype.cancel === 'function' && typeof onCancel === 'function';
+
+	      function cleanup() {
+	        if (callbacks) {
+	          callbacks = null;
+	        }
+	        if (timer) {
+	          clearTimeout(timer);
+	          timer = 0;
+	        }
+	      }
+
+	      var _resolve= function(value){
+	        cleanup();
+	        resolve(value);
+	      };
+
+	      var _reject= function(err){
+	        cleanup();
+	        reject(err);
+	      };
+
+	      if (isCancelable) {
+	        executor(_resolve, _reject, onCancel);
+	      } else {
+	        callbacks = [function(reason){
+	          _reject(reason || Error('canceled'));
+	        }];
+	        executor(_resolve, _reject, function (cb) {
+	          if (subscriptionClosed) {
+	            throw Error('Unable to subscribe on cancel event asynchronously')
+	          }
+	          if (typeof cb !== 'function') {
+	            throw TypeError('onCancel callback must be a function');
+	          }
+	          callbacks.push(cb);
+	        });
+	        subscriptionClosed= true;
+	      }
+
+	      if (options.timeout > 0) {
+	        timer= setTimeout(function(){
+	          var reason= Error('timeout');
+	          reason.code = 'ETIMEDOUT';
+	          timer= 0;
+	          promise.cancel(reason);
+	          reject(reason);
+	        }, options.timeout);
+	      }
+	    });
+
+	    if (!isCancelable) {
+	      promise.cancel = function (reason) {
+	        if (!callbacks) {
+	          return;
+	        }
+	        var length = callbacks.length;
+	        for (var i = 1; i < length; i++) {
+	          callbacks[i](reason);
+	        }
+	        // internal callback to reject the promise
+	        callbacks[0](reason);
+	        callbacks = null;
+	      };
+	    }
+
+	    return promise;
+	  }
+
+	  function findTargetIndex(observer) {
+	    var observers = this._observers;
+	    if(!observers){
+	      return -1;
+	    }
+	    var len = observers.length;
+	    for (var i = 0; i < len; i++) {
+	      if (observers[i]._target === observer) return i;
+	    }
+	    return -1;
+	  }
+
+	  // Attention, function return type now is array, always !
+	  // It has zero elements if no any matches found and one or more
+	  // elements (leafs) if there are matches
+	  //
+	  function searchListenerTree(handlers, type, tree, i, typeLength) {
+	    if (!tree) {
+	      return null;
+	    }
+
+	    if (i === 0) {
+	      var kind = typeof type;
+	      if (kind === 'string') {
+	        var ns, n, l = 0, j = 0, delimiter = this.delimiter, dl = delimiter.length;
+	        if ((n = type.indexOf(delimiter)) !== -1) {
+	          ns = new Array(5);
+	          do {
+	            ns[l++] = type.slice(j, n);
+	            j = n + dl;
+	          } while ((n = type.indexOf(delimiter, j)) !== -1);
+
+	          ns[l++] = type.slice(j);
+	          type = ns;
+	          typeLength = l;
+	        } else {
+	          type = [type];
+	          typeLength = 1;
+	        }
+	      } else if (kind === 'object') {
+	        typeLength = type.length;
+	      } else {
+	        type = [type];
+	        typeLength = 1;
+	      }
+	    }
+
+	    var listeners= null, branch, xTree, xxTree, isolatedBranch, endReached, currentType = type[i],
+	        nextType = type[i + 1], branches, _listeners;
+
+	    if (i === typeLength) {
+	      //
+	      // If at the end of the event(s) list and the tree has listeners
+	      // invoke those listeners.
+	      //
+
+	      if(tree._listeners) {
+	        if (typeof tree._listeners === 'function') {
+	          handlers && handlers.push(tree._listeners);
+	          listeners = [tree];
+	        } else {
+	          handlers && handlers.push.apply(handlers, tree._listeners);
+	          listeners = [tree];
+	        }
+	      }
+	    } else {
+
+	      if (currentType === '*') {
+	        //
+	        // If the event emitted is '*' at this part
+	        // or there is a concrete match at this patch
+	        //
+	        branches = ownKeys(tree);
+	        n = branches.length;
+	        while (n-- > 0) {
+	          branch = branches[n];
+	          if (branch !== '_listeners') {
+	            _listeners = searchListenerTree(handlers, type, tree[branch], i + 1, typeLength);
+	            if (_listeners) {
+	              if (listeners) {
+	                listeners.push.apply(listeners, _listeners);
+	              } else {
+	                listeners = _listeners;
+	              }
+	            }
+	          }
+	        }
+	        return listeners;
+	      } else if (currentType === '**') {
+	        endReached = (i + 1 === typeLength || (i + 2 === typeLength && nextType === '*'));
+	        if (endReached && tree._listeners) {
+	          // The next element has a _listeners, add it to the handlers.
+	          listeners = searchListenerTree(handlers, type, tree, typeLength, typeLength);
+	        }
+
+	        branches = ownKeys(tree);
+	        n = branches.length;
+	        while (n-- > 0) {
+	          branch = branches[n];
+	          if (branch !== '_listeners') {
+	            if (branch === '*' || branch === '**') {
+	              if (tree[branch]._listeners && !endReached) {
+	                _listeners = searchListenerTree(handlers, type, tree[branch], typeLength, typeLength);
+	                if (_listeners) {
+	                  if (listeners) {
+	                    listeners.push.apply(listeners, _listeners);
+	                  } else {
+	                    listeners = _listeners;
+	                  }
+	                }
+	              }
+	              _listeners = searchListenerTree(handlers, type, tree[branch], i, typeLength);
+	            } else if (branch === nextType) {
+	              _listeners = searchListenerTree(handlers, type, tree[branch], i + 2, typeLength);
+	            } else {
+	              // No match on this one, shift into the tree but not in the type array.
+	              _listeners = searchListenerTree(handlers, type, tree[branch], i, typeLength);
+	            }
+	            if (_listeners) {
+	              if (listeners) {
+	                listeners.push.apply(listeners, _listeners);
+	              } else {
+	                listeners = _listeners;
+	              }
+	            }
+	          }
+	        }
+	        return listeners;
+	      } else if (tree[currentType]) {
+	        listeners = searchListenerTree(handlers, type, tree[currentType], i + 1, typeLength);
+	      }
+	    }
+
+	      xTree = tree['*'];
+	    if (xTree) {
+	      //
+	      // If the listener tree will allow any match for this part,
+	      // then recursively explore all branches of the tree
+	      //
+	      searchListenerTree(handlers, type, xTree, i + 1, typeLength);
+	    }
+
+	    xxTree = tree['**'];
+	    if (xxTree) {
+	      if (i < typeLength) {
+	        if (xxTree._listeners) {
+	          // If we have a listener on a '**', it will catch all, so add its handler.
+	          searchListenerTree(handlers, type, xxTree, typeLength, typeLength);
+	        }
+
+	        // Build arrays of matching next branches and others.
+	        branches= ownKeys(xxTree);
+	        n= branches.length;
+	        while(n-->0){
+	          branch= branches[n];
+	          if (branch !== '_listeners') {
+	            if (branch === nextType) {
+	              // We know the next element will match, so jump twice.
+	              searchListenerTree(handlers, type, xxTree[branch], i + 2, typeLength);
+	            } else if (branch === currentType) {
+	              // Current node matches, move into the tree.
+	              searchListenerTree(handlers, type, xxTree[branch], i + 1, typeLength);
+	            } else {
+	              isolatedBranch = {};
+	              isolatedBranch[branch] = xxTree[branch];
+	              searchListenerTree(handlers, type, {'**': isolatedBranch}, i + 1, typeLength);
+	            }
+	          }
+	        }
+	      } else if (xxTree._listeners) {
+	        // We have reached the end and still on a '**'
+	        searchListenerTree(handlers, type, xxTree, typeLength, typeLength);
+	      } else if (xxTree['*'] && xxTree['*']._listeners) {
+	        searchListenerTree(handlers, type, xxTree['*'], typeLength, typeLength);
+	      }
+	    }
+
+	    return listeners;
+	  }
+
+	  function growListenerTree(type, listener, prepend) {
+	    var len = 0, j = 0, i, delimiter = this.delimiter, dl= delimiter.length, ns;
+
+	    if(typeof type==='string') {
+	      if ((i = type.indexOf(delimiter)) !== -1) {
+	        ns = new Array(5);
+	        do {
+	          ns[len++] = type.slice(j, i);
+	          j = i + dl;
+	        } while ((i = type.indexOf(delimiter, j)) !== -1);
+
+	        ns[len++] = type.slice(j);
+	      }else {
+	        ns= [type];
+	        len= 1;
+	      }
+	    }else {
+	      ns= type;
+	      len= type.length;
+	    }
+
+	    //
+	    // Looks for two consecutive '**', if so, don't add the event at all.
+	    //
+	    if (len > 1) {
+	      for (i = 0; i + 1 < len; i++) {
+	        if (ns[i] === '**' && ns[i + 1] === '**') {
+	          return;
+	        }
+	      }
+	    }
+
+
+
+	    var tree = this.listenerTree, name;
+
+	    for (i = 0; i < len; i++) {
+	      name = ns[i];
+
+	      tree = tree[name] || (tree[name] = {});
+
+	      if (i === len - 1) {
+	        if (!tree._listeners) {
+	          tree._listeners = listener;
+	        } else {
+	          if (typeof tree._listeners === 'function') {
+	            tree._listeners = [tree._listeners];
+	          }
+
+	          if (prepend) {
+	            tree._listeners.unshift(listener);
+	          } else {
+	            tree._listeners.push(listener);
+	          }
+
+	          if (
+	              !tree._listeners.warned &&
+	              this._maxListeners > 0 &&
+	              tree._listeners.length > this._maxListeners
+	          ) {
+	            tree._listeners.warned = true;
+	            logPossibleMemoryLeak.call(this, tree._listeners.length, name);
+	          }
+	        }
+	        return true;
+	      }
+	    }
+
+	    return true;
+	  }
+
+	  function collectTreeEvents(tree, events, root, asArray){
+	     var branches= ownKeys(tree);
+	     var i= branches.length;
+	     var branch, branchName, path;
+	     var hasListeners= tree['_listeners'];
+	     var isArrayPath;
+
+	     while(i-->0){
+	         branchName= branches[i];
+
+	         branch= tree[branchName];
+
+	         if(branchName==='_listeners'){
+	             path= root;
+	         }else {
+	             path = root ? root.concat(branchName) : [branchName];
+	         }
+
+	         isArrayPath= asArray || typeof branchName==='symbol';
+
+	         hasListeners && events.push(isArrayPath? path : path.join(this.delimiter));
+
+	         if(typeof branch==='object'){
+	             collectTreeEvents.call(this, branch, events, path, isArrayPath);
+	         }
+	     }
+
+	     return events;
+	  }
+
+	  function recursivelyGarbageCollect(root) {
+	    var keys = ownKeys(root);
+	    var i= keys.length;
+	    var obj, key, flag;
+	    while(i-->0){
+	      key = keys[i];
+	      obj = root[key];
+
+	      if(obj){
+	          flag= true;
+	          if(key !== '_listeners' && !recursivelyGarbageCollect(obj)){
+	             delete root[key];
+	          }
+	      }
+	    }
+
+	    return flag;
+	  }
+
+	  function Listener(emitter, event, listener){
+	    this.emitter= emitter;
+	    this.event= event;
+	    this.listener= listener;
+	  }
+
+	  Listener.prototype.off= function(){
+	    this.emitter.off(this.event, this.listener);
+	    return this;
+	  };
+
+	  function setupListener(event, listener, options){
+	      if (options === true) {
+	        promisify = true;
+	      } else if (options === false) {
+	        async = true;
+	      } else {
+	        if (!options || typeof options !== 'object') {
+	          throw TypeError('options should be an object or true');
+	        }
+	        var async = options.async;
+	        var promisify = options.promisify;
+	        var nextTick = options.nextTick;
+	        var objectify = options.objectify;
+	      }
+
+	      if (async || nextTick || promisify) {
+	        var _listener = listener;
+	        var _origin = listener._origin || listener;
+
+	        if (nextTick && !nextTickSupported) {
+	          throw Error('process.nextTick is not supported');
+	        }
+
+	        if (promisify === undefined$1) {
+	          promisify = listener.constructor.name === 'AsyncFunction';
+	        }
+
+	        listener = function () {
+	          var args = arguments;
+	          var context = this;
+	          var event = this.event;
+
+	          return promisify ? (nextTick ? Promise.resolve() : new Promise(function (resolve) {
+	            _setImmediate(resolve);
+	          }).then(function () {
+	            context.event = event;
+	            return _listener.apply(context, args)
+	          })) : (nextTick ? process.nextTick : _setImmediate)(function () {
+	            context.event = event;
+	            _listener.apply(context, args);
+	          });
+	        };
+
+	        listener._async = true;
+	        listener._origin = _origin;
+	      }
+
+	    return [listener, objectify? new Listener(this, event, listener): this];
+	  }
+
+	  function EventEmitter(conf) {
+	    this._events = {};
+	    this._newListener = false;
+	    this._removeListener = false;
+	    this.verboseMemoryLeak = false;
+	    configure.call(this, conf);
+	  }
+
+	  EventEmitter.EventEmitter2 = EventEmitter; // backwards compatibility for exporting EventEmitter property
+
+	  EventEmitter.prototype.listenTo= function(target, events, options){
+	    if(typeof target!=='object'){
+	      throw TypeError('target musts be an object');
+	    }
+
+	    var emitter= this;
+
+	    options = resolveOptions(options, {
+	      on: undefined$1,
+	      off: undefined$1,
+	      reducers: undefined$1
+	    }, {
+	      on: functionReducer,
+	      off: functionReducer,
+	      reducers: objectFunctionReducer
+	    });
+
+	    function listen(events){
+	      if(typeof events!=='object'){
+	        throw TypeError('events must be an object');
+	      }
+
+	      var reducers= options.reducers;
+	      var index= findTargetIndex.call(emitter, target);
+	      var observer;
+
+	      if(index===-1){
+	        observer= new TargetObserver(emitter, target, options);
+	      }else {
+	        observer= emitter._observers[index];
+	      }
+
+	      var keys= ownKeys(events);
+	      var len= keys.length;
+	      var event;
+	      var isSingleReducer= typeof reducers==='function';
+
+	      for(var i=0; i<len; i++){
+	        event= keys[i];
+	        observer.subscribe(
+	            event,
+	            events[event] || event,
+	            isSingleReducer ? reducers : reducers && reducers[event]
+	        );
+	      }
+	    }
+
+	    isArray(events)?
+	        listen(toObject(events)) :
+	        (typeof events==='string'? listen(toObject(events.split(/\s+/))): listen(events));
+
+	    return this;
+	  };
+
+	  EventEmitter.prototype.stopListeningTo = function (target, event) {
+	    var observers = this._observers;
+
+	    if(!observers){
+	      return false;
+	    }
+
+	    var i = observers.length;
+	    var observer;
+	    var matched= false;
+
+	    if(target && typeof target!=='object'){
+	      throw TypeError('target should be an object');
+	    }
+
+	    while (i-- > 0) {
+	      observer = observers[i];
+	      if (!target || observer._target === target) {
+	        observer.unsubscribe(event);
+	        matched= true;
+	      }
+	    }
+
+	    return matched;
+	  };
+
+	  // By default EventEmitters will print a warning if more than
+	  // 10 listeners are added to it. This is a useful default which
+	  // helps finding memory leaks.
+	  //
+	  // Obviously not all Emitters should be limited to 10. This function allows
+	  // that to be increased. Set to zero for unlimited.
+
+	  EventEmitter.prototype.delimiter = '.';
+
+	  EventEmitter.prototype.setMaxListeners = function(n) {
+	    if (n !== undefined$1) {
+	      this._maxListeners = n;
+	      if (!this._conf) this._conf = {};
+	      this._conf.maxListeners = n;
+	    }
+	  };
+
+	  EventEmitter.prototype.getMaxListeners = function() {
+	    return this._maxListeners;
+	  };
+
+	  EventEmitter.prototype.event = '';
+
+	  EventEmitter.prototype.once = function(event, fn, options) {
+	    return this._once(event, fn, false, options);
+	  };
+
+	  EventEmitter.prototype.prependOnceListener = function(event, fn, options) {
+	    return this._once(event, fn, true, options);
+	  };
+
+	  EventEmitter.prototype._once = function(event, fn, prepend, options) {
+	    return this._many(event, 1, fn, prepend, options);
+	  };
+
+	  EventEmitter.prototype.many = function(event, ttl, fn, options) {
+	    return this._many(event, ttl, fn, false, options);
+	  };
+
+	  EventEmitter.prototype.prependMany = function(event, ttl, fn, options) {
+	    return this._many(event, ttl, fn, true, options);
+	  };
+
+	  EventEmitter.prototype._many = function(event, ttl, fn, prepend, options) {
+	    var self = this;
+
+	    if (typeof fn !== 'function') {
+	      throw new Error('many only accepts instances of Function');
+	    }
+
+	    function listener() {
+	      if (--ttl === 0) {
+	        self.off(event, listener);
+	      }
+	      return fn.apply(this, arguments);
+	    }
+
+	    listener._origin = fn;
+
+	    return this._on(event, listener, prepend, options);
+	  };
+
+	  EventEmitter.prototype.emit = function() {
+	    if (!this._events && !this._all) {
+	      return false;
+	    }
+
+	    this._events || init.call(this);
+
+	    var type = arguments[0], ns, wildcard= this.wildcard;
+	    var args,l,i,j, containsSymbol;
+
+	    if (type === 'newListener' && !this._newListener) {
+	      if (!this._events.newListener) {
+	        return false;
+	      }
+	    }
+
+	    if (wildcard) {
+	      ns= type;
+	      if(type!=='newListener' && type!=='removeListener'){
+	        if (typeof type === 'object') {
+	          l = type.length;
+	          if (symbolsSupported) {
+	            for (i = 0; i < l; i++) {
+	              if (typeof type[i] === 'symbol') {
+	                containsSymbol = true;
+	                break;
+	              }
+	            }
+	          }
+	          if (!containsSymbol) {
+	            type = type.join(this.delimiter);
+	          }
+	        }
+	      }
+	    }
+
+	    var al = arguments.length;
+	    var handler;
+
+	    if (this._all && this._all.length) {
+	      handler = this._all.slice();
+
+	      for (i = 0, l = handler.length; i < l; i++) {
+	        this.event = type;
+	        switch (al) {
+	        case 1:
+	          handler[i].call(this, type);
+	          break;
+	        case 2:
+	          handler[i].call(this, type, arguments[1]);
+	          break;
+	        case 3:
+	          handler[i].call(this, type, arguments[1], arguments[2]);
+	          break;
+	        default:
+	          handler[i].apply(this, arguments);
+	        }
+	      }
+	    }
+
+	    if (wildcard) {
+	      handler = [];
+	      searchListenerTree.call(this, handler, ns, this.listenerTree, 0, l);
+	    } else {
+	      handler = this._events[type];
+	      if (typeof handler === 'function') {
+	        this.event = type;
+	        switch (al) {
+	        case 1:
+	          handler.call(this);
+	          break;
+	        case 2:
+	          handler.call(this, arguments[1]);
+	          break;
+	        case 3:
+	          handler.call(this, arguments[1], arguments[2]);
+	          break;
+	        default:
+	          args = new Array(al - 1);
+	          for (j = 1; j < al; j++) args[j - 1] = arguments[j];
+	          handler.apply(this, args);
+	        }
+	        return true;
+	      } else if (handler) {
+	        // need to make copy of handlers because list can change in the middle
+	        // of emit call
+	        handler = handler.slice();
+	      }
+	    }
+
+	    if (handler && handler.length) {
+	      if (al > 3) {
+	        args = new Array(al - 1);
+	        for (j = 1; j < al; j++) args[j - 1] = arguments[j];
+	      }
+	      for (i = 0, l = handler.length; i < l; i++) {
+	        this.event = type;
+	        switch (al) {
+	        case 1:
+	          handler[i].call(this);
+	          break;
+	        case 2:
+	          handler[i].call(this, arguments[1]);
+	          break;
+	        case 3:
+	          handler[i].call(this, arguments[1], arguments[2]);
+	          break;
+	        default:
+	          handler[i].apply(this, args);
+	        }
+	      }
+	      return true;
+	    } else if (!this.ignoreErrors && !this._all && type === 'error') {
+	      if (arguments[1] instanceof Error) {
+	        throw arguments[1]; // Unhandled 'error' event
+	      } else {
+	        throw new Error("Uncaught, unspecified 'error' event.");
+	      }
+	    }
+
+	    return !!this._all;
+	  };
+
+	  EventEmitter.prototype.emitAsync = function() {
+	    if (!this._events && !this._all) {
+	      return false;
+	    }
+
+	    this._events || init.call(this);
+
+	    var type = arguments[0], wildcard= this.wildcard, ns, containsSymbol;
+	    var args,l,i,j;
+
+	    if (type === 'newListener' && !this._newListener) {
+	        if (!this._events.newListener) { return Promise.resolve([false]); }
+	    }
+
+	    if (wildcard) {
+	      ns= type;
+	      if(type!=='newListener' && type!=='removeListener'){
+	        if (typeof type === 'object') {
+	          l = type.length;
+	          if (symbolsSupported) {
+	            for (i = 0; i < l; i++) {
+	              if (typeof type[i] === 'symbol') {
+	                containsSymbol = true;
+	                break;
+	              }
+	            }
+	          }
+	          if (!containsSymbol) {
+	            type = type.join(this.delimiter);
+	          }
+	        }
+	      }
+	    }
+
+	    var promises= [];
+
+	    var al = arguments.length;
+	    var handler;
+
+	    if (this._all) {
+	      for (i = 0, l = this._all.length; i < l; i++) {
+	        this.event = type;
+	        switch (al) {
+	        case 1:
+	          promises.push(this._all[i].call(this, type));
+	          break;
+	        case 2:
+	          promises.push(this._all[i].call(this, type, arguments[1]));
+	          break;
+	        case 3:
+	          promises.push(this._all[i].call(this, type, arguments[1], arguments[2]));
+	          break;
+	        default:
+	          promises.push(this._all[i].apply(this, arguments));
+	        }
+	      }
+	    }
+
+	    if (wildcard) {
+	      handler = [];
+	      searchListenerTree.call(this, handler, ns, this.listenerTree, 0);
+	    } else {
+	      handler = this._events[type];
+	    }
+
+	    if (typeof handler === 'function') {
+	      this.event = type;
+	      switch (al) {
+	      case 1:
+	        promises.push(handler.call(this));
+	        break;
+	      case 2:
+	        promises.push(handler.call(this, arguments[1]));
+	        break;
+	      case 3:
+	        promises.push(handler.call(this, arguments[1], arguments[2]));
+	        break;
+	      default:
+	        args = new Array(al - 1);
+	        for (j = 1; j < al; j++) args[j - 1] = arguments[j];
+	        promises.push(handler.apply(this, args));
+	      }
+	    } else if (handler && handler.length) {
+	      handler = handler.slice();
+	      if (al > 3) {
+	        args = new Array(al - 1);
+	        for (j = 1; j < al; j++) args[j - 1] = arguments[j];
+	      }
+	      for (i = 0, l = handler.length; i < l; i++) {
+	        this.event = type;
+	        switch (al) {
+	        case 1:
+	          promises.push(handler[i].call(this));
+	          break;
+	        case 2:
+	          promises.push(handler[i].call(this, arguments[1]));
+	          break;
+	        case 3:
+	          promises.push(handler[i].call(this, arguments[1], arguments[2]));
+	          break;
+	        default:
+	          promises.push(handler[i].apply(this, args));
+	        }
+	      }
+	    } else if (!this.ignoreErrors && !this._all && type === 'error') {
+	      if (arguments[1] instanceof Error) {
+	        return Promise.reject(arguments[1]); // Unhandled 'error' event
+	      } else {
+	        return Promise.reject("Uncaught, unspecified 'error' event.");
+	      }
+	    }
+
+	    return Promise.all(promises);
+	  };
+
+	  EventEmitter.prototype.on = function(type, listener, options) {
+	    return this._on(type, listener, false, options);
+	  };
+
+	  EventEmitter.prototype.prependListener = function(type, listener, options) {
+	    return this._on(type, listener, true, options);
+	  };
+
+	  EventEmitter.prototype.onAny = function(fn) {
+	    return this._onAny(fn, false);
+	  };
+
+	  EventEmitter.prototype.prependAny = function(fn) {
+	    return this._onAny(fn, true);
+	  };
+
+	  EventEmitter.prototype.addListener = EventEmitter.prototype.on;
+
+	  EventEmitter.prototype._onAny = function(fn, prepend){
+	    if (typeof fn !== 'function') {
+	      throw new Error('onAny only accepts instances of Function');
+	    }
+
+	    if (!this._all) {
+	      this._all = [];
+	    }
+
+	    // Add the function to the event listener collection.
+	    if(prepend){
+	      this._all.unshift(fn);
+	    }else {
+	      this._all.push(fn);
+	    }
+
+	    return this;
+	  };
+
+	  EventEmitter.prototype._on = function(type, listener, prepend, options) {
+	    if (typeof type === 'function') {
+	      this._onAny(type, listener);
+	      return this;
+	    }
+
+	    if (typeof listener !== 'function') {
+	      throw new Error('on only accepts instances of Function');
+	    }
+	    this._events || init.call(this);
+
+	    var returnValue= this, temp;
+
+	    if (options !== undefined$1) {
+	      temp = setupListener.call(this, type, listener, options);
+	      listener = temp[0];
+	      returnValue = temp[1];
+	    }
+
+	    // To avoid recursion in the case that type == "newListeners"! Before
+	    // adding it to the listeners, first emit "newListeners".
+	    if (this._newListener) {
+	      this.emit('newListener', type, listener);
+	    }
+
+	    if (this.wildcard) {
+	      growListenerTree.call(this, type, listener, prepend);
+	      return returnValue;
+	    }
+
+	    if (!this._events[type]) {
+	      // Optimize the case of one listener. Don't need the extra array object.
+	      this._events[type] = listener;
+	    } else {
+	      if (typeof this._events[type] === 'function') {
+	        // Change to array.
+	        this._events[type] = [this._events[type]];
+	      }
+
+	      // If we've already got an array, just add
+	      if(prepend){
+	        this._events[type].unshift(listener);
+	      }else {
+	        this._events[type].push(listener);
+	      }
+
+	      // Check for listener leak
+	      if (
+	        !this._events[type].warned &&
+	        this._maxListeners > 0 &&
+	        this._events[type].length > this._maxListeners
+	      ) {
+	        this._events[type].warned = true;
+	        logPossibleMemoryLeak.call(this, this._events[type].length, type);
+	      }
+	    }
+
+	    return returnValue;
+	  };
+
+	  EventEmitter.prototype.off = function(type, listener) {
+	    if (typeof listener !== 'function') {
+	      throw new Error('removeListener only takes instances of Function');
+	    }
+
+	    var handlers,leafs=[];
+
+	    if(this.wildcard) {
+	      var ns = typeof type === 'string' ? type.split(this.delimiter) : type.slice();
+	      leafs = searchListenerTree.call(this, null, ns, this.listenerTree, 0);
+	      if(!leafs) return this;
+	    } else {
+	      // does not use listeners(), so no side effect of creating _events[type]
+	      if (!this._events[type]) return this;
+	      handlers = this._events[type];
+	      leafs.push({_listeners:handlers});
+	    }
+
+	    for (var iLeaf=0; iLeaf<leafs.length; iLeaf++) {
+	      var leaf = leafs[iLeaf];
+	      handlers = leaf._listeners;
+	      if (isArray(handlers)) {
+
+	        var position = -1;
+
+	        for (var i = 0, length = handlers.length; i < length; i++) {
+	          if (handlers[i] === listener ||
+	            (handlers[i].listener && handlers[i].listener === listener) ||
+	            (handlers[i]._origin && handlers[i]._origin === listener)) {
+	            position = i;
+	            break;
+	          }
+	        }
+
+	        if (position < 0) {
+	          continue;
+	        }
+
+	        if(this.wildcard) {
+	          leaf._listeners.splice(position, 1);
+	        }
+	        else {
+	          this._events[type].splice(position, 1);
+	        }
+
+	        if (handlers.length === 0) {
+	          if(this.wildcard) {
+	            delete leaf._listeners;
+	          }
+	          else {
+	            delete this._events[type];
+	          }
+	        }
+	        if (this._removeListener)
+	          this.emit("removeListener", type, listener);
+
+	        return this;
+	      }
+	      else if (handlers === listener ||
+	        (handlers.listener && handlers.listener === listener) ||
+	        (handlers._origin && handlers._origin === listener)) {
+	        if(this.wildcard) {
+	          delete leaf._listeners;
+	        }
+	        else {
+	          delete this._events[type];
+	        }
+	        if (this._removeListener)
+	          this.emit("removeListener", type, listener);
+	      }
+	    }
+
+	    this.listenerTree && recursivelyGarbageCollect(this.listenerTree);
+
+	    return this;
+	  };
+
+	  EventEmitter.prototype.offAny = function(fn) {
+	    var i = 0, l = 0, fns;
+	    if (fn && this._all && this._all.length > 0) {
+	      fns = this._all;
+	      for(i = 0, l = fns.length; i < l; i++) {
+	        if(fn === fns[i]) {
+	          fns.splice(i, 1);
+	          if (this._removeListener)
+	            this.emit("removeListenerAny", fn);
+	          return this;
+	        }
+	      }
+	    } else {
+	      fns = this._all;
+	      if (this._removeListener) {
+	        for(i = 0, l = fns.length; i < l; i++)
+	          this.emit("removeListenerAny", fns[i]);
+	      }
+	      this._all = [];
+	    }
+	    return this;
+	  };
+
+	  EventEmitter.prototype.removeListener = EventEmitter.prototype.off;
+
+	  EventEmitter.prototype.removeAllListeners = function (type) {
+	    if (type === undefined$1) {
+	      !this._events || init.call(this);
+	      return this;
+	    }
+
+	    if (this.wildcard) {
+	      var leafs = searchListenerTree.call(this, null, type, this.listenerTree, 0), leaf, i;
+	      if (!leafs) return this;
+	      for (i = 0; i < leafs.length; i++) {
+	        leaf = leafs[i];
+	        leaf._listeners = null;
+	      }
+	      this.listenerTree && recursivelyGarbageCollect(this.listenerTree);
+	    } else if (this._events) {
+	      this._events[type] = null;
+	    }
+	    return this;
+	  };
+
+	  EventEmitter.prototype.listeners = function (type) {
+	    var _events = this._events;
+	    var keys, listeners, allListeners;
+	    var i;
+	    var listenerTree;
+
+	    if (type === undefined$1) {
+	      if (this.wildcard) {
+	        throw Error('event name required for wildcard emitter');
+	      }
+
+	      if (!_events) {
+	        return [];
+	      }
+
+	      keys = ownKeys(_events);
+	      i = keys.length;
+	      allListeners = [];
+	      while (i-- > 0) {
+	        listeners = _events[keys[i]];
+	        if (typeof listeners === 'function') {
+	          allListeners.push(listeners);
+	        } else {
+	          allListeners.push.apply(allListeners, listeners);
+	        }
+	      }
+	      return allListeners;
+	    } else {
+	      if (this.wildcard) {
+	        listenerTree= this.listenerTree;
+	        if(!listenerTree) return [];
+	        var handlers = [];
+	        var ns = typeof type === 'string' ? type.split(this.delimiter) : type.slice();
+	        searchListenerTree.call(this, handlers, ns, listenerTree, 0);
+	        return handlers;
+	      }
+
+	      if (!_events) {
+	        return [];
+	      }
+
+	      listeners = _events[type];
+
+	      if (!listeners) {
+	        return [];
+	      }
+	      return typeof listeners === 'function' ? [listeners] : listeners;
+	    }
+	  };
+
+	  EventEmitter.prototype.eventNames = function(nsAsArray){
+	    var _events= this._events;
+	    return this.wildcard? collectTreeEvents.call(this, this.listenerTree, [], null, nsAsArray) : (_events? ownKeys(_events) : []);
+	  };
+
+	  EventEmitter.prototype.listenerCount = function(type) {
+	    return this.listeners(type).length;
+	  };
+
+	  EventEmitter.prototype.hasListeners = function (type) {
+	    if (this.wildcard) {
+	      var handlers = [];
+	      var ns = typeof type === 'string' ? type.split(this.delimiter) : type.slice();
+	      searchListenerTree.call(this, handlers, ns, this.listenerTree, 0);
+	      return handlers.length > 0;
+	    }
+
+	    var _events = this._events;
+	    var _all = this._all;
+
+	    return !!(_all && _all.length || _events && (type === undefined$1 ? ownKeys(_events).length : _events[type]));
+	  };
+
+	  EventEmitter.prototype.listenersAny = function() {
+
+	    if(this._all) {
+	      return this._all;
+	    }
+	    else {
+	      return [];
+	    }
+
+	  };
+
+	  EventEmitter.prototype.waitFor = function (event, options) {
+	    var self = this;
+	    var type = typeof options;
+	    if (type === 'number') {
+	      options = {timeout: options};
+	    } else if (type === 'function') {
+	      options = {filter: options};
+	    }
+
+	    options= resolveOptions(options, {
+	      timeout: 0,
+	      filter: undefined$1,
+	      handleError: false,
+	      Promise: Promise,
+	      overload: false
+	    }, {
+	      filter: functionReducer,
+	      Promise: constructorReducer
+	    });
+
+	    return makeCancelablePromise(options.Promise, function (resolve, reject, onCancel) {
+	      function listener() {
+	        var filter= options.filter;
+	        if (filter && !filter.apply(self, arguments)) {
+	          return;
+	        }
+	        self.off(event, listener);
+	        if (options.handleError) {
+	          var err = arguments[0];
+	          err ? reject(err) : resolve(toArray.apply(null, arguments).slice(1));
+	        } else {
+	          resolve(toArray.apply(null, arguments));
+	        }
+	      }
+
+	      onCancel(function(){
+	        self.off(event, listener);
+	      });
+
+	      self._on(event, listener, false);
+	    }, {
+	      timeout: options.timeout,
+	      overload: options.overload
+	    })
+	  };
+
+	  function once(emitter, name, options) {
+	    options= resolveOptions(options, {
+	      Promise: Promise,
+	      timeout: 0,
+	      overload: false
+	    }, {
+	      Promise: constructorReducer
+	    });
+
+	    var _Promise= options.Promise;
+
+	    return makeCancelablePromise(_Promise, function(resolve, reject, onCancel){
+	      var handler;
+	      if (typeof emitter.addEventListener === 'function') {
+	        handler=  function () {
+	          resolve(toArray.apply(null, arguments));
+	        };
+
+	        onCancel(function(){
+	          emitter.removeEventListener(name, handler);
+	        });
+
+	        emitter.addEventListener(
+	            name,
+	            handler,
+	            {once: true}
+	        );
+	        return;
+	      }
+
+	      var eventListener = function(){
+	        errorListener && emitter.removeListener('error', errorListener);
+	        resolve(toArray.apply(null, arguments));
+	      };
+
+	      var errorListener;
+
+	      if (name !== 'error') {
+	        errorListener = function (err){
+	          emitter.removeListener(name, eventListener);
+	          reject(err);
+	        };
+
+	        emitter.once('error', errorListener);
+	      }
+
+	      onCancel(function(){
+	        errorListener && emitter.removeListener('error', errorListener);
+	        emitter.removeListener(name, eventListener);
+	      });
+
+	      emitter.once(name, eventListener);
+	    }, {
+	      timeout: options.timeout,
+	      overload: options.overload
+	    });
+	  }
+
+	  var prototype= EventEmitter.prototype;
+
+	  Object.defineProperties(EventEmitter, {
+	    defaultMaxListeners: {
+	      get: function () {
+	        return prototype._maxListeners;
+	      },
+	      set: function (n) {
+	        if (typeof n !== 'number' || n < 0 || Number.isNaN(n)) {
+	          throw TypeError('n must be a non-negative number')
+	        }
+	        prototype._maxListeners = n;
+	      },
+	      enumerable: true
+	    },
+	    once: {
+	      value: once,
+	      writable: true,
+	      configurable: true
+	    }
+	  });
+
+	  Object.defineProperties(prototype, {
+	      _maxListeners: {
+	          value: defaultMaxListeners,
+	          writable: true,
+	          configurable: true
+	      },
+	      _observers: {value: null, writable: true, configurable: true}
+	  });
+
+	  if (typeof undefined$1 === 'function' && undefined$1.amd) {
+	     // AMD. Register as an anonymous module.
+	    undefined$1(function() {
+	      return EventEmitter;
+	    });
+	  } else {
+	    // CommonJS
+	    module.exports = EventEmitter;
+	  }
+	}();
+	});
+
 	/*
 	 * moleculer
-	 * Copyright (c) 2018 MoleculerJS (https://github.com/moleculerjs/moleculer)
+	 * Copyright (c) 2023 MoleculerJS (https://github.com/moleculerjs/moleculer)
 	 * MIT Licensed
 	 */
 
-	// Packet types
-	const PACKET_UNKNOWN		= "???";
-	const PACKET_EVENT 			= "EVENT";
-	const PACKET_REQUEST 		= "REQ";
-	const PACKET_RESPONSE		= "RES";
-	const PACKET_DISCOVER 		= "DISCOVER";
-	const PACKET_INFO 			= "INFO";
-	const PACKET_DISCONNECT 	= "DISCONNECT";
-	const PACKET_HEARTBEAT 		= "HEARTBEAT";
-	const PACKET_PING 			= "PING";
-	const PACKET_PONG 			= "PONG";
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("./packets").Packet} PacketClass
+	 * @typedef {import("./packets").PacketType} PacketType
+	 */
 
-	const PACKET_GOSSIP_REQ		= "GOSSIP_REQ";
-	const PACKET_GOSSIP_RES		= "GOSSIP_RES";
-	const PACKET_GOSSIP_HELLO	= "GOSSIP_HELLO";
+	// Packet types
+	const PACKET_UNKNOWN = "???";
+	const PACKET_EVENT = "EVENT";
+	const PACKET_REQUEST = "REQ";
+	const PACKET_RESPONSE = "RES";
+	const PACKET_DISCOVER = "DISCOVER";
+	const PACKET_INFO = "INFO";
+	const PACKET_DISCONNECT = "DISCONNECT";
+	const PACKET_HEARTBEAT = "HEARTBEAT";
+	const PACKET_PING = "PING";
+	const PACKET_PONG = "PONG";
+
+	const PACKET_GOSSIP_REQ = "GOSSIP_REQ";
+	const PACKET_GOSSIP_RES = "GOSSIP_RES";
+	const PACKET_GOSSIP_HELLO = "GOSSIP_HELLO";
 
 	const DATATYPE_UNDEFINED = 0;
 	const DATATYPE_NULL = 1;
@@ -146,15 +1823,17 @@
 	/**
 	 * Packet for transporters
 	 *
+	 * @template T
 	 * @class Packet
+	 * @implements {PacketClass}
 	 */
 	class Packet {
 		/**
 		 * Creates an instance of Packet.
 		 *
-		 * @param {String} type
+		 * @param {PacketType} type
 		 * @param {String} target
-		 * @param {any} payload
+		 * @param {T} payload
 		 *
 		 * @memberof Packet
 		 */
@@ -190,7 +1869,53 @@
 
 	var errors = createCommonjsModule(function (module) {
 
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("./service-broker")} ServiceBroker
+	 * @typedef {import("./errors").Regenerator} RegeneratorClass
+	 * @typedef {import("./errors").PlainMoleculerError} PlainMoleculerError
+	 */
 
+	/**
+	 * Extendable errors class.
+	 *
+	 * Credits: https://github.com/bjyoungblood/es6-error/blob/master/src/index.js
+	 */
+	class ExtendableError extends Error {
+		constructor(message = "") {
+			super(message);
+
+			// extending Error is weird and does not propagate `message`
+			Object.defineProperty(this, "message", {
+				configurable: true,
+				enumerable: false,
+				value: message,
+				writable: true
+			});
+
+			Object.defineProperty(this, "name", {
+				configurable: true,
+				enumerable: false,
+				value: this.constructor.name,
+				writable: true
+			});
+
+			if (Object.prototype.hasOwnProperty.call(Error, "captureStackTrace")) {
+				Error.captureStackTrace(this, this.constructor);
+				return;
+			}
+
+			Object.defineProperty(this, "stack", {
+				configurable: true,
+				enumerable: false,
+				value: new Error(message).stack,
+				writable: true
+			});
+		}
+	}
+
+	class TimeoutError extends ExtendableError {}
 
 	/**
 	 * Custom Moleculer Error class
@@ -198,14 +1923,14 @@
 	 * @class MoleculerError
 	 * @extends {ExtendableError}
 	 */
-	class MoleculerError extends ExtendableError__default {
+	class MoleculerError extends ExtendableError {
 		/**
 		 * Creates an instance of MoleculerError.
 		 *
-		 * @param {String?} message
-		 * @param {Number?} code
-		 * @param {String?} type
-		 * @param {any} data
+		 * @param {String=} message
+		 * @param {Number=} code
+		 * @param {String=} type
+		 * @param {any=} data
 		 *
 		 * @memberof MoleculerError
 		 */
@@ -231,7 +1956,7 @@
 		 * @param {String?} message
 		 * @param {Number?} code
 		 * @param {String?} type
-		 * @param {any} data
+		 * @param {any?} data
 		 *
 		 * @memberof MoleculerRetryableError
 		 */
@@ -245,30 +1970,33 @@
 	}
 
 	/**
-	 * Moleculer Error class for Broker disconnections which is retryable.
+	 * Moleculer Error class for Broker disconnections which are retryable.
 	 *
 	 * @class MoleculerServerError
 	 * @extends {MoleculerRetryableError}
 	 */
 	class BrokerDisconnectedError extends MoleculerRetryableError {
 		constructor() {
-			super("The broker's transporter has disconnected. Please try again when a connection is reestablished.", 502, "BAD_GATEWAY");
+			super(
+				"The broker's transporter has disconnected. Please try again when a connection is reestablished.",
+				502,
+				"BAD_GATEWAY"
+			);
 			// Stack trace is hidden because it creates a lot of logs and, in this case, won't help users find the issue
 			this.stack = "";
 		}
 	}
 
 	/**
-	 * Moleculer Error class for server error which is retryable.
+	 * Moleculer Error class for server errors which are retryable.
 	 *
 	 * @class MoleculerServerError
 	 * @extends {MoleculerRetryableError}
 	 */
-	class MoleculerServerError extends MoleculerRetryableError {
-	}
+	class MoleculerServerError extends MoleculerRetryableError {}
 
 	/**
-	 * Moleculer Error class for client errors which is not retryable.
+	 * Moleculer Error class for client errors which are not retryable.
 	 *
 	 * @class MoleculerClientError
 	 * @extends {MoleculerError}
@@ -289,7 +2017,6 @@
 		}
 	}
 
-
 	/**
 	 * 'Service not found' Error message
 	 *
@@ -308,13 +2035,11 @@
 			let msg;
 			if (data.nodeID && data.action)
 				msg = `Service '${data.action}' is not found on '${data.nodeID}' node.`;
-			else if (data.action)
-				msg = `Service '${data.action}' is not found.`;
+			else if (data.action) msg = `Service '${data.action}' is not found.`;
 
 			if (data.service && data.version)
 				msg = `Service '${data.version}.${data.service}' not found.`;
-			else if (data.service)
-				msg = `Service '${data.service}' not found.`;
+			else if (data.service) msg = `Service '${data.service}' not found.`;
 
 			super(msg, 404, "SERVICE_NOT_FOUND", data);
 		}
@@ -338,8 +2063,7 @@
 			let msg;
 			if (data.nodeID)
 				msg = `Service '${data.action}' is not available on '${data.nodeID}' node.`;
-			else
-				msg = `Service '${data.action}' is not available.`;
+			else msg = `Service '${data.action}' is not available.`;
 
 			super(msg, 404, "SERVICE_NOT_AVAILABLE", data);
 		}
@@ -360,7 +2084,12 @@
 		 * @memberof RequestTimeoutError
 		 */
 		constructor(data) {
-			super(`Request is timed out when call '${data.action}' action on '${data.nodeID}' node.`, 504, "REQUEST_TIMEOUT", data);
+			super(
+				`Request is timed out when call '${data.action}' action on '${data.nodeID}' node.`,
+				504,
+				"REQUEST_TIMEOUT",
+				data
+			);
 		}
 	}
 
@@ -379,7 +2108,12 @@
 		 * @memberof RequestSkippedError
 		 */
 		constructor(data) {
-			super(`Calling '${data.action}' is skipped because timeout reached on '${data.nodeID}' node.`, 514, "REQUEST_SKIPPED", data);
+			super(
+				`Calling '${data.action}' is skipped because timeout reached on '${data.nodeID}' node.`,
+				514,
+				"REQUEST_SKIPPED",
+				data
+			);
 			this.retryable = false;
 		}
 	}
@@ -399,7 +2133,12 @@
 		 * @memberof RequestRejectedError
 		 */
 		constructor(data) {
-			super(`Request is rejected when call '${data.action}' action on '${data.nodeID}' node.`, 503, "REQUEST_REJECTED", data);
+			super(
+				`Request is rejected when call '${data.action}' action on '${data.nodeID}' node.`,
+				503,
+				"REQUEST_REJECTED",
+				data
+			);
 		}
 	}
 
@@ -418,7 +2157,12 @@
 		 * @memberof QueueIsFullError
 		 */
 		constructor(data) {
-			super(`Queue is full. Request '${data.action}' action on '${data.nodeID}' node is rejected.`, 429, "QUEUE_FULL", data);
+			super(
+				`Queue is full. Request '${data.action}' action on '${data.nodeID}' node is rejected.`,
+				429,
+				"QUEUE_FULL",
+				data
+			);
 		}
 	}
 
@@ -458,7 +2202,12 @@
 		 * @memberof MaxCallLevelError
 		 */
 		constructor(data) {
-			super(`Request level is reached the limit (${data.level}) on '${data.nodeID}' node.`, 500, "MAX_CALL_LEVEL", data);
+			super(
+				`Request level is reached the limit (${data.level}) on '${data.nodeID}' node.`,
+				500,
+				"MAX_CALL_LEVEL",
+				data
+			);
 			this.retryable = false;
 		}
 	}
@@ -467,7 +2216,7 @@
 	 * Custom Moleculer Error class for Service schema errors
 	 *
 	 * @class ServiceSchemaError
-	 * @extends {Error}
+	 * @extends {MoleculerError}
 	 */
 	class ServiceSchemaError extends MoleculerError {
 		/**
@@ -486,7 +2235,7 @@
 	 * Custom Moleculer Error class for broker option errors
 	 *
 	 * @class BrokerOptionsError
-	 * @extends {Error}
+	 * @extends {MoleculerError}
 	 */
 	class BrokerOptionsError extends MoleculerError {
 		/**
@@ -505,7 +2254,7 @@
 	 * Custom Moleculer Error class for Graceful stopping
 	 *
 	 * @class GracefulStopTimeoutError
-	 * @extends {Error}
+	 * @extends {MoleculerError}
 	 */
 	class GracefulStopTimeoutError extends MoleculerError {
 		/**
@@ -515,11 +2264,18 @@
 		 * @memberof GracefulStopTimeoutError
 		 */
 		constructor(data) {
-			if (data && data.service)  {
-				super(`Unable to stop '${data.service.name}' service gracefully.`, 500, "GRACEFUL_STOP_TIMEOUT", data && data.service ? {
-					name: data.service.name,
-					version: data.service.version
-				} : null);
+			if (data && data.service) {
+				super(
+					`Unable to stop '${data.service.name}' service gracefully.`,
+					500,
+					"GRACEFUL_STOP_TIMEOUT",
+					data && data.service
+						? {
+								name: data.service.name,
+								version: data.service.version
+							}
+						: null
+				);
 			} else {
 				super("Unable to stop ServiceBroker gracefully.", 500, "GRACEFUL_STOP_TIMEOUT");
 			}
@@ -530,7 +2286,7 @@
 	 * Protocol version is mismatch
 	 *
 	 * @class ProtocolVersionMismatchError
-	 * @extends {Error}
+	 * @extends {MoleculerError}
 	 */
 	class ProtocolVersionMismatchError extends MoleculerError {
 		/**
@@ -549,7 +2305,7 @@
 	 * Invalid packet format error
 	 *
 	 * @class InvalidPacketDataError
-	 * @extends {Error}
+	 * @extends {MoleculerError}
 	 */
 	class InvalidPacketDataError extends MoleculerError {
 		/**
@@ -567,39 +2323,196 @@
 	/**
 	 * Recreate an error from a transferred payload `err`
 	 *
-	 * @param {Error} err
+	 * @param {MoleculerError} err
 	 * @returns {MoleculerError}
 	 */
 	function recreateError(err) {
 		const Class = module.exports[err.name];
 		if (Class) {
-			switch(err.name) {
-				case "MoleculerError": return new Class(err.message, err.code, err.type, err.data);
-				case "MoleculerRetryableError": return new Class(err.message, err.code, err.type, err.data);
-				case "MoleculerServerError": return new Class(err.message, err.code, err.type, err.data);
-				case "MoleculerClientError": return new Class(err.message, err.code, err.type, err.data);
+			switch (err.name) {
+				case "MoleculerError":
+					return new Class(err.message, err.code, err.type, err.data);
+				case "MoleculerRetryableError":
+					return new Class(err.message, err.code, err.type, err.data);
+				case "MoleculerServerError":
+					return new Class(err.message, err.code, err.type, err.data);
+				case "MoleculerClientError":
+					return new Class(err.message, err.code, err.type, err.data);
 
-				case "ValidationError": return new Class(err.message, err.type, err.data);
+				case "ValidationError":
+					return new Class(err.message, err.type, err.data);
 
-				case "ServiceNotFoundError": return new Class(err.data);
-				case "ServiceNotAvailableError": return new Class(err.data);
-				case "RequestTimeoutError": return new Class(err.data);
-				case "RequestSkippedError": return new Class(err.data);
-				case "RequestRejectedError": return new Class(err.data);
-				case "QueueIsFullError": return new Class(err.data);
-				case "MaxCallLevelError": return new Class(err.data);
-				case "GracefulStopTimeoutError": return new Class(err.data);
-				case "ProtocolVersionMismatchError": return new Class(err.data);
-				case "InvalidPacketDataError": return new Class(err.data);
+				case "ServiceNotFoundError":
+					return new Class(err.data);
+				case "ServiceNotAvailableError":
+					return new Class(err.data);
+				case "RequestTimeoutError":
+					return new Class(err.data);
+				case "RequestSkippedError":
+					return new Class(err.data);
+				case "RequestRejectedError":
+					return new Class(err.data);
+				case "QueueIsFullError":
+					return new Class(err.data);
+				case "MaxCallLevelError":
+					return new Class(err.data);
+				case "GracefulStopTimeoutError":
+					return new Class(err.data);
+				case "ProtocolVersionMismatchError":
+					return new Class(err.data);
+				case "InvalidPacketDataError":
+					return new Class(err.data);
 
 				case "ServiceSchemaError":
-				case "BrokerOptionsError": return new Class(err.message, err.data);
+				case "BrokerOptionsError":
+					return new Class(err.message, err.data);
 			}
 		}
 	}
 
+	/**
+	 * Error Regenerator
+	 * @class Regenerator
+	 * @implements {RegeneratorClass}
+	 */
+	class Regenerator {
+		/**
+		 * Initializes Regenerator
+		 *
+		 * @param {ServiceBroker} broker
+		 *
+		 * @memberof Regenerator
+		 */
+		init(broker) {
+			this.broker = broker;
+		}
+
+		/**
+		 * Restores an Error object
+		 *
+		 * @param {PlainMoleculerError} plainError
+		 * @param {Record<string, any>} payload
+		 * @return {Error}
+		 *
+		 * @memberof Regenerator
+		 */
+		restore(plainError, payload) {
+			let err = this.restoreCustomError(plainError, payload);
+			if (!err) {
+				err = recreateError(plainError);
+			}
+			if (!err) {
+				err = this._createDefaultError(plainError);
+			}
+			this._restoreExternalFields(plainError, err, payload);
+			this._restoreStack(plainError, err);
+
+			return err;
+		}
+
+		/**
+		 * Extracts a plain error object from Error object
+		 *
+		 * @param {Record<string, any>} plainErr
+		 * @param {Record<string, any>} payload
+		 * @return {PlainMoleculerError} plain error
+		 *
+		 * @memberof Regenerator
+		 */
+		extractPlainError(plainErr /*, payload*/) {
+			return {
+				name: plainErr.name,
+				message: plainErr.message,
+				nodeID: plainErr.nodeID || this.broker.nodeID,
+				code: plainErr.code,
+				type: plainErr.type,
+				retryable: plainErr.retryable,
+				stack: plainErr.stack,
+				data: plainErr.data
+			};
+		}
+
+		/**
+		 * Hook to restore a custom error in a child class
+		 *
+		 * @param {PlainMoleculerError} plainError
+		 * @param {Object} payload
+		 * @return {MoleculerError}
+		 *
+		 * @memberof Regenerator
+		 */
+		restoreCustomError(/*plainError, payload*/) {
+			return undefined;
+		}
+
+		/**
+		 * Creates a default error if not found
+		 *
+		 * @param {PlainMoleculerError} plainError
+		 * @return {any}
+		 * @private
+		 *
+		 * @memberof Regenerator
+		 */
+		_createDefaultError(plainError) {
+			/** @type {any} */
+			const err = new Error(plainError.message);
+			err.name = plainError.name;
+			err.code = plainError.code;
+			err.type = plainError.type;
+			err.data = plainError.data;
+			if (plainError.stack) err.stack = plainError.stack;
+
+			return err;
+		}
+
+		/**
+		 * Restores external error fields
+		 *
+		 * @param {PlainMoleculerError} plainError
+		 * @param {PlainMoleculerError} err
+		 * @param {Object} payload
+		 * @private
+		 *
+		 * @memberof Regenerator
+		 */
+		_restoreExternalFields(plainError, err, payload) {
+			err.retryable = plainError.retryable;
+			err.nodeID = plainError.nodeID || payload.sender;
+		}
+
+		/**
+		 * Restores an error stack
+		 *
+		 * @param {PlainMoleculerError} plainError
+		 * @param {Error} err
+		 * @private
+		 *
+		 * @memberof Regenerator
+		 */
+		_restoreStack(plainError, err) {
+			if (plainError.stack) err.stack = plainError.stack;
+		}
+	}
+
+	/**
+	 * Resolves a regenerator option
+	 *
+	 * @param {Regenerator=} opt
+	 * @return {Regenerator}
+	 */
+	function resolveRegenerator(opt) {
+		if (opt instanceof Regenerator) {
+			return opt;
+		}
+
+		return new Regenerator();
+	}
 
 	module.exports = {
+		ExtendableError,
+		TimeoutError,
+
 		MoleculerError,
 		MoleculerRetryableError,
 		MoleculerServerError,
@@ -624,7 +2537,9 @@
 
 		BrokerDisconnectedError,
 
-		recreateError
+		recreateError,
+		resolveRegenerator,
+		Regenerator
 	};
 	});
 
@@ -635,13 +2550,12 @@
 	 */
 
 	var constants$1 = {
-
 		// --- METRIC TYPES ---
 
-		TYPE_COUNTER:  	"counter",
-		TYPE_GAUGE:  	"gauge",
+		TYPE_COUNTER: "counter",
+		TYPE_GAUGE: "gauge",
 		TYPE_HISTOGRAM: "histogram",
-		TYPE_INFO:  	"info",
+		TYPE_INFO: "info",
 
 		// --- METRICREGISTRY METRICS ---
 
@@ -666,33 +2580,21 @@
 		PROCESS_MEMORY_HEAP_SPACE_SIZE_PHYSICAL: "process.memory.heap.space.size.physical", // bytes
 
 		PROCESS_MEMORY_HEAP_STAT_HEAP_SIZE_TOTAL: "process.memory.heap.stat.heap.size.total", // bytes
-		PROCESS_MEMORY_HEAP_STAT_EXECUTABLE_SIZE_TOTAL: "process.memory.heap.stat.executable.size.total", // bytes
+		PROCESS_MEMORY_HEAP_STAT_EXECUTABLE_SIZE_TOTAL:
+			"process.memory.heap.stat.executable.size.total", // bytes
 		PROCESS_MEMORY_HEAP_STAT_PHYSICAL_SIZE_TOTAL: "process.memory.heap.stat.physical.size.total", // bytes
 		PROCESS_MEMORY_HEAP_STAT_AVAILABLE_SIZE_TOTAL: "process.memory.heap.stat.available.size.total", // bytes
 		PROCESS_MEMORY_HEAP_STAT_USED_HEAP_SIZE: "process.memory.heap.stat.used.heap.size", // bytes
 		PROCESS_MEMORY_HEAP_STAT_HEAP_SIZE_LIMIT: "process.memory.heap.stat.heap.size.limit", // bytes
 		PROCESS_MEMORY_HEAP_STAT_MALLOCATED_MEMORY: "process.memory.heap.stat.mallocated.memory", // bytes
-		PROCESS_MEMORY_HEAP_STAT_PEAK_MALLOCATED_MEMORY: "process.memory.heap.stat.peak.mallocated.memory", // bytes
+		PROCESS_MEMORY_HEAP_STAT_PEAK_MALLOCATED_MEMORY:
+			"process.memory.heap.stat.peak.mallocated.memory", // bytes
 		PROCESS_MEMORY_HEAP_STAT_ZAP_GARBAGE: "process.memory.heap.stat.zap.garbage",
 
 		PROCESS_UPTIME: "process.uptime", // seconds
 		PROCESS_INTERNAL_ACTIVE_HANDLES: "process.internal.active.handles",
-		PROCESS_INTERNAL_ACTIVE_REQUESTS: "process.internal.active.requests",
 
 		PROCESS_VERSIONS_NODE: "process.versions.node",
-
-		// --- EVENT LOOP METRICS ---
-
-		PROCESS_EVENTLOOP_LAG_MIN: "process.eventloop.lag.min", // msec
-		PROCESS_EVENTLOOP_LAG_AVG: "process.eventloop.lag.avg", // msec
-		PROCESS_EVENTLOOP_LAG_MAX: "process.eventloop.lag.max", // msec
-		PROCESS_EVENTLOOP_LAG_COUNT: "process.eventloop.lag.count",
-
-		// --- GARBAGE COLLECTOR METRICS ---
-
-		PROCESS_GC_TIME: "process.gc.time", // nanoseconds
-		PROCESS_GC_TOTAL_TIME: "process.gc.total.time", // milliseconds
-		PROCESS_GC_EXECUTED_TOTAL: "process.gc.executed.total",
 
 		// --- OS METRICS ---
 
@@ -881,7 +2783,7 @@
 		UNIT_PACKET: "packet",
 		UNIT_MESSAGE: "message",
 		UNIT_STREAM: "stream",
-		UNIT_EVENT: "event",
+		UNIT_EVENT: "event"
 	};
 
 	// TODO: https://github.com/xpl/ansicolor#chrome-devtools-compatibility
@@ -927,44 +2829,60 @@
 
 	var kleur_1 = kleur;
 
+	var utils_1 = createCommonjsModule(function (module) {
+
+
+
+
+
+	const { TimeoutError } = errors;
+
 	const lut = [];
-	for (let i=0; i<256; i++) { lut[i] = (i<16?"0":"")+(i).toString(16); }
+	for (let i = 0; i < 256; i++) {
+		lut[i] = (i < 16 ? "0" : "") + i.toString(16);
+	}
 
 	const RegexCache = new Map();
 
 	const deprecateList = [];
 
 	const byteMultipliers = {
-		b:  1,
+		b: 1,
 		kb: 1 << 10,
 		mb: 1 << 20,
 		gb: 1 << 30,
 		tb: Math.pow(1024, 4),
-		pb: Math.pow(1024, 5),
+		pb: Math.pow(1024, 5)
 	};
 	// eslint-disable-next-line security/detect-unsafe-regex
 	const parseByteStringRe = /^((-|\+)?(\d+(?:\.\d+)?)) *(kb|mb|gb|tb|pb)$/i;
 
-	class TimeoutError extends ExtendableError__default {}
-
 	/**
 	 * Circular replacing of unsafe properties in object
 	 *
-	 * @param {Object=} options List of options to change circularReplacer behaviour
-	 * @param {number=} options.maxSafeObjectSize Maximum size of objects for safe object converting
-	 * @return {function(...[*]=)}
+	 * @param {object} options List of options to change circularReplacer behaviour
+	 * @param {number?} [options.maxSafeObjectSize = Infinity] Maximum size of objects for safe object converting
+	 * @return {(key: string, value: any) => any}
 	 */
 	function circularReplacer(options = { maxSafeObjectSize: Infinity }) {
 		const seen = new WeakSet();
-		return function(key, value) {
+		return function (key, value) {
 			if (typeof value === "object" && value !== null) {
-				const objectType = value.constructor && value.constructor.name || typeof value;
+				const objectType = (value.constructor && value.constructor.name) || typeof value;
 
-				if (options.maxSafeObjectSize && "length" in value && value.length > options.maxSafeObjectSize) {
+				if (
+					options.maxSafeObjectSize &&
+					"length" in value &&
+					value.length > options.maxSafeObjectSize
+				) {
 					return `[${objectType} ${value.length}]`;
 				}
 
-				if (options.maxSafeObjectSize && "size" in value && value.size > options.maxSafeObjectSize) {
+				if (
+					options.maxSafeObjectSize &&
+					"size" in value &&
+					value.size > options.maxSafeObjectSize
+				) {
 					return `[${objectType} ${value.size}]`;
 				}
 
@@ -982,7 +2900,6 @@
 	const divisors = [60 * 60 * 1000, 60 * 1000, 1000, 1, 1e-3, 1e-6];
 
 	const utils = {
-
 		isFunction(fn) {
 			return typeof fn === "function";
 		},
@@ -996,7 +2913,13 @@
 		},
 
 		isPlainObject(o) {
-			return o !=null ? Object.getPrototypeOf(o) === Object.prototype || Object.getPrototypeOf(o) === null : false;
+			return o != null
+				? Object.getPrototypeOf(o) === Object.prototype || Object.getPrototypeOf(o) === null
+				: false;
+		},
+
+		isDate(d) {
+			return d instanceof Date && !Number.isNaN(d.getTime());
 		},
 
 		flatten(arr) {
@@ -1008,8 +2931,7 @@
 
 			for (let i = 0; i < divisors.length; i++) {
 				const val = milli / divisors[i];
-				if (val >= 1.0)
-					return "" + Math.floor(val) + units[i];
+				if (val >= 1.0) return "" + Math.floor(val) + units[i];
 			}
 
 			return "now";
@@ -1017,21 +2939,38 @@
 
 		// Fast UUID generator: e7 https://jsperf.com/uuid-generator-opt/18
 		generateToken() {
-			const d0 = Math.random()*0xffffffff|0;
-			const d1 = Math.random()*0xffffffff|0;
-			const d2 = Math.random()*0xffffffff|0;
-			const d3 = Math.random()*0xffffffff|0;
-			return lut[d0&0xff]+lut[d0>>8&0xff]+lut[d0>>16&0xff]+lut[d0>>24&0xff]+"-"+
-				lut[d1&0xff]+lut[d1>>8&0xff]+"-"+lut[d1>>16&0x0f|0x40]+lut[d1>>24&0xff]+"-"+
-				lut[d2&0x3f|0x80]+lut[d2>>8&0xff]+"-"+lut[d2>>16&0xff]+lut[d2>>24&0xff]+
-				lut[d3&0xff]+lut[d3>>8&0xff]+lut[d3>>16&0xff]+lut[d3>>24&0xff];
+			const d0 = (Math.random() * 0xffffffff) | 0;
+			const d1 = (Math.random() * 0xffffffff) | 0;
+			const d2 = (Math.random() * 0xffffffff) | 0;
+			const d3 = (Math.random() * 0xffffffff) | 0;
+			return (
+				lut[d0 & 0xff] +
+				lut[(d0 >> 8) & 0xff] +
+				lut[(d0 >> 16) & 0xff] +
+				lut[(d0 >> 24) & 0xff] +
+				"-" +
+				lut[d1 & 0xff] +
+				lut[(d1 >> 8) & 0xff] +
+				"-" +
+				lut[((d1 >> 16) & 0x0f) | 0x40] +
+				lut[(d1 >> 24) & 0xff] +
+				"-" +
+				lut[(d2 & 0x3f) | 0x80] +
+				lut[(d2 >> 8) & 0xff] +
+				"-" +
+				lut[(d2 >> 16) & 0xff] +
+				lut[(d2 >> 24) & 0xff] +
+				lut[d3 & 0xff] +
+				lut[(d3 >> 8) & 0xff] +
+				lut[(d3 >> 16) & 0xff] +
+				lut[(d3 >> 24) & 0xff]
+			);
 		},
 
 		removeFromArray(arr, item) {
-			if (!arr || arr.length == 0) return arr;
+			if (!arr || arr.length === 0) return arr;
 			const idx = arr.indexOf(item);
-			if (idx !== -1)
-				arr.splice(idx, 1);
+			if (idx !== -1) arr.splice(idx, 1);
 
 			return arr;
 		},
@@ -1056,7 +2995,7 @@
 			const interfaces = os__default.networkInterfaces();
 			for (let iface in interfaces) {
 				for (let i in interfaces[iface]) {
-					const f = interfaces[iface][i];
+					const f = interfaces[iface]?.[i];
 					if (f.family === "IPv4") {
 						if (f.internal) {
 							ilist.push(f.address);
@@ -1078,21 +3017,19 @@
 		 * @returns
 		 */
 		isPromise(p) {
-			return (p != null && typeof p.then === "function");
+			return p != null && typeof p.then === "function";
 		},
 
 		/**
 		 * Polyfill a Promise library with missing Bluebird features.
 		 *
-		 * NOT USED & NOT TESTED YET !!!
-		 *
-		 * @param {PromiseClass} P
+		 * @param {typeof Promise} P
 		 */
 		polyfillPromise(P) {
 			if (!utils.isFunction(P.method)) {
 				// Based on https://github.com/petkaantonov/bluebird/blob/master/src/method.js#L8
-				P.method = function(fn) {
-					return function() {
+				P.method = function (fn) {
+					return function () {
 						try {
 							const val = fn.apply(this, arguments);
 							return P.resolve(val);
@@ -1105,28 +3042,23 @@
 
 			if (!utils.isFunction(P.delay)) {
 				// Based on https://github.com/petkaantonov/bluebird/blob/master/src/timers.js#L15
-				P.delay = function(ms) {
-					return new P(resolve => timersBrowserify.setTimeout(resolve, +ms));
+				P.delay = function (ms) {
+					return new P(resolve => timersBrowserify.setTimeout(() => resolve(null), +ms));
 				};
-				P.prototype.delay = function(ms) {
+				P.prototype.delay = function (ms) {
 					return this.then(res => P.delay(ms).then(() => res));
 					//return this.then(res => new P(resolve => setTimeout(() => resolve(res), +ms)));
 				};
 			}
 
 			if (!utils.isFunction(P.prototype.timeout)) {
-				P.TimeoutError = TimeoutError;
-
-				P.prototype.timeout = function(ms, message) {
+				P.prototype.timeout = function (ms, message) {
 					let timer;
 					const timeout = new P((resolve, reject) => {
-						timer = timersBrowserify.setTimeout(() => reject(new P.TimeoutError(message)), +ms);
+						timer = timersBrowserify.setTimeout(() => reject(new TimeoutError(message)), +ms);
 					});
 
-					return P.race([
-						timeout,
-						this
-					])
+					return P.race([timeout, this])
 						.then(value => {
 							clearTimeout(timer);
 							return value;
@@ -1139,22 +3071,36 @@
 			}
 
 			if (!utils.isFunction(P.mapSeries)) {
-
-				P.mapSeries = function(arr, fn) {
+				P.mapSeries = function (arr, fn) {
 					const promFn = Promise.method(fn);
 					const res = [];
 
-					return arr.reduce((p, item, i) => {
-						return p.then(r => {
-							res[i] = r;
-							return promFn(item, i);
+					return arr
+						.reduce((p, item, i) => {
+							return p.then(r => {
+								res[i] = r;
+								return promFn(item, i);
+							});
+						}, P.resolve())
+						.then(r => {
+							res[arr.length] = r;
+							return res.slice(1);
 						});
-					}, P.resolve()).then(r => {
-						res[arr.length] = r;
-						return res.slice(1);
-					});
 				};
 			}
+		},
+
+		/**
+		 * Promise control
+		 * if you'd always like to know the result of each promise
+		 *
+		 * @param {Array} promises
+		 * @param {Boolean} settled set true for result of each promise with reject
+		 * @param {Object} promise
+		 * @return {Promise<{[p: string]: PromiseSettledResult<*>}>|Promise<unknown[]>}
+		 */
+		promiseAllControl(promises, settled = false, promise = Promise) {
+			return settled ? promise.allSettled(promises) : promise.all(promises);
 		},
 
 		/**
@@ -1164,7 +3110,7 @@
 		 */
 		clearRequireCache(filename) {
 			/* istanbul ignore next */
-			Object.keys(require.cache).forEach(function(key) {
+			Object.keys(require.cache).forEach(function (key) {
 				if (key == filename) {
 					delete require.cache[key];
 				}
@@ -1181,7 +3127,6 @@
 		match(text, pattern) {
 			// Simple patterns
 			if (pattern.indexOf("?") == -1) {
-
 				// Exact match (eg. "prefix.event")
 				const firstStarPosition = pattern.indexOf("*");
 				if (firstStarPosition == -1) {
@@ -1205,7 +3150,7 @@
 				}
 
 				// Accept simple text, without point character (*)
-				if (len == 1 && firstStarPosition == 0) {
+				if (len == 1 && firstStarPosition === 0) {
 					return text.indexOf(".") == -1;
 				}
 
@@ -1243,8 +3188,7 @@
 		 * @param {String} msg
 		 */
 		deprecate(prop, msg) {
-			if (arguments.length == 1)
-				msg = prop;
+			if (arguments.length == 1) msg = prop;
 
 			if (deprecateList.indexOf(prop) === -1) {
 				// eslint-disable-next-line no-console
@@ -1257,8 +3201,8 @@
 		 * Remove circular references & Functions from the JS object
 		 *
 		 * @param {Object|Array} obj
-		 * @param {Object=} options List of options to change circularReplacer behaviour
-		 * @param {number=} options.maxSafeObjectSize List of options to change circularReplacer behaviour
+		 * @param {object} options List of options to change circularReplacer behaviour
+		 * @param {number?} [options.maxSafeObjectSize = Infinity] Maximum size of objects for safe object converting
 		 * @returns {Object|Array}
 		 */
 		safetyObject(obj, options) {
@@ -1268,7 +3212,7 @@
 		/**
 		 * Sets a variable on an object based on its dot path.
 		 *
-		 * @param {Object} obj
+		 * @param {Record<string,any>} obj
 		 * @param {String} path
 		 * @param {*} value
 		 * @returns {Object}
@@ -1276,7 +3220,7 @@
 		dotSet(obj, path, value) {
 			const parts = path.split(".");
 			const part = parts.shift();
-			if (parts.length > 0) {
+			if (part && parts.length > 0) {
 				if (!Object.prototype.hasOwnProperty.call(obj, part)) {
 					obj[part] = {};
 				} else if (obj[part] == null) {
@@ -1298,22 +3242,21 @@
 		 * @param {String} p - directory path
 		 */
 		makeDirs(p) {
-			p.split(path__default.sep)
-				.reduce((prevPath, folder) => {
-					const currentPath = path__default.join(prevPath, folder, path__default.sep);
-					if (!fs__default.existsSync(currentPath)) {
-						fs__default.mkdirSync(currentPath);
-					}
-					return currentPath;
-				}, "");
+			p.split(path__default.sep).reduce((prevPath, folder) => {
+				const currentPath = path__default.join(prevPath, folder, path__default.sep);
+				if (!fs__default.existsSync(currentPath)) {
+					fs__default.mkdirSync(currentPath);
+				}
+				return currentPath;
+			}, "");
 		},
 
 		/**
 		 * Parse a byte string to number of bytes. E.g "1kb" -> 1024
 		 * Credits: https://github.com/visionmedia/bytes.js
 		 *
-		 * @param {String} v
-		 * @returns {Number}
+		 * @param {String|number} v
+		 * @returns {Number|null}
 		 */
 		parseByteString(v) {
 			if (typeof v === "number" && !isNaN(v)) {
@@ -1327,13 +3270,12 @@
 			// Test if the string passed is valid
 			let results = parseByteStringRe.exec(v);
 			let floatValue;
-			let unit = "b";
+			let unit;
 
 			if (!results) {
 				// Nothing could be extracted from the given string
 				floatValue = parseInt(v, 10);
-				if (Number.isNaN(floatValue))
-					return null;
+				if (Number.isNaN(floatValue)) return null;
 
 				unit = "b";
 			} else {
@@ -1343,28 +3285,112 @@
 			}
 
 			return Math.floor(byteMultipliers[unit] * floatValue);
+		},
+
+		/**
+		 * Get the name of constructor of an object.
+		 *
+		 * @param {Object} obj
+		 * @returns {String|undefined}
+		 */
+		getConstructorName(obj) {
+			if (obj == null) return undefined;
+
+			let target = obj.prototype;
+			if (target && target.constructor && target.constructor.name) {
+				return target.constructor.name;
+			}
+			if (obj.constructor && obj.constructor.name) {
+				return obj.constructor.name;
+			}
+			return undefined;
+		},
+
+		/**
+		 * Check whether the instance is an instance of the given class.
+		 *
+		 * @param {Object} instance
+		 * @param {Object} baseClass
+		 * @returns {Boolean}
+		 */
+		isInheritedClass(instance, baseClass) {
+			const baseClassName = module.exports.getConstructorName(baseClass);
+			let proto = instance;
+			while ((proto = Object.getPrototypeOf(proto))) {
+				const protoName = module.exports.getConstructorName(proto);
+				if (baseClassName == protoName) return true;
+			}
+
+			return false;
+		},
+
+		/**
+		 * Creates a duplicate-free version of an array
+		 *
+		 * @param {Array<String|Number>} arr
+		 * @returns {Array<String|Number>}
+		 */
+		uniq(arr) {
+			return [...new Set(arr)];
+		},
+
+		/**
+		 * Produces a random floating number between the inclusive lower and upper bounds.
+		 *
+		 * @param {Number} a
+		 * @param {Number} b
+		 * @returns {Number}
+		 */
+		random(a = 1, b = 0) {
+			const lower = Math.min(a, b);
+			const upper = Math.max(a, b);
+
+			return lower + Math.random() * (upper - lower);
+		},
+
+		/**
+		 * Produces a random integer number between the inclusive lower and upper bounds.
+		 *
+		 * @param {Number} a
+		 * @param {Number} b
+		 * @returns {Number}
+		 */
+		randomInt(a = 1, b = 0) {
+			const lower = Math.ceil(Math.min(a, b));
+			const upper = Math.floor(Math.max(a, b));
+
+			return Math.floor(lower + Math.random() * (upper - lower + 1));
 		}
 	};
 
-	var utils_1 = utils;
+	module.exports = utils;
+	});
 
 	/*
 	 * moleculer
-	 * Copyright (c) 2019 MoleculerJS (https://github.com/moleculerjs/moleculer)
+	 * Copyright (c) 2023 MoleculerJS (https://github.com/moleculerjs/moleculer)
 	 * MIT Licensed
+	 */
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("../registry")} MetricRegistry
+	 * @typedef {import("./base")} BaseMetricClass
+	 * @typedef {import("./base").BaseMetricOptions} BaseMetricOptions
 	 */
 
 	/**
 	 * Abstract Base Metric class.
 	 *
 	 * @class BaseMetric
+	 * @implements {BaseMetricClass}
 	 */
 	class BaseMetric {
-
 		/**
 		 * Creates an instance of BaseMetric.
 		 *
-		 * @param {Object} opts
+		 * @param {BaseMetricOptions} opts
 		 * @param {MetricRegistry} registry
 		 * @memberof BaseMetric
 		 */
@@ -1416,9 +3442,12 @@
 		/**
 		 * Reset item by labels
 		 *
+		 * @param {Object?} labels
+		 * @param {Number?} timestamp
+		 *
 		 * @memberof BaseMetric
 		 */
-		reset(/*labels, timestamp*/) {
+		reset(labels, timestamp) {
 			/* istanbul ignore next */
 			throw new Error("Not implemented");
 		}
@@ -1426,9 +3455,10 @@
 		/**
 		 * Reset all items
 		 *
+		 * @param {Number?} timestamp
 		 * @memberof BaseMetric
 		 */
-		resetAll(/*timestamp*/) {
+		resetAll(timestamp) {
 			/* istanbul ignore next */
 			throw new Error("Not implemented");
 		}
@@ -1452,20 +3482,15 @@
 		 * @memberof BaseMetric
 		 */
 		hashingLabels(labels) {
-			if (this.labelNames.length == 0 || labels == null || typeof labels !== "object")
-				return "";
+			if (this.labelNames.length == 0 || labels == null || typeof labels !== "object") return "";
 
 			const parts = [];
 			for (let i = 0; i < this.labelNames.length; i++) {
 				const v = labels[this.labelNames[i]];
-				if (typeof v == "number")
-					parts.push(v);
-				else if (typeof v === "string")
-					parts.push("\"" + v + "\"");
-				else if (typeof v === "boolean")
-					parts.push("" + v);
-				else
-					parts.push("");
+				if (typeof v == "number") parts.push(v);
+				else if (typeof v === "string") parts.push('"' + v + '"');
+				else if (typeof v === "boolean") parts.push("" + v);
+				else parts.push("");
 			}
 			return parts.join("|");
 		}
@@ -1473,12 +3498,11 @@
 		/**
 		 * Get a snapshot.
 		 *
-		 * @returns {Object}
+		 * @returns {Object|null}
 		 * @memberof BaseMetric
 		 */
 		snapshot() {
-			if (!this.dirty && this.lastSnapshot)
-				return this.lastSnapshot;
+			if (!this.dirty && this.lastSnapshot) return this.lastSnapshot;
 
 			this.lastSnapshot = this.generateSnapshot();
 			this.clearDirty();
@@ -1489,6 +3513,7 @@
 		/**
 		 * Generate a snapshot.
 		 *
+		 * @returns {Array}
 		 * @memberof BaseMetric
 		 */
 		generateSnapshot() {
@@ -1498,9 +3523,9 @@
 
 		/**
 		 * Metric has been changed.
-		 * @param {any} value
-		 * @param {Object} labels
-		 * @param {Number?} timestamp
+		 * @param {any=} value
+		 * @param {Object=} labels
+		 * @param {Number=} timestamp
 		 */
 		changed(value, labels, timestamp) {
 			this.setDirty();
@@ -1535,8 +3560,14 @@
 	}
 	*/
 
-	class MetricRate {
+	/**
+	 * @typedef {import("./rates")} MetricRateClass
+	 */
 
+	/**
+	 * @implements {MetricRateClass}
+	 */
+	class MetricRate {
 		constructor(metric, item, min) {
 			this.metric = metric;
 			this.item = item;
@@ -1567,7 +3598,7 @@
 			this.lastValue = this.value;
 
 			// Calculate the current requests/minute
-			const oneMinRate = diff / elapsedSec * SECONDS_PER_MINUTE;
+			const oneMinRate = (diff / elapsedSec) * SECONDS_PER_MINUTE;
 
 			// Weighted calculation
 			let rate = this.rate + (oneMinRate - this.rate) * 0.5;
@@ -1579,8 +3610,7 @@
 
 			this.rate = rate;
 
-			if (changed)
-				this.metric.changed(this.item.value, this.item.labels, now);
+			if (changed) this.metric.changed(this.item.value, this.item.labels, now);
 		}
 
 		reset() {
@@ -1589,7 +3619,6 @@
 
 			this.rate = 0;
 		}
-
 	}
 	var rates = MetricRate;
 
@@ -1599,16 +3628,25 @@
 
 
 	/**
+	 * Import types
+	 *
+	 * @typedef {import("../registry")} MetricRegistry
+	 * @typedef {import("./gauge")} GaugeMetricClass
+	 * @typedef {import("./gauge").GaugeMetricSnapshot} GaugeMetricSnapshot
+	 * @typedef {import("./gauge").GaugeMetricOptions} GaugeMetricOptions
+	 */
+
+	/**
 	 * Gauge metric class.
 	 *
 	 * @class GaugeMetric
 	 * @extends {BaseMetric}
+	 * @implements {GaugeMetricClass}
 	 */
 	class GaugeMetric extends base {
-
 		/**
 		 * Creates an instance of GaugeMetric.
-		 * @param {Object} opts
+		 * @param {GaugeMetricOptions} opts
 		 * @param {MetricRegistry} registry
 		 * @memberof GaugeMetric
 		 */
@@ -1628,8 +3666,7 @@
 		 * @memberof GaugeMetric
 		 */
 		increment(labels, value, timestamp) {
-			if (value == null)
-				value = 1;
+			if (value == null) value = 1;
 
 			const item = this.get(labels);
 			return this.set((item ? item.value : 0) + value, labels, timestamp);
@@ -1645,8 +3682,7 @@
 		 * @memberof GaugeMetric
 		 */
 		decrement(labels, value, timestamp) {
-			if (value == null)
-				value = 1;
+			if (value == null) value = 1;
 
 			const item = this.get(labels);
 			return this.set((item ? item.value : 0) - value, labels, timestamp);
@@ -1669,8 +3705,7 @@
 					item.value = value;
 					item.timestamp = timestamp == null ? Date.now() : timestamp;
 
-					if (item.rate)
-						item.rate.update(value);
+					if (item.rate) item.rate.update(value);
 
 					this.changed(value, labels, timestamp);
 				}
@@ -1678,7 +3713,7 @@
 				item = {
 					value,
 					labels: pick(labels, this.labelNames),
-					timestamp: timestamp == null ? Date.now() : timestamp,
+					timestamp: timestamp == null ? Date.now() : timestamp
 				};
 				this.values.set(hash, item);
 
@@ -1696,7 +3731,7 @@
 		/**
 		 * Reset item by labels.
 		 *
-		 * @param {Object} labels
+		 * @param {Object?} labels
 		 * @param {Number?} timestamp
 		 * @returns
 		 * @memberof GaugeMetric
@@ -1722,7 +3757,7 @@
 		/**
 		 * Generate a snapshot.
 		 *
-		 * @returns {Array<Object>}
+		 * @returns {Array<GaugeMetricSnapshot>}
 		 * @memberof GaugeMetric
 		 */
 		generateSnapshot() {
@@ -1735,8 +3770,7 @@
 					timestamp: item.timestamp
 				};
 
-				if (item.rate)
-					res.rate = item.rate.rate;
+				if (item.rate) res.rate = item.rate.rate;
 
 				return res;
 			});
@@ -1748,16 +3782,24 @@
 	var gauge = GaugeMetric;
 
 	/**
+	 * Import types
+	 *
+	 * @typedef {import("../registry")} MetricRegistry
+	 * @typedef {import("./counter")} CounterMetricClass
+	 * @typedef {import("./gauge").GaugeMetricOptions} GaugeMetricOptions
+	 */
+
+	/**
 	 * Counter metric class.
 	 *
 	 * @class CounterMetric
 	 * @extends {GaugeMetric}
+	 * @implements {CounterMetricClass}
 	 */
 	class CounterMetric extends gauge {
-
 		/**
 		 * Creates an instance of CounterMetric.
-		 * @param {Object} opts
+		 * @param {GaugeMetricOptions} opts
 		 * @param {MetricRegistry} registry
 		 * @memberof CounterMetric
 		 */
@@ -1786,16 +3828,25 @@
 	};
 
 	/**
+	 * Import types
+	 *
+	 * @typedef {import("../registry")} MetricRegistry
+	 * @typedef {import("./histogram")} HistogramMetricClass
+	 * @typedef {import("./histogram").HistogramMetricSnapshot} HistogramMetricSnapshot
+	 * @typedef {import("./histogram").HistogramMetricOptions} HistogramMetricOptions
+	 */
+
+	/**
 	 * Histogram metric class.
 	 *
 	 * @class HistogramMetric
 	 * @extends {BaseMetric}
+	 * @implements {HistogramMetricClass}
 	 */
 	class HistogramMetric extends base {
-
 		/**
 		 * Creates an instance of HistogramMetric.
-		 * @param {Object} opts
+		 * @param {HistogramMetricOptions} opts
 		 * @param {MetricRegistry} registry
 		 * @memberof HistogramMetric
 		 */
@@ -1805,9 +3856,17 @@
 
 			// Create buckets
 			if (isPlainObject(opts.linearBuckets)) {
-				this.buckets = HistogramMetric.generateLinearBuckets(opts.linearBuckets.start, opts.linearBuckets.width, opts.linearBuckets.count);
+				this.buckets = HistogramMetric.generateLinearBuckets(
+					opts.linearBuckets.start,
+					opts.linearBuckets.width,
+					opts.linearBuckets.count
+				);
 			} else if (isPlainObject(opts.exponentialBuckets)) {
-				this.buckets = HistogramMetric.generateExponentialBuckets(opts.exponentialBuckets.start, opts.exponentialBuckets.factor, opts.exponentialBuckets.count);
+				this.buckets = HistogramMetric.generateExponentialBuckets(
+					opts.exponentialBuckets.start,
+					opts.exponentialBuckets.factor,
+					opts.exponentialBuckets.count
+				);
 			} else if (Array.isArray(opts.buckets)) {
 				this.buckets = Array.from(opts.buckets);
 			} else if (opts.buckets === true) {
@@ -1845,12 +3904,14 @@
 			const hash = this.hashingLabels(labels);
 			let item = this.values.get(hash);
 			if (!item) {
-				item = this.resetItem({
-					labels: ___default.pick(labels, this.labelNames)
-				});
+				item = this.resetItem(
+					{
+						labels: ___default.pick(labels, this.labelNames)
+					},
+					null
+				);
 
-				if (this.rate)
-					item.rate = new rates(this, item, 1);
+				if (this.rate) item.rate = new rates(this, item, 1);
 
 				this.values.set(hash, item);
 			}
@@ -1873,8 +3934,7 @@
 				item.quantileValues.add(value);
 			}
 
-			if (item.rate)
-				item.rate.update(item.count);
+			if (item.rate) item.rate.update(item.count);
 
 			this.changed(value, labels, timestamp);
 
@@ -1898,7 +3958,9 @@
 		 * @memberof HistogramMetric
 		 */
 		generateSnapshot() {
-			return Array.from(this.values.keys()).map(key => this.generateItemSnapshot(this.values.get(key), key));
+			return Array.from(this.values.keys()).map(key =>
+				this.generateItemSnapshot(this.values.get(key), key)
+			);
 		}
 
 		/**
@@ -1916,17 +3978,18 @@
 				count: item.count,
 				sum: item.sum,
 				lastValue: item.lastValue,
-				timestamp: item.timestamp,
+				timestamp: item.timestamp
 			};
 
 			if (this.buckets)
-				snapshot.buckets = this.buckets.reduce((a, b) => setProp(a, b, item.bucketValues[b]), {});
+				snapshot.buckets = this.buckets.reduce(
+					(a, b) => setProp(a, b, item.bucketValues[b]),
+					{}
+				);
 
-			if (this.quantiles)
-				Object.assign(snapshot, item.quantileValues.snapshot());
+			if (this.quantiles) Object.assign(snapshot, item.quantileValues.snapshot());
 
-			if (item.rate)
-				snapshot.rate = item.rate.rate;
+			if (item.rate) snapshot.rate = item.rate.rate;
 
 			return snapshot;
 		}
@@ -1948,7 +4011,12 @@
 			}
 
 			if (this.quantiles) {
-				item.quantileValues = new TimeWindowQuantiles(this, this.quantiles, this.maxAgeSeconds, this.ageBuckets);
+				item.quantileValues = new TimeWindowQuantiles(
+					this,
+					this.quantiles,
+					this.maxAgeSeconds,
+					this.ageBuckets
+				);
 			}
 
 			return item;
@@ -1994,8 +4062,7 @@
 		 */
 		static generateLinearBuckets(start, width, count) {
 			const buckets = [];
-			for (let i = 0; i < count; i++)
-				buckets.push(start + i * width);
+			for (let i = 0; i < count; i++) buckets.push(start + i * width);
 
 			return buckets;
 		}
@@ -2012,8 +4079,7 @@
 		 */
 		static generateExponentialBuckets(start, factor, count) {
 			const buckets = [];
-			for (let i = 0; i < count; i++)
-				buckets[i] = start * Math.pow(factor, i);
+			for (let i = 0; i < count; i++) buckets[i] = start * Math.pow(factor, i);
 
 			return buckets;
 		}
@@ -2025,7 +4091,6 @@
 	 * @class TimeWindowQuantiles
 	 */
 	class TimeWindowQuantiles {
-
 		/**
 		 * Creates an instance of TimeWindowQuantiles.
 		 * @param {BaseMetric} metric
@@ -2040,7 +4105,7 @@
 			this.maxAgeSeconds = maxAgeSeconds;
 			this.ageBuckets = ageBuckets;
 			this.ringBuckets = [];
-			for(let i = 0; i < ageBuckets; i++) {
+			for (let i = 0; i < ageBuckets; i++) {
 				this.ringBuckets.push(new Bucket());
 			}
 			this.dirty = true;
@@ -2102,14 +4167,16 @@
 		 * @memberof TimeWindowQuantiles
 		 */
 		snapshot() {
-			if (!this.dirty && this.lastSnapshot)
-				return this.lastSnapshot;
+			if (!this.dirty && this.lastSnapshot) return this.lastSnapshot;
 
 			const samples = this.ringBuckets.reduce((a, b) => a.concat(b.samples), []);
 			samples.sort(sortAscending);
 
 			const mean = samples.length ? samples.reduce((a, b) => a + b, 0) / samples.length : null;
-			const variance = samples.length > 1 ? samples.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (samples.length - 1) : null;
+			const variance =
+				samples.length > 1
+					? samples.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (samples.length - 1)
+					: null;
 			const stdDev = variance ? Math.sqrt(variance) : null;
 
 			this.lastSnapshot = {
@@ -2118,7 +4185,10 @@
 				variance,
 				stdDev,
 				max: samples.length ? samples[samples.length - 1] : null,
-				quantiles: this.quantiles.reduce((a, q) => setProp(a, q, samples[Math.ceil(q * samples.length) - 1]), {})
+				quantiles: this.quantiles.reduce(
+					(a, q) => setProp(a, q, samples[Math.ceil(q * samples.length) - 1]),
+					{}
+				)
 			};
 
 			this.clearDirty();
@@ -2174,16 +4244,25 @@
 
 
 	/**
+	 * Import types
+	 *
+	 * @typedef {import("../registry")} MetricRegistry
+	 * @typedef {import("./info")} InfoMetricClass
+	 * @typedef {import("./info").InfoMetricSnapshot} InfoMetricSnapshot
+	 * @typedef {import("./base").BaseMetricOptions} BaseMetricOptions
+	 */
+
+	/**
 	 * Information metric.
 	 *
 	 * @class InfoMetric
 	 * @extends {BaseMetric}
+	 * @implements {InfoMetricClass}
 	 */
 	class InfoMetric extends base {
-
 		/**
 		 * Creates an instance of InfoMetric.
-		 * @param {Object} opts
+		 * @param {BaseMetricOptions} opts
 		 * @param {MetricRegistry} registry
 		 * @memberof InfoMetric
 		 */
@@ -2195,7 +4274,7 @@
 		/**
 		 * Set value.
 		 *
-		 * @param {*} value
+		 * @param {any} value
 		 * @param {Object?} labels
 		 * @param {Number?} timestamp
 		 * @returns
@@ -2252,7 +4331,7 @@
 		/**
 		 * Generate a snapshot.
 		 *
-		 * @returns {Array<Object>}
+		 * @returns {Array<InfoMetricSnapshot>}
 		 * @memberof InfoMetric
 		 */
 		generateSnapshot() {
@@ -2279,8 +4358,14 @@
 		Counter: counter,
 		Gauge: gauge,
 		Histogram: histogram,
-		Info: info,
+		Info: info
 	};
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("./base")} BaseMetric
+	 */
 
 	/**
 	 * Get MetricType class by name.
@@ -2290,12 +4375,10 @@
 	 */
 	function getByName(name) {
 		/* istanbul ignore next */
-		if (!name)
-			return null;
+		if (!name) return null;
 
 		let n = Object.keys(Types).find(n => n.toLowerCase() == name.toLowerCase());
-		if (n)
-			return Types[n];
+		if (n) return Types[n];
 	}
 
 	/**
@@ -2307,32 +4390,48 @@
 	 */
 	function resolve(type) {
 		const TypeClass = getByName(type);
-		if (!TypeClass)
-			throw new BrokerOptionsError(`Invalid metric type '${type}'.`, { type });
+		if (!TypeClass) throw new BrokerOptionsError(`Invalid metric type '${type}'.`, { type });
 
 		return TypeClass;
 	}
 
+	/**
+	 * Register a custom metric types
+	 * @param {string} name
+	 * @param {BaseMetric} value
+	 */
 	function register(name, value) {
 		Types[name] = value;
 	}
 
 	var types = Object.assign(Types, { resolve, register });
 
+	/* eslint-disable no-unused-vars */
+
+
 	const { match, isString } = utils_1;
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("../registry")} MetricRegistry
+	 * @typedef {import("./base").MetricReporterOptions} MetricReporterOptions
+	 * @typedef {import("./base")} MetricBaseReporterClass
+	 * @typedef {import("../types/base")} BaseMetric
+	 */
 
 	/**
 	 * Metric reporter base class.
 	 *
-	 * @class BaseReporter
+	 * @class MetricBaseReporter
+	 * @implements {MetricBaseReporterClass}
 	 */
-	class BaseReporter {
-
+	class MetricBaseReporter {
 		/**
 		 * Creates an instance of BaseReporter.
 		 *
-		 * @param {Object} opts
-		 * @memberof BaseReporter
+		 * @param {MetricReporterOptions?} opts
+		 * @memberof MetricBaseReporter
 		 */
 		constructor(opts) {
 			this.opts = ___default.defaultsDeep(opts, {
@@ -2343,21 +4442,18 @@
 				metricNameSuffix: null,
 
 				metricNameFormatter: null,
-				labelNameFormatter: null,
+				labelNameFormatter: null
 			});
 
-			if (isString(this.opts.includes))
-				this.opts.includes = [this.opts.includes];
-
-			if (isString(this.opts.excludes))
-				this.opts.excludes = [this.opts.excludes];
+			if (isString(this.opts.includes)) this.opts.includes = [this.opts.includes];
+			if (isString(this.opts.excludes)) this.opts.excludes = [this.opts.excludes];
 		}
 
 		/**
 		 * Initialize reporter
 		 *
 		 * @param {MetricRegistry} registry
-		 * @memberof BaseReporter
+		 * @memberof MetricBaseReporter
 		 */
 		init(registry) {
 			this.registry = registry;
@@ -2368,7 +4464,7 @@
 		/**
 		 * Stop reporter
 		 *
-		 * @memberof BaseReporter
+		 * @memberof MetricBaseReporter
 		 */
 		stop() {
 			return Promise.resolve();
@@ -2379,17 +4475,15 @@
 		 *
 		 * @param {String} name
 		 * @returns {boolean}
-		 * @memberof BaseReporter
+		 * @memberof MetricBaseReporter
 		 */
 		matchMetricName(name) {
 			if (Array.isArray(this.opts.includes)) {
-				if (!this.opts.includes.some(pattern => match(name, pattern)))
-					return false;
+				if (!this.opts.includes.some(pattern => match(name, pattern))) return false;
 			}
 
 			if (Array.isArray(this.opts.excludes)) {
-				if (!this.opts.excludes.every(pattern => !match(name, pattern)))
-					return false;
+				if (!this.opts.excludes.every(pattern => !match(name, pattern))) return false;
 			}
 
 			return true;
@@ -2400,12 +4494,14 @@
 		 *
 		 * @param {String} name
 		 * @returns {String}
-		 * @memberof BaseReporter
+		 * @memberof MetricBaseReporter
 		 */
 		formatMetricName(name) {
-			name = (this.opts.metricNamePrefix ? this.opts.metricNamePrefix : "") + name + (this.opts.metricNameSuffix ? this.opts.metricNameSuffix : "");
-			if (this.opts.metricNameFormatter)
-				return this.opts.metricNameFormatter(name);
+			name =
+				(this.opts.metricNamePrefix ? this.opts.metricNamePrefix : "") +
+				name +
+				(this.opts.metricNameSuffix ? this.opts.metricNameSuffix : "");
+			if (this.opts.metricNameFormatter) return this.opts.metricNameFormatter(name);
 			return name;
 		}
 
@@ -2414,11 +4510,10 @@
 		 *
 		 * @param {String} name
 		 * @returns {String}
-		 * @memberof BaseReporter
+		 * @memberof MetricBaseReporter
 		 */
 		formatLabelName(name) {
-			if (this.opts.labelNameFormatter)
-				return this.opts.labelNameFormatter(name);
+			if (this.opts.labelNameFormatter) return this.opts.labelNameFormatter(name);
 			return name;
 		}
 
@@ -2430,48 +4525,59 @@
 		 * @param {Object} labels
 		 * @param {Number?} timestamp
 		 *
-		 * @memberof BaseReporter
+		 * @memberof MetricBaseReporter
 		 */
-		metricChanged(/*metric, value, labels, timestamp*/) {
+		metricChanged(metric, value, labels, timestamp) {
 			// Not implemented. Abstract method
 		}
 	}
 
-	var base$1 = BaseReporter;
+	var base$1 = MetricBaseReporter;
 
 	const { isFunction } = utils_1;
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("../registry")} MetricRegistry
+	 * @typedef {import("./console").ConsoleReporterOptions} ConsoleReporterOptions
+	 * @typedef {import("./console")} ConsoleReporterClass
+	 * @typedef {import("../types/base")} BaseMetric
+	 */
 
 	/**
 	 * Console reporter for Moleculer Metrics
 	 *
 	 * @class ConsoleReporter
 	 * @extends {BaseReporter}
+	 * @implements {ConsoleReporterClass}
 	 */
 	class ConsoleReporter extends base$1 {
-
 		/**
 		 * Creates an instance of ConsoleReporter.
-		 * @param {Object} opts
+		 *
+		 * @param {ConsoleReporterOptions?} opts
 		 * @memberof ConsoleReporter
 		 */
 		constructor(opts) {
 			super(opts);
 
+			/** @type {ConsoleReporterOptions} */
 			this.opts = ___default.defaultsDeep(this.opts, {
 				interval: 5,
 				logger: null,
 				colors: true,
-				onlyChanges: true,
+				onlyChanges: true
 			});
 
-			if (!this.opts.colors)
-				kleur_1.enabled = false;
+			if (!this.opts.colors) kleur_1.enabled = false;
 
 			this.lastChanges = new Set();
 		}
 
 		/**
 		 * Initialize reporter
+		 *
 		 * @param {MetricRegistry} registry
 		 * @memberof ConsoleReporter
 		 */
@@ -2493,10 +4599,20 @@
 		 */
 		labelsToStr(labels) {
 			const keys = Object.keys(labels);
-			if (keys.length == 0)
-				return kleur_1.gray("{}");
+			if (keys.length === 0) return kleur_1.gray("{}");
 
-			return kleur_1.gray("{") + keys.map(key => `${kleur_1.gray(this.formatLabelName(key))}: ${kleur_1.magenta("" + labels[key])}`).join(", ") + kleur_1.gray("}");
+			return (
+				kleur_1.gray("{") +
+				keys
+					.map(
+						key =>
+							`${kleur_1.gray(this.formatLabelName(key))}: ${kleur_1.magenta(
+							"" + labels[key]
+						)}`
+					)
+					.join(", ") +
+				kleur_1.gray("}")
+			);
 		}
 
 		/**
@@ -2507,31 +4623,40 @@
 		print() {
 			let list = this.registry.list({
 				includes: this.opts.includes,
-				excludes: this.opts.excludes,
+				excludes: this.opts.excludes
 			});
 
-			if (this.opts.onlyChanges)
-				list = list.filter(metric => this.lastChanges.has(metric.name));
+			if (this.opts.onlyChanges) list = list.filter(metric => this.lastChanges.has(metric.name));
 
-			if (list.length == 0)
-				return;
+			if (list.length === 0) return;
 
-			this.log(kleur_1.gray(`------------------- [ METRICS START (${list.length}) ] -------------------`));
+			this.log(
+				kleur_1.gray(`------------------- [ METRICS START (${list.length}) ] -------------------`)
+			);
 
 			list.forEach(metric => {
-				this.log(kleur_1.cyan().bold(this.formatMetricName(metric.name)) + " " + kleur_1.gray("(" + metric.type + ")"));
-				if (metric.values.size == 0) {
+				this.log(
+					kleur_1.cyan().bold(this.formatMetricName(metric.name)) +
+						" " +
+						kleur_1.gray("(" + metric.type + ")")
+				);
+				if (metric.values.size === 0) {
 					this.log(kleur_1.gray("  <no values>"));
 				} else {
-					const unit = metric.unit ? kleur_1.gray(this.registry.pluralizeUnit(metric.unit)) : "";
+					const unit = metric.unit
+						? kleur_1.gray(this.registry.pluralizeUnit(metric.unit))
+						: "";
 					metric.values.forEach(item => {
 						let val;
 						const labelStr = this.labelsToStr(item.labels);
-						switch(metric.type) {
+						switch (metric.type) {
 							case constants$1.TYPE_COUNTER:
 							case constants$1.TYPE_GAUGE:
 							case constants$1.TYPE_INFO:
-								val = item.value === "" ? kleur_1.grey("<empty string>") : kleur_1.green().bold(item.value);
+								val =
+									item.value === ""
+										? kleur_1.grey("<empty string>")
+										: kleur_1.green().bold(item.value);
 								if (item.rate != null) {
 									/*const s = [];
 									Object.keys(item.rates).forEach(b => {
@@ -2541,7 +4666,12 @@
 									val = kleur.green().bold(`Value: ${val} | ` + s.join(" | "));
 									*/
 
-									val = val + kleur_1.grey(" | Rate: ") + (item.rate != null ? kleur_1.green().bold(item.rate.toFixed(2)) : "-");
+									val =
+										val +
+										kleur_1.grey(" | Rate: ") +
+										(item.rate != null
+											? kleur_1.green().bold(item.rate.toFixed(2))
+											: "-");
 								}
 
 								break;
@@ -2551,19 +4681,31 @@
 
 								if (item.buckets) {
 									Object.keys(item.buckets).forEach(b => {
-										s.push(`${b}: ${item.buckets[b] != null ? item.buckets[b] : "-"}`);
+										s.push(
+											`${b}: ${item.buckets[b] != null ? item.buckets[b] : "-"}`
+										);
 									});
 								}
 
 								if (item.quantiles) {
 									s.push(`Min: ${item.min != null ? item.min.toFixed(2) : "-"}`);
 									s.push(`Mean: ${item.mean != null ? item.mean.toFixed(2) : "-"}`);
-									s.push(`Var: ${item.variance != null ? item.variance.toFixed(2) : "-"}`);
-									s.push(`StdDev: ${item.stdDev != null ? item.stdDev.toFixed(2) : "-"}`);
+									s.push(
+										`Var: ${item.variance != null ? item.variance.toFixed(2) : "-"}`
+									);
+									s.push(
+										`StdDev: ${item.stdDev != null ? item.stdDev.toFixed(2) : "-"}`
+									);
 									s.push(`Max: ${item.max != null ? item.max.toFixed(2) : "-"}`);
 
 									Object.keys(item.quantiles).forEach(key => {
-										s.push(`${key}: ${item.quantiles[key] != null ? item.quantiles[key].toFixed(2) : "-"}`);
+										s.push(
+											`${key}: ${
+											item.quantiles[key] != null
+												? item.quantiles[key].toFixed(2)
+												: "-"
+										}`
+										);
 									});
 								}
 
@@ -2580,7 +4722,9 @@
 				this.log("");
 			});
 
-			this.log(kleur_1.gray(`-------------------- [ METRICS END (${list.length}) ] --------------------`));
+			this.log(
+				kleur_1.gray(`-------------------- [ METRICS END (${list.length}) ] --------------------`)
+			);
 
 			this.lastChanges.clear();
 		}
@@ -2602,9 +4746,6 @@
 		 * Some metric has been changed.
 		 *
 		 * @param {BaseMetric} metric
-		 * @param {any} value
-		 * @param {Object} labels
-		 * @param {Number?} timestamp
 		 *
 		 * @memberof BaseReporter
 		 */
@@ -2622,21 +4763,32 @@
 	};
 
 	/**
+	 * Import types
+	 *
+	 * @typedef {import("../registry")} MetricRegistry
+	 * @typedef {import("./event").EventReporterOptions} EventReporterOptions
+	 * @typedef {import("./event")} EventReporterClass
+	 * @typedef {import("../types/base").BaseMetricPOJO} BaseMetricPOJO
+	 * @typedef {import("../types/base")} BaseMetric
+	 */
+
+	/**
 	 * Event reporter for Moleculer Metrics
 	 *
 	 * @class EventReporter
 	 * @extends {BaseReporter}
+	 * @implements {EventReporterClass}
 	 */
 	class EventReporter extends base$1 {
-
 		/**
 		 * Creates an instance of EventReporter.
-		 * @param {Object} opts
+		 * @param {EventReporterOptions} opts
 		 * @memberof EventReporter
 		 */
 		constructor(opts) {
 			super(opts);
 
+			/** @type {EventReporterOptions} */
 			this.opts = ___default.defaultsDeep(this.opts, {
 				eventName: "$metrics.snapshot",
 
@@ -2645,7 +4797,7 @@
 
 				onlyChanges: false,
 
-				interval: 5,
+				interval: 5
 			});
 
 			this.lastChanges = new Set();
@@ -2674,14 +4826,12 @@
 		sendEvent() {
 			let list = this.registry.list({
 				includes: this.opts.includes,
-				excludes: this.opts.excludes,
+				excludes: this.opts.excludes
 			});
 
-			if (this.opts.onlyChanges)
-				list = list.filter(metric => this.lastChanges.has(metric.name));
+			if (this.opts.onlyChanges) list = list.filter(metric => this.lastChanges.has(metric.name));
 
-			if (list.length == 0)
-				return;
+			if (list.length === 0) return;
 
 			if (this.opts.broadcast) {
 				this.logger.debug(`Send metrics.snapshot (${list.length} metrics) broadcast events.`);
@@ -2694,15 +4844,10 @@
 			this.lastChanges.clear();
 		}
 
-
 		/**
 		 * Some metric has been changed.
 		 *
 		 * @param {BaseMetric} metric
-		 * @param {any} value
-		 * @param {Object} labels
-		 * @param {Number?} timestamp
-		 *
 		 * @memberof BaseReporter
 		 */
 		metricChanged(metric) {
@@ -2714,7 +4859,7 @@
 
 	var event = EventReporter;
 
-	const { isObject, isString: isString$1 } = utils_1;
+	const { isObject, isString: isString$1, isInheritedClass } = utils_1;
 	const { BrokerOptionsError: BrokerOptionsError$1 } = errors;
 
 	const Reporters = {
@@ -2724,40 +4869,37 @@
 		Event: event,
 		Datadog: require$$19,
 		Prometheus: require$$19,
-		StatsD: require$$19,
+		StatsD: require$$19
 	};
 
 	function getByName$1(name) {
 		/* istanbul ignore next */
-		if (!name)
-			return null;
+		if (!name) return null;
 
 		let n = Object.keys(Reporters).find(n => n.toLowerCase() == name.toLowerCase());
-		if (n)
-			return Reporters[n];
+		if (n) return Reporters[n];
 	}
 
 	/**
 	 * Resolve reporter by name
 	 *
-	 * @param {object|string} opt
-	 * @returns {Reporter}
+	 * @param {Record<string,any>|string} opt
+	 * @returns {any}
 	 * @memberof ServiceBroker
 	 */
 	function resolve$1(opt) {
-		if (opt instanceof Reporters.Base) {
+		if (isObject(opt) && isInheritedClass(opt, Reporters.Base)) {
 			return opt;
 		} else if (isString$1(opt)) {
 			let ReporterClass = getByName$1(opt);
-			if (ReporterClass)
-				return new ReporterClass();
-
+			if (ReporterClass) return new ReporterClass();
 		} else if (isObject(opt)) {
 			let ReporterClass = getByName$1(opt.type);
-			if (ReporterClass)
-				return new ReporterClass(opt.options);
+			if (ReporterClass) return new ReporterClass(opt.options);
 			else
-				throw new BrokerOptionsError$1(`Invalid metric reporter type '${opt.type}'.`, { type: opt.type });
+				throw new BrokerOptionsError$1(`Invalid metric reporter type '${opt.type}'.`, {
+					type: opt.type
+				});
 		}
 
 		throw new BrokerOptionsError$1(`Invalid metric reporter type '${opt}'.`, { type: opt });
@@ -2791,14 +4933,31 @@
 								const usages = [];
 								for (let i = 0; i < first.length; i++) {
 									const first_idle = first[i].idle;
-									const first_total = first[i].idle + first[i].user + first[i].nice + first[i].sys + first[i].irq;
+									const first_total =
+										first[i].idle +
+										first[i].user +
+										first[i].nice +
+										first[i].sys +
+										first[i].irq;
 									const second_idle = second[i].idle;
-									const second_total = second[i].idle + second[i].user + second[i].nice + second[i].sys + second[i].irq;
+									const second_total =
+										second[i].idle +
+										second[i].user +
+										second[i].nice +
+										second[i].sys +
+										second[i].irq;
 									const third_idle = third[i].idle;
-									const third_total = third[i].idle + third[i].user + third[i].nice + third[i].sys + third[i].irq;
-									const first_usage = 1 - (second_idle - first_idle) / (second_total - first_total);
-									const second_usage = 1 - (third_idle - second_idle) / (third_total - second_total);
-									const per_usage = (first_usage + second_usage) / 2 * 100;
+									const third_total =
+										third[i].idle +
+										third[i].user +
+										third[i].nice +
+										third[i].sys +
+										third[i].irq;
+									const first_usage =
+										1 - (second_idle - first_idle) / (second_total - first_total);
+									const second_usage =
+										1 - (third_idle - second_idle) / (third_total - second_total);
+									const per_usage = ((first_usage + second_usage) / 2) * 100;
 									usages.push(per_usage);
 								}
 
@@ -2911,12 +5070,12 @@
 
 	getCpuUsage.loadavg = loadavg;
 
-	let v8, eventLoop;
+	let v8;
 
 	// Load `v8` module for heap metrics.
 	try {
 		v8 = null;
-	} catch (e) {
+	} catch {
 		// silent
 	}
 
@@ -2933,137 +5092,319 @@
 
 		// --- PROCESS METRICS ---
 
-		const item = this.register({ name: constants$1.PROCESS_ARGUMENTS, type: constants$1.TYPE_INFO, labelNames: ["index"], description: "Process arguments" });
+		const item = this.register({
+			name: constants$1.PROCESS_ARGUMENTS,
+			type: constants$1.TYPE_INFO,
+			labelNames: ["index"],
+			description: "Process arguments"
+		});
 		_process.argv.map((arg, index) => item.set(arg, { index }));
 
-		this.register({ name: constants$1.PROCESS_PID, type: constants$1.TYPE_INFO, description: "Process PID" }).set(_process.pid);
-		this.register({ name: constants$1.PROCESS_PPID, type: constants$1.TYPE_INFO, description: "Process parent PID" }).set(_process.ppid);
+		this.register({
+			name: constants$1.PROCESS_PID,
+			type: constants$1.TYPE_INFO,
+			description: "Process PID"
+		}).set(_process.pid);
+		this.register({
+			name: constants$1.PROCESS_PPID,
+			type: constants$1.TYPE_INFO,
+			description: "Process parent PID"
+		}).set(_process.ppid);
 
-		this.register({ name: constants$1.PROCESS_MEMORY_HEAP_SIZE_TOTAL, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_BYTE, description: "Process heap size" });
-		this.register({ name: constants$1.PROCESS_MEMORY_HEAP_SIZE_USED, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_BYTE, description: "Process used heap size" });
-		this.register({ name: constants$1.PROCESS_MEMORY_RSS, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_BYTE, description: "Process RSS size" });
-		this.register({ name: constants$1.PROCESS_MEMORY_EXTERNAL, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_BYTE, description: "Process external memory size" });
+		this.register({
+			name: constants$1.PROCESS_MEMORY_HEAP_SIZE_TOTAL,
+			type: constants$1.TYPE_GAUGE,
+			unit: constants$1.UNIT_BYTE,
+			description: "Process heap size"
+		});
+		this.register({
+			name: constants$1.PROCESS_MEMORY_HEAP_SIZE_USED,
+			type: constants$1.TYPE_GAUGE,
+			unit: constants$1.UNIT_BYTE,
+			description: "Process used heap size"
+		});
+		this.register({
+			name: constants$1.PROCESS_MEMORY_RSS,
+			type: constants$1.TYPE_GAUGE,
+			unit: constants$1.UNIT_BYTE,
+			description: "Process RSS size"
+		});
+		this.register({
+			name: constants$1.PROCESS_MEMORY_EXTERNAL,
+			type: constants$1.TYPE_GAUGE,
+			unit: constants$1.UNIT_BYTE,
+			description: "Process external memory size"
+		});
 
-		this.register({ name: constants$1.PROCESS_MEMORY_HEAP_SPACE_SIZE_TOTAL, type: constants$1.TYPE_GAUGE, labelNames: ["space"], unit: constants$1.UNIT_BYTE, description: "Process total heap space size" });
-		this.register({ name: constants$1.PROCESS_MEMORY_HEAP_SPACE_SIZE_USED, type: constants$1.TYPE_GAUGE, labelNames: ["space"], unit: constants$1.UNIT_BYTE, description: "Process used heap space size" });
-		this.register({ name: constants$1.PROCESS_MEMORY_HEAP_SPACE_SIZE_AVAILABLE, type: constants$1.TYPE_GAUGE, labelNames: ["space"], unit: constants$1.UNIT_BYTE, description: "Process available heap space size" });
-		this.register({ name: constants$1.PROCESS_MEMORY_HEAP_SPACE_SIZE_PHYSICAL, type: constants$1.TYPE_GAUGE, labelNames: ["space"], unit: constants$1.UNIT_BYTE, description: "Process physical heap space size" });
+		this.register({
+			name: constants$1.PROCESS_MEMORY_HEAP_SPACE_SIZE_TOTAL,
+			type: constants$1.TYPE_GAUGE,
+			labelNames: ["space"],
+			unit: constants$1.UNIT_BYTE,
+			description: "Process total heap space size"
+		});
+		this.register({
+			name: constants$1.PROCESS_MEMORY_HEAP_SPACE_SIZE_USED,
+			type: constants$1.TYPE_GAUGE,
+			labelNames: ["space"],
+			unit: constants$1.UNIT_BYTE,
+			description: "Process used heap space size"
+		});
+		this.register({
+			name: constants$1.PROCESS_MEMORY_HEAP_SPACE_SIZE_AVAILABLE,
+			type: constants$1.TYPE_GAUGE,
+			labelNames: ["space"],
+			unit: constants$1.UNIT_BYTE,
+			description: "Process available heap space size"
+		});
+		this.register({
+			name: constants$1.PROCESS_MEMORY_HEAP_SPACE_SIZE_PHYSICAL,
+			type: constants$1.TYPE_GAUGE,
+			labelNames: ["space"],
+			unit: constants$1.UNIT_BYTE,
+			description: "Process physical heap space size"
+		});
 
-		this.register({ name: constants$1.PROCESS_MEMORY_HEAP_STAT_HEAP_SIZE_TOTAL, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_BYTE, description: "Process heap stat size" });
-		this.register({ name: constants$1.PROCESS_MEMORY_HEAP_STAT_EXECUTABLE_SIZE_TOTAL, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_BYTE, description: "Process heap stat executable size" });
-		this.register({ name: constants$1.PROCESS_MEMORY_HEAP_STAT_PHYSICAL_SIZE_TOTAL, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_BYTE, description: "Process heap stat physical size" });
-		this.register({ name: constants$1.PROCESS_MEMORY_HEAP_STAT_AVAILABLE_SIZE_TOTAL, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_BYTE, description: "Process heap stat available size" });
-		this.register({ name: constants$1.PROCESS_MEMORY_HEAP_STAT_USED_HEAP_SIZE, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_BYTE, description: "Process heap stat used size" });
-		this.register({ name: constants$1.PROCESS_MEMORY_HEAP_STAT_HEAP_SIZE_LIMIT, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_BYTE, description: "Process heap stat size limit" });
-		this.register({ name: constants$1.PROCESS_MEMORY_HEAP_STAT_MALLOCATED_MEMORY, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_BYTE, description: "Process heap stat mallocated size" });
-		this.register({ name: constants$1.PROCESS_MEMORY_HEAP_STAT_PEAK_MALLOCATED_MEMORY, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_BYTE, description: "Peak of process heap stat mallocated size" });
-		this.register({ name: constants$1.PROCESS_MEMORY_HEAP_STAT_ZAP_GARBAGE, type: constants$1.TYPE_GAUGE, description: "Process heap stat zap garbage" });
+		this.register({
+			name: constants$1.PROCESS_MEMORY_HEAP_STAT_HEAP_SIZE_TOTAL,
+			type: constants$1.TYPE_GAUGE,
+			unit: constants$1.UNIT_BYTE,
+			description: "Process heap stat size"
+		});
+		this.register({
+			name: constants$1.PROCESS_MEMORY_HEAP_STAT_EXECUTABLE_SIZE_TOTAL,
+			type: constants$1.TYPE_GAUGE,
+			unit: constants$1.UNIT_BYTE,
+			description: "Process heap stat executable size"
+		});
+		this.register({
+			name: constants$1.PROCESS_MEMORY_HEAP_STAT_PHYSICAL_SIZE_TOTAL,
+			type: constants$1.TYPE_GAUGE,
+			unit: constants$1.UNIT_BYTE,
+			description: "Process heap stat physical size"
+		});
+		this.register({
+			name: constants$1.PROCESS_MEMORY_HEAP_STAT_AVAILABLE_SIZE_TOTAL,
+			type: constants$1.TYPE_GAUGE,
+			unit: constants$1.UNIT_BYTE,
+			description: "Process heap stat available size"
+		});
+		this.register({
+			name: constants$1.PROCESS_MEMORY_HEAP_STAT_USED_HEAP_SIZE,
+			type: constants$1.TYPE_GAUGE,
+			unit: constants$1.UNIT_BYTE,
+			description: "Process heap stat used size"
+		});
+		this.register({
+			name: constants$1.PROCESS_MEMORY_HEAP_STAT_HEAP_SIZE_LIMIT,
+			type: constants$1.TYPE_GAUGE,
+			unit: constants$1.UNIT_BYTE,
+			description: "Process heap stat size limit"
+		});
+		this.register({
+			name: constants$1.PROCESS_MEMORY_HEAP_STAT_MALLOCATED_MEMORY,
+			type: constants$1.TYPE_GAUGE,
+			unit: constants$1.UNIT_BYTE,
+			description: "Process heap stat mallocated size"
+		});
+		this.register({
+			name: constants$1.PROCESS_MEMORY_HEAP_STAT_PEAK_MALLOCATED_MEMORY,
+			type: constants$1.TYPE_GAUGE,
+			unit: constants$1.UNIT_BYTE,
+			description: "Peak of process heap stat mallocated size"
+		});
+		this.register({
+			name: constants$1.PROCESS_MEMORY_HEAP_STAT_ZAP_GARBAGE,
+			type: constants$1.TYPE_GAUGE,
+			description: "Process heap stat zap garbage"
+		});
 
-		this.register({ name: constants$1.PROCESS_UPTIME, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_SECONDS, description: "Process uptime" });
-		this.register({ name: constants$1.PROCESS_INTERNAL_ACTIVE_HANDLES, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_HANDLE, description: "Number of active process handlers" });
-		this.register({ name: constants$1.PROCESS_INTERNAL_ACTIVE_REQUESTS, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_REQUEST, description: "Number of active process requests" });
+		this.register({
+			name: constants$1.PROCESS_UPTIME,
+			type: constants$1.TYPE_GAUGE,
+			unit: constants$1.UNIT_SECONDS,
+			description: "Process uptime"
+		});
+		this.register({
+			name: constants$1.PROCESS_INTERNAL_ACTIVE_HANDLES,
+			type: constants$1.TYPE_GAUGE,
+			unit: constants$1.UNIT_HANDLE,
+			description: "Number of active process handlers"
+		});
 
-		this.register({ name: constants$1.PROCESS_VERSIONS_NODE, type: constants$1.TYPE_INFO, description: "Node version" }).set(_process.versions.node);
+		this.register({
+			name: constants$1.PROCESS_VERSIONS_NODE,
+			type: constants$1.TYPE_INFO,
+			description: "Node version"
+		}).set(_process.versions.node);
 
 		// --- OS METRICS ---
 
-		this.register({ name: constants$1.OS_MEMORY_FREE, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_BYTE, description: "OS free memory size" });
-		this.register({ name: constants$1.OS_MEMORY_USED, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_BYTE, description: "OS used memory size" });
-		this.register({ name: constants$1.OS_MEMORY_TOTAL, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_BYTE, description: "OS total memory size" });
-		this.register({ name: constants$1.OS_UPTIME, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_SECONDS, description: "OS uptime" });
-		this.register({ name: constants$1.OS_TYPE, type: constants$1.TYPE_INFO, description: "OS type" }).set(os__default.type());
-		this.register({ name: constants$1.OS_RELEASE, type: constants$1.TYPE_INFO, description: "OS release" }).set(os__default.release());
-		this.register({ name: constants$1.OS_HOSTNAME, type: constants$1.TYPE_INFO, description: "Hostname" }).set(os__default.hostname());
-		this.register({ name: constants$1.OS_ARCH, type: constants$1.TYPE_INFO, description: "OS architecture" }).set(os__default.arch());
-		this.register({ name: constants$1.OS_PLATFORM, type: constants$1.TYPE_INFO, description: "OS platform" }).set(os__default.platform());
+		this.register({
+			name: constants$1.OS_MEMORY_FREE,
+			type: constants$1.TYPE_GAUGE,
+			unit: constants$1.UNIT_BYTE,
+			description: "OS free memory size"
+		});
+		this.register({
+			name: constants$1.OS_MEMORY_USED,
+			type: constants$1.TYPE_GAUGE,
+			unit: constants$1.UNIT_BYTE,
+			description: "OS used memory size"
+		});
+		this.register({
+			name: constants$1.OS_MEMORY_TOTAL,
+			type: constants$1.TYPE_GAUGE,
+			unit: constants$1.UNIT_BYTE,
+			description: "OS total memory size"
+		});
+		this.register({
+			name: constants$1.OS_UPTIME,
+			type: constants$1.TYPE_GAUGE,
+			unit: constants$1.UNIT_SECONDS,
+			description: "OS uptime"
+		});
+		this.register({ name: constants$1.OS_TYPE, type: constants$1.TYPE_INFO, description: "OS type" }).set(
+			os__default.type()
+		);
+		this.register({
+			name: constants$1.OS_RELEASE,
+			type: constants$1.TYPE_INFO,
+			description: "OS release"
+		}).set(os__default.release());
+		this.register({
+			name: constants$1.OS_HOSTNAME,
+			type: constants$1.TYPE_INFO,
+			description: "Hostname"
+		}).set(os__default.hostname());
+		this.register({
+			name: constants$1.OS_ARCH,
+			type: constants$1.TYPE_INFO,
+			description: "OS architecture"
+		}).set(os__default.arch());
+		this.register({
+			name: constants$1.OS_PLATFORM,
+			type: constants$1.TYPE_INFO,
+			description: "OS platform"
+		}).set(os__default.platform());
 
 		const userInfo = getUserInfo();
-		this.register({ name: constants$1.OS_USER_UID, type: constants$1.TYPE_INFO, description: "UID" }).set(userInfo.uid);
-		this.register({ name: constants$1.OS_USER_GID, type: constants$1.TYPE_INFO, description: "GID" }).set(userInfo.gid);
-		this.register({ name: constants$1.OS_USER_USERNAME, type: constants$1.TYPE_INFO, description: "Username" }).set(userInfo.username);
-		this.register({ name: constants$1.OS_USER_HOMEDIR, type: constants$1.TYPE_INFO, description: "User's home directory" }).set(userInfo.homedir);
+		this.register({ name: constants$1.OS_USER_UID, type: constants$1.TYPE_INFO, description: "UID" }).set(
+			userInfo.uid
+		);
+		this.register({ name: constants$1.OS_USER_GID, type: constants$1.TYPE_INFO, description: "GID" }).set(
+			userInfo.gid
+		);
+		this.register({
+			name: constants$1.OS_USER_USERNAME,
+			type: constants$1.TYPE_INFO,
+			description: "Username"
+		}).set(userInfo.username);
+		this.register({
+			name: constants$1.OS_USER_HOMEDIR,
+			type: constants$1.TYPE_INFO,
+			description: "User's home directory"
+		}).set(userInfo.homedir);
 
-		this.register({ name: constants$1.OS_NETWORK_ADDRESS, type: constants$1.TYPE_INFO, labelNames: ["interface", "family"], description: "Network address" });
-		this.register({ name: constants$1.OS_NETWORK_MAC, type: constants$1.TYPE_INFO, labelNames: ["interface", "family"], description: "MAC address" });
+		this.register({
+			name: constants$1.OS_NETWORK_ADDRESS,
+			type: constants$1.TYPE_INFO,
+			labelNames: ["interface", "family"],
+			description: "Network address"
+		});
+		this.register({
+			name: constants$1.OS_NETWORK_MAC,
+			type: constants$1.TYPE_INFO,
+			labelNames: ["interface", "family"],
+			description: "MAC address"
+		});
 
-		this.register({ name: constants$1.OS_DATETIME_UNIX, type: constants$1.TYPE_GAUGE, description: "Current datetime in Unix format" });
-		this.register({ name: constants$1.OS_DATETIME_ISO, type: constants$1.TYPE_INFO, description: "Current datetime in ISO string" });
-		this.register({ name: constants$1.OS_DATETIME_UTC, type: constants$1.TYPE_INFO, description: "Current UTC datetime" });
-		this.register({ name: constants$1.OS_DATETIME_TZ_OFFSET, type: constants$1.TYPE_GAUGE, description: "Timezone offset" });
+		this.register({
+			name: constants$1.OS_DATETIME_UNIX,
+			type: constants$1.TYPE_GAUGE,
+			description: "Current datetime in Unix format"
+		});
+		this.register({
+			name: constants$1.OS_DATETIME_ISO,
+			type: constants$1.TYPE_INFO,
+			description: "Current datetime in ISO string"
+		});
+		this.register({
+			name: constants$1.OS_DATETIME_UTC,
+			type: constants$1.TYPE_INFO,
+			description: "Current UTC datetime"
+		});
+		this.register({
+			name: constants$1.OS_DATETIME_TZ_OFFSET,
+			type: constants$1.TYPE_GAUGE,
+			description: "Timezone offset"
+		});
 
-		this.register({ name: constants$1.OS_CPU_LOAD_1, type: constants$1.TYPE_GAUGE, description: "CPU load1" });
-		this.register({ name: constants$1.OS_CPU_LOAD_5, type: constants$1.TYPE_GAUGE, description: "CPU load5" });
-		this.register({ name: constants$1.OS_CPU_LOAD_15, type: constants$1.TYPE_GAUGE, description: "CPU load15" });
-		this.register({ name: constants$1.OS_CPU_UTILIZATION, type: constants$1.TYPE_GAUGE, description: "CPU utilization" });
+		this.register({
+			name: constants$1.OS_CPU_LOAD_1,
+			type: constants$1.TYPE_GAUGE,
+			description: "CPU load1"
+		});
+		this.register({
+			name: constants$1.OS_CPU_LOAD_5,
+			type: constants$1.TYPE_GAUGE,
+			description: "CPU load5"
+		});
+		this.register({
+			name: constants$1.OS_CPU_LOAD_15,
+			type: constants$1.TYPE_GAUGE,
+			description: "CPU load15"
+		});
+		this.register({
+			name: constants$1.OS_CPU_UTILIZATION,
+			type: constants$1.TYPE_GAUGE,
+			description: "CPU utilization"
+		});
 
-		this.register({ name: constants$1.OS_CPU_USER, type: constants$1.TYPE_GAUGE, description: "CPU user time" });
-		this.register({ name: constants$1.OS_CPU_SYSTEM, type: constants$1.TYPE_GAUGE, description: "CPU system time" });
+		this.register({
+			name: constants$1.OS_CPU_USER,
+			type: constants$1.TYPE_GAUGE,
+			description: "CPU user time"
+		});
+		this.register({
+			name: constants$1.OS_CPU_SYSTEM,
+			type: constants$1.TYPE_GAUGE,
+			description: "CPU system time"
+		});
 
-		this.register({ name: constants$1.OS_CPU_TOTAL, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_CPU, description: "Number of CPUs" });
-		this.register({ name: constants$1.OS_CPU_INFO_MODEL, type: constants$1.TYPE_INFO, labelNames: ["index"], description: "CPU model" });
-		this.register({ name: constants$1.OS_CPU_INFO_SPEED, type: constants$1.TYPE_GAUGE, labelNames: ["index"], unit: constants$1.UNIT_GHZ, description: "CPU speed" });
-		this.register({ name: constants$1.OS_CPU_INFO_TIMES_USER, type: constants$1.TYPE_GAUGE, labelNames: ["index"], description: "CPU user time" });
-		this.register({ name: constants$1.OS_CPU_INFO_TIMES_SYS, type: constants$1.TYPE_GAUGE, labelNames: ["index"], description: "CPU system time" });
-
-		startGCWatcher.call(this);
-		startEventLoopStats.call(this);
+		this.register({
+			name: constants$1.OS_CPU_TOTAL,
+			type: constants$1.TYPE_GAUGE,
+			unit: constants$1.UNIT_CPU,
+			description: "Number of CPUs"
+		});
+		this.register({
+			name: constants$1.OS_CPU_INFO_MODEL,
+			type: constants$1.TYPE_INFO,
+			labelNames: ["index"],
+			description: "CPU model"
+		});
+		this.register({
+			name: constants$1.OS_CPU_INFO_SPEED,
+			type: constants$1.TYPE_GAUGE,
+			labelNames: ["index"],
+			unit: constants$1.UNIT_GHZ,
+			description: "CPU speed"
+		});
+		this.register({
+			name: constants$1.OS_CPU_INFO_TIMES_USER,
+			type: constants$1.TYPE_GAUGE,
+			labelNames: ["index"],
+			description: "CPU user time"
+		});
+		this.register({
+			name: constants$1.OS_CPU_INFO_TIMES_SYS,
+			type: constants$1.TYPE_GAUGE,
+			labelNames: ["index"],
+			description: "CPU system time"
+		});
 
 		this.logger.debug(`Registered ${this.store.size} common metrics.`);
-	}
-
-	/**
-	 * Start GC watcher listener.
-	 */
-	function startGCWatcher() {
-	// Load `gc-stats` module for GC metrics.
-		try {
-			const gc = (null)();
-
-			/* istanbul ignore next */
-			if (gc) {
-				// --- GARBAGE COLLECTOR METRICS ---
-
-				this.register({ name: constants$1.PROCESS_GC_TIME, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_NANOSECONDS, description: "GC time" });
-				this.register({ name: constants$1.PROCESS_GC_TOTAL_TIME, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_MILLISECONDS, description: "Total time of GC" });
-				this.register({ name: constants$1.PROCESS_GC_EXECUTED_TOTAL, type: constants$1.TYPE_GAUGE, labelNames: ["type"], unit: null, description: "Number of executed GC" });
-
-				gc.on("stats", stats => {
-					this.set(constants$1.PROCESS_GC_TIME, stats.pause);
-					this.increment(constants$1.PROCESS_GC_TOTAL_TIME, null, stats.pause / 1e6);
-					if (stats.gctype == 1)
-						this.increment(constants$1.PROCESS_GC_EXECUTED_TOTAL, { type: "scavenge" });
-					if (stats.gctype == 2)
-						this.increment(constants$1.PROCESS_GC_EXECUTED_TOTAL, { type: "marksweep" });
-					if (stats.gctype == 4)
-						this.increment(constants$1.PROCESS_GC_EXECUTED_TOTAL, { type: "incremental" });
-					if (stats.gctype == 8)
-						this.increment(constants$1.PROCESS_GC_EXECUTED_TOTAL, { type: "weakphantom" });
-					if (stats.gctype == 15) {
-						this.increment(constants$1.PROCESS_GC_EXECUTED_TOTAL, { type: "scavenge" });
-						this.increment(constants$1.PROCESS_GC_EXECUTED_TOTAL, { type: "marksweep" });
-						this.increment(constants$1.PROCESS_GC_EXECUTED_TOTAL, { type: "incremental" });
-						this.increment(constants$1.PROCESS_GC_EXECUTED_TOTAL, { type: "weakphantom" });
-					}
-				});
-			}
-		} catch (e) {
-			// silent
-		}
-	}
-
-	function startEventLoopStats() {
-		// Load `event-loop-stats` metric for Event-loop metrics.
-		try {
-			eventLoop = null;
-			if (eventLoop) {
-				this.register({ name: constants$1.PROCESS_EVENTLOOP_LAG_MIN, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_MILLISECONDS, description: "Minimum of event loop lag" });
-				this.register({ name: constants$1.PROCESS_EVENTLOOP_LAG_AVG, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_MILLISECONDS, description: "Average of event loop lag" });
-				this.register({ name: constants$1.PROCESS_EVENTLOOP_LAG_MAX, type: constants$1.TYPE_GAUGE, unit: constants$1.UNIT_MILLISECONDS, description: "Maximum of event loop lag" });
-				this.register({ name: constants$1.PROCESS_EVENTLOOP_LAG_COUNT, type: constants$1.TYPE_GAUGE, description: "Number of event loop lag samples." });
-			}
-		} catch (e) {
-			// silent
-		}
 	}
 
 	/**
@@ -3090,15 +5431,22 @@
 				const space = item.space_name;
 				this.set(constants$1.PROCESS_MEMORY_HEAP_SPACE_SIZE_TOTAL, item.space_size, { space });
 				this.set(constants$1.PROCESS_MEMORY_HEAP_SPACE_SIZE_USED, item.space_used_size, { space });
-				this.set(constants$1.PROCESS_MEMORY_HEAP_SPACE_SIZE_AVAILABLE, item.space_available_size, { space });
-				this.set(constants$1.PROCESS_MEMORY_HEAP_SPACE_SIZE_PHYSICAL, item.physical_space_size, { space });
+				this.set(constants$1.PROCESS_MEMORY_HEAP_SPACE_SIZE_AVAILABLE, item.space_available_size, {
+					space
+				});
+				this.set(constants$1.PROCESS_MEMORY_HEAP_SPACE_SIZE_PHYSICAL, item.physical_space_size, {
+					space
+				});
 			});
 		}
 
 		if (v8 && v8.getHeapStatistics) {
 			const stat = v8.getHeapStatistics();
 			this.set(constants$1.PROCESS_MEMORY_HEAP_STAT_HEAP_SIZE_TOTAL, stat.total_heap_size);
-			this.set(constants$1.PROCESS_MEMORY_HEAP_STAT_EXECUTABLE_SIZE_TOTAL, stat.total_heap_size_executable);
+			this.set(
+				constants$1.PROCESS_MEMORY_HEAP_STAT_EXECUTABLE_SIZE_TOTAL,
+				stat.total_heap_size_executable
+			);
 			this.set(constants$1.PROCESS_MEMORY_HEAP_STAT_PHYSICAL_SIZE_TOTAL, stat.total_physical_size);
 			this.set(constants$1.PROCESS_MEMORY_HEAP_STAT_AVAILABLE_SIZE_TOTAL, stat.total_available_size);
 			this.set(constants$1.PROCESS_MEMORY_HEAP_STAT_USED_HEAP_SIZE, stat.used_heap_size);
@@ -3109,8 +5457,7 @@
 		}
 
 		this.set(constants$1.PROCESS_UPTIME, _process.uptime());
-		this.set(constants$1.PROCESS_INTERNAL_ACTIVE_HANDLES, _process._getActiveHandles().length);
-		this.set(constants$1.PROCESS_INTERNAL_ACTIVE_REQUESTS, _process._getActiveRequests().length);
+		this.set(constants$1.PROCESS_INTERNAL_ACTIVE_HANDLES, _process.getActiveResourcesInfo().length);
 
 		// --- OS METRICS ---
 
@@ -3129,8 +5476,7 @@
 
 		// --- NETWORK INTERFACES ---
 
-
-		const getNetworkInterfaces = () =>{
+		const getNetworkInterfaces = () => {
 			const list = [];
 			const ilist = [];
 			const interfaces = os__default.networkInterfaces();
@@ -3138,9 +5484,9 @@
 				for (let i in interfaces[iface]) {
 					const f = interfaces[iface][i];
 					if (f.internal) {
-						ilist.push({ f,iface });
+						ilist.push({ f, iface });
 					} else {
-						list.push({ f,iface });
+						list.push({ f, iface });
 					}
 				}
 			}
@@ -3148,7 +5494,7 @@
 		};
 
 		const interfaces = getNetworkInterfaces();
-		for (let { f,iface } of interfaces) {
+		for (let { f, iface } of interfaces) {
 			this.set(constants$1.OS_NETWORK_ADDRESS, f.address, { interface: iface, family: f.family });
 			this.set(constants$1.OS_NETWORK_MAC, f.mac, { interface: iface, family: f.family });
 		}
@@ -3164,38 +5510,37 @@
 		this.set(constants$1.OS_CPU_LOAD_5, load[1]);
 		this.set(constants$1.OS_CPU_LOAD_15, load[2]);
 
-		if (eventLoop && eventLoop.sense) {
-			const stat = eventLoop.sense();
-			this.set(constants$1.PROCESS_EVENTLOOP_LAG_MIN, stat.min);
-			this.set(constants$1.PROCESS_EVENTLOOP_LAG_AVG, stat.num ? stat.sum / stat.num : 0);
-			this.set(constants$1.PROCESS_EVENTLOOP_LAG_MAX, stat.max);
-			this.set(constants$1.PROCESS_EVENTLOOP_LAG_COUNT, stat.num);
-		}
-
 		// this.increment(METRIC.MOLECULER_METRICS_COMMON_COLLECT_TOTAL);
 		const duration = end();
 
 		return this.broker.Promise.resolve()
-			.then(() => cpuUsage().then(res => {
-				this.set(constants$1.OS_CPU_UTILIZATION, res.avg);
+			.then(() =>
+				cpuUsage().then(res => {
+					this.set(constants$1.OS_CPU_UTILIZATION, res.avg);
 
-				try {
-					const cpus = require$$0__default();
-					this.set(constants$1.OS_CPU_TOTAL, cpus.length);
-					this.set(constants$1.OS_CPU_USER, cpus.reduce((a,b) => a + b.times.user, 0));
-					this.set(constants$1.OS_CPU_SYSTEM, cpus.reduce((a,b) => a + b.times.sys, 0));
+					try {
+						const cpus = require$$0__default();
+						this.set(constants$1.OS_CPU_TOTAL, cpus.length);
+						this.set(
+							constants$1.OS_CPU_USER,
+							cpus.reduce((a, b) => a + b.times.user, 0)
+						);
+						this.set(
+							constants$1.OS_CPU_SYSTEM,
+							cpus.reduce((a, b) => a + b.times.sys, 0)
+						);
 
-					cpus.forEach((cpu, index) => {
-						this.set(constants$1.OS_CPU_INFO_MODEL, cpu.model, { index });
-						this.set(constants$1.OS_CPU_INFO_SPEED, cpu.speed, { index });
-						this.set(constants$1.OS_CPU_INFO_TIMES_USER, cpu.times.user, { index });
-						this.set(constants$1.OS_CPU_INFO_TIMES_SYS, cpu.times.sys, { index });
-					});
-
-				} catch(err) {
-					// silent
-				}
-			}))
+						cpus.forEach((cpu, index) => {
+							this.set(constants$1.OS_CPU_INFO_MODEL, cpu.model, { index });
+							this.set(constants$1.OS_CPU_INFO_SPEED, cpu.speed, { index });
+							this.set(constants$1.OS_CPU_INFO_TIMES_USER, cpu.times.user, { index });
+							this.set(constants$1.OS_CPU_INFO_TIMES_SYS, cpu.times.sys, { index });
+						});
+					} catch {
+						// silent
+					}
+				})
+			)
 			.catch(() => {
 				// silent this.logger.warn("Unable to collect CPU usage metrics.", err);
 			})
@@ -3212,7 +5557,7 @@
 	function getUserInfo() {
 		try {
 			return os__default.userInfo();
-		} catch (e) {
+		} catch {
 			/* istanbul ignore next */
 			return {};
 		}
@@ -3244,14 +5589,36 @@
 
 	const { registerCommonMetrics: registerCommonMetrics$1, updateCommonMetrics: updateCommonMetrics$1 } = commons;
 
-	const METRIC_NAME_REGEXP 	= /^[a-zA-Z_][a-zA-Z0-9-_:.]*$/;
-	const METRIC_LABEL_REGEXP 	= /^[a-zA-Z_][a-zA-Z0-9-_.]*$/;
+	const METRIC_NAME_REGEXP = /^[a-zA-Z_][a-zA-Z0-9-_:.]*$/;
+	const METRIC_LABEL_REGEXP = /^[a-zA-Z_][a-zA-Z0-9-_.]*$/;
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("./registry")} MetricRegistryClass
+	 * @typedef {import("./registry").MetricListOptions} MetricListOptions
+	 * @typedef {import("./registry").GaugeMetricOptions} GaugeMetricOptions
+	 * @typedef {import("./registry").CounterMetricOptions} CounterMetricOptions
+	 * @typedef {import("./registry").HistogramMetricOptions} HistogramMetricOptions
+	 * @typedef {import("./registry").InfoMetricOptions} InfoMetricOptions
+	 *
+	 * @typedef {import("./types/counter")} CounterMetric
+	 * @typedef {import("./types/gauge")} GaugeMetric
+	 * @typedef {import("./types/histogram")} HistogramMetric
+	 * @typedef {import("./types/info")} InfoMetric
+	 * @typedef {import("./types/base")} BaseMetric
+	 * @typedef {import("./types/base").BaseMetricOptions} BaseMetricOptions
+	 *
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 */
 
 	/**
 	 * Metric Registry class
+	 *
+	 * @class MetricRegistry
+	 * @implements {MetricRegistryClass}
 	 */
 	class MetricRegistry {
-
 		/**
 		 * Creates an instance of MetricRegistry.
 		 *
@@ -3265,8 +5632,7 @@
 
 			this.dirty = true;
 
-			if (opts === true || opts === false)
-				opts = { enabled: opts };
+			if (opts === true || opts === false) opts = { enabled: opts };
 
 			this.opts = ___default.defaultsDeep({}, opts, {
 				enabled: true,
@@ -3284,8 +5650,7 @@
 
 			this.store = new Map();
 
-			if (this.opts.enabled)
-				this.logger.info("Metrics: Enabled");
+			if (this.opts.enabled) this.logger.info("Metrics: Enabled");
 		}
 
 		/**
@@ -3293,10 +5658,11 @@
 		 */
 		init() {
 			if (this.opts.enabled) {
-
 				// Create Reporter instances
 				if (this.opts.reporter) {
-					const reporters$1 = Array.isArray(this.opts.reporter) ? this.opts.reporter : [this.opts.reporter];
+					const reporters$1 = Array.isArray(this.opts.reporter)
+						? this.opts.reporter
+						: [this.opts.reporter];
 
 					this.reporter = ___default.compact(reporters$1).map(r => {
 						const reporter = reporters.resolve(r);
@@ -3304,8 +5670,14 @@
 						return reporter;
 					});
 
-					const reporterNames = this.reporter.map(reporter => this.broker.getConstructorName(reporter));
-					this.logger.info(`Metric reporter${reporterNames.length > 1 ? "s" : ""}: ${reporterNames.join(", ")}`);
+					const reporterNames = this.reporter.map(reporter =>
+						this.broker.getConstructorName(reporter)
+					);
+					this.logger.info(
+						`Metric reporter${reporterNames.length > 1 ? "s" : ""}: ${reporterNames.join(
+						", "
+					)}`
+					);
 				}
 
 				// Start colllect timer
@@ -3347,19 +5719,35 @@
 		/**
 		 * Register a new metric.
 		 *
-		 * @param {Object} opts
-		 * @returns {BaseMetric}
-		 * @memberof MetricRegistry
+		 * @overload
+		 * @param {GaugeMetricOptions} opts
+		 * @returns {GaugeMetric}
+		 */
+		/**
+		 * @overload
+		 * @param {CounterMetricOptions} opts
+		 * @returns {CounterMetric}
+		 */
+		/**
+		 * @overload
+		 * @param {HistogramMetricOptions} opts
+		 * @returns {HistogramMetric}
+		 */
+		/**
+		 * @overload
+		 * @param {InfoMetricOptions} opts
+		 * @returns {InfoMetric}
+		 */
+		/**
+		 * @param {GaugeMetricOptions|CounterMetricOptions|HistogramMetricOptions|InfoMetricOptions} opts
+		 * @returns {CounterMetric | GaugeMetric | HistogramMetric | InfoMetric}
 		 */
 		register(opts) {
-			if (!isPlainObject$1(opts))
-				throw new Error("Wrong argument. Must be an Object.");
+			if (!isPlainObject$1(opts)) throw new Error("Wrong argument. Must be an Object.");
 
-			if (!opts.type)
-				throw new Error("The metric 'type' property is mandatory.");
+			if (!opts.type) throw new Error("The metric 'type' property is mandatory.");
 
-			if (!opts.name)
-				throw new Error("The metric 'name' property is mandatory.");
+			if (!opts.name) throw new Error("The metric 'name' property is mandatory.");
 
 			if (!METRIC_NAME_REGEXP.test(opts.name))
 				throw new Error("The metric 'name' is not valid: " + opts.name);
@@ -3368,14 +5756,12 @@
 				opts.labelNames.forEach(name => {
 					if (!METRIC_LABEL_REGEXP.test(name))
 						throw new Error(`The '${opts.name}' metric label name is not valid: ${name}`);
-
 				});
 			}
 
 			const MetricClass = types.resolve(opts.type);
 
-			if (!this.opts.enabled)
-				return null;
+			if (!this.opts.enabled) return null;
 
 			const item = new MetricClass(opts, this);
 			this.store.set(opts.name, item);
@@ -3397,13 +5783,12 @@
 		 * Get metric by name
 		 *
 		 * @param {String} name
-		 * @returns {BaseMetric}
+		 * @returns {CounterMetric | GaugeMetric | HistogramMetric | InfoMetric}
 		 * @memberof MetricRegistry
 		 */
 		getMetric(name) {
 			const item = this.store.get(name);
-			if (!item)
-				return null;
+			if (!item) return null;
 
 			return item;
 		}
@@ -3412,19 +5797,20 @@
 		 * Increment a metric value.
 		 *
 		 * @param {String} name
-		 * @param {Object?} labels
-		 * @param {number} [value=1]
-		 * @param {Number?} timestamp
+		 * @param {Object=} labels
+		 * @param {number=} [value=1]
+		 * @param {Number=} timestamp
 		 * @returns
 		 * @memberof MetricRegistry
 		 */
 		increment(name, labels, value = 1, timestamp) {
-			if (!this.opts.enabled)
-				return null;
+			if (!this.opts.enabled) return null;
 
-			const item = this.getMetric(name);
+			const item = /** @type {GaugeMetric} */ (this.getMetric(name));
 			if (!isFunction$1(item.increment))
-				throw new Error("Invalid metric type. Incrementing works only with counter & gauge metric types.");
+				throw new Error(
+					"Invalid metric type. Incrementing works only with counter & gauge metric types."
+				);
 
 			return item.increment(labels, value, timestamp);
 		}
@@ -3433,17 +5819,16 @@
 		 * Decrement a metric value.
 		 *
 		 * @param {String} name
-		 * @param {Object?} labels
-		 * @param {number} [value=1]
-		 * @param {Number?} timestamp
+		 * @param {Object=} labels
+		 * @param {number=} [value=1]
+		 * @param {Number=} timestamp
 		 * @returns
 		 * @memberof MetricRegistry
 		 */
 		decrement(name, labels, value = 1, timestamp) {
-			if (!this.opts.enabled)
-				return null;
+			if (!this.opts.enabled) return null;
 
-			const item = this.getMetric(name);
+			const item = /** @type {GaugeMetric} */ (this.getMetric(name));
 			if (!isFunction$1(item.decrement))
 				throw new Error("Invalid metric type. Decrementing works only with gauge metric type.");
 
@@ -3454,19 +5839,20 @@
 		 * Set a metric value.
 		 *
 		 * @param {String} name
-		 * @param {*} value
-		 * @param {Object?} labels
-		 * @param {Number?} timestamp
+		 * @param {any} value
+		 * @param {Object=} labels
+		 * @param {Number=} timestamp
 		 * @returns
 		 * @memberof MetricRegistry
 		 */
 		set(name, value, labels, timestamp) {
-			if (!this.opts.enabled)
-				return null;
+			if (!this.opts.enabled) return null;
 
-			const item = this.getMetric(name);
+			const item = /** @type {GaugeMetric} */ (this.getMetric(name));
 			if (!isFunction$1(item.set))
-				throw new Error("Invalid metric type. Value setting works only with counter, gauge & info metric types.");
+				throw new Error(
+					"Invalid metric type. Value setting works only with counter, gauge & info metric types."
+				);
 
 			return item.set(value, labels, timestamp);
 		}
@@ -3476,18 +5862,19 @@
 		 *
 		 * @param {String} name
 		 * @param {Number} value
-		 * @param {Object?} labels
-		 * @param {Number?} timestamp
+		 * @param {Object=} labels
+		 * @param {Number=} timestamp
 		 * @returns
 		 * @memberof MetricRegistry
 		 */
 		observe(name, value, labels, timestamp) {
-			if (!this.opts.enabled)
-				return null;
+			if (!this.opts.enabled) return null;
 
-			const item = this.getMetric(name);
+			const item = /** @type {HistogramMetric} */ (this.getMetric(name));
 			if (!isFunction$1(item.observe))
-				throw new Error("Invalid metric type. Observing works only with histogram metric type.");
+				throw new Error(
+					"Invalid metric type. Observing works only with histogram metric type."
+				);
 
 			return item.observe(value, labels, timestamp);
 		}
@@ -3502,8 +5889,7 @@
 		 * @memberof MetricRegistry
 		 */
 		reset(name, labels, timestamp) {
-			if (!this.opts.enabled)
-				return null;
+			if (!this.opts.enabled) return null;
 
 			const item = this.getMetric(name);
 			item.reset(labels, timestamp);
@@ -3518,8 +5904,7 @@
 		 * @memberof MetricRegistry
 		 */
 		resetAll(name, timestamp) {
-			if (!this.opts.enabled)
-				return null;
+			if (!this.opts.enabled) return null;
 
 			const item = this.getMetric(name);
 			item.resetAll(timestamp);
@@ -3531,16 +5916,18 @@
 		 * @param {String} name
 		 * @param {Object?} labels
 		 * @param {Number?} timestamp
-		 * @returns {Function} `end`˙function.
+		 * @returns {() => number} `end`˙function.
 		 * @memberof MetricRegistry
 		 */
 		timer(name, labels, timestamp) {
 			let item;
 			if (name && this.opts.enabled) {
 				item = this.getMetric(name);
-				if (!isFunction$1(item.observe) && !isFunction$1(item.set)) {
+				if (!("observe" in item) && !("set" in item)) {
 					/* istanbul ignore next */
-					throw new Error("Invalid metric type. Timing works only with histogram or gauge metric types");
+					throw new Error(
+						"Invalid metric type. Timing works only with histogram or gauge metric types"
+					);
 				}
 			}
 
@@ -3550,10 +5937,8 @@
 				const duration = (delta[0] + delta[1] / 1e9) * 1000;
 
 				if (item) {
-					if (item.type == constants$1.TYPE_HISTOGRAM)
-						item.observe(duration, labels, timestamp);
-					else if (item.type == constants$1.TYPE_GAUGE)
-						item.set(duration, labels, timestamp);
+					if (item.type == constants$1.TYPE_HISTOGRAM) item.observe(duration, labels, timestamp);
+					else if (item.type == constants$1.TYPE_GAUGE) item.set(duration, labels, timestamp);
 				}
 
 				return duration;
@@ -3573,41 +5958,47 @@
 		changed(metric, value, labels, timestamp) {
 			this.dirty = true;
 			if (Array.isArray(this.reporter))
-				this.reporter.forEach(reporter => reporter.metricChanged(metric, value, labels, timestamp));
+				this.reporter.forEach(reporter =>
+					reporter.metricChanged(metric, value, labels, timestamp)
+				);
 		}
 
 		/**
 		 * List all registered metrics with labels & values.
 		 *
-		 * @param {Object?} opts
-		 * @param {String|Array<String>|null} opts.types
-		 * @param {String|Array<String>|null} opts.includes
-		 * @param {String|Array<String>|null} opts.excludes
+		 * @param {MetricListOptions?} opts
 		 */
 		list(opts) {
 			const res = [];
-			opts = opts || {};
+			opts = opts ?? {};
 
-			const types = opts.types != null ? (isString$2(opts.types) ? [opts.types] : opts.types) : null;
-			const includes = opts.includes != null ? (isString$2(opts.includes) ? [opts.includes] : opts.includes) : null;
-			const excludes = opts.excludes != null ? (isString$2(opts.excludes) ? [opts.excludes] : opts.excludes) : null;
+			const types =
+				opts.types != null ? (isString$2(opts.types) ? [opts.types] : opts.types) : null;
+			const includes =
+				opts.includes != null
+					? isString$2(opts.includes)
+						? [opts.includes]
+						: opts.includes
+					: null;
+			const excludes =
+				opts.excludes != null
+					? isString$2(opts.excludes)
+						? [opts.excludes]
+						: opts.excludes
+					: null;
 
 			this.store.forEach(metric => {
-				if (types && !types.some(type => metric.type == type))
-					return;
+				if (types && !types.some(type => metric.type == type)) return;
 
-				if (includes && !includes.some(pattern => match$1(metric.name, pattern)))
-					return;
+				if (includes && !includes.some(pattern => match$1(metric.name, pattern))) return;
 
-				if (excludes && !excludes.every(pattern => !match$1(metric.name, pattern)))
-					return;
+				if (excludes && !excludes.every(pattern => !match$1(metric.name, pattern))) return;
 
 				res.push(metric.toObject());
 			});
 
 			return res;
 		}
-
 
 		/**
 		 * Pluralize metric units.
@@ -3616,7 +6007,7 @@
 		 * @returns {String}
 		 */
 		pluralizeUnit(unit) {
-			switch(unit) {
+			switch (unit) {
 				case constants$1.UNIT_GHZ:
 					return unit;
 			}
@@ -3640,24 +6031,42 @@
 		Reporters: reporters
 	};
 
-	const { Packet: Packet$1 } 		= packets;
+	const { Packet: Packet$1 } = packets;
 
 
-	const { Transform } 	= require$$0__default$1;
-	const { METRIC }		= metrics;
+	const { Transform } = require$$0__default$1;
+	const { METRIC } = metrics;
+
+
+	/**
+	 * @typedef {import("./service-broker")} ServiceBroker
+	 * @typedef {import("./transporters/base")} Transporter
+	 * @typedef {import("stream").Stream} Stream
+	 * @typedef {import("stream").Readable} Readable
+	 * @typedef {import("./context")} Context
+	 * @typedef {import("./registry").NodeRawInfo} NodeRawInfo
+	 * @typedef {import("./transit")} TransitClass
+	 * @typedef {import("./packets").PacketDiscoverPayload} PacketDiscoverPayload
+	 * @typedef {import("./packets").PacketInfoPayload} PacketInfoPayload
+	 * @typedef {import("./packets").PacketRequestPayload} PacketRequestPayload
+	 * @typedef {import("./packets").PacketResponsePayload} PacketResponsePayload
+	 * @typedef {import("./packets").PacketEventPayload} PacketEventPayload
+	 * @typedef {import("./packets").PacketPingPayload} PacketPingPayload
+	 * @typedef {import("./packets").PacketPongPayload} PacketPongPayload
+	 */
 
 	/**
 	 * Transit class
 	 *
 	 * @class Transit
+	 * @implements {TransitClass}
 	 */
 	class Transit {
-
 		/**
 		 * Create an instance of Transit.
 		 *
-		 * @param {ServiceBroker} Broker instance
-		 * @param {Transporter} Transporter instance
+		 * @param {ServiceBroker} broker
+		 * @param {Transporter} transporter
 		 * @param {Object?} opts
 		 *
 		 * @memberof Transit
@@ -3672,24 +6081,11 @@
 			this.tx = transporter;
 			this.opts = opts;
 			this.discoverer = broker.registry.discoverer;
+			this.errorRegenerator = broker.errorRegenerator;
 
 			this.pendingRequests = new Map();
 			this.pendingReqStreams = new Map();
 			this.pendingResStreams = new Map();
-
-			/* deprecated */
-			this.stat = {
-				packets: {
-					sent: {
-						count: 0,
-						bytes: 0
-					},
-					received: {
-						count: 0,
-						bytes: 0
-					}
-				}
-			};
 
 			this.connected = false;
 			this.disconnecting = false;
@@ -3698,14 +6094,22 @@
 			const wrappedMessageHandler = (cmd, packet) => this.messageHandler(cmd, packet);
 
 			this.publish = this.broker.wrapMethod("transitPublish", this.publish, this);
-			this.messageHandler = this.broker.wrapMethod("transitMessageHandler", this.messageHandler, this);
-
+			this.messageHandler = this.broker.wrapMethod(
+				"transitMessageHandler",
+				this.messageHandler,
+				this
+			);
 
 			if (this.tx) {
 				this.tx.init(this, wrappedMessageHandler, this.afterConnect.bind(this));
 
 				this.tx.send = this.broker.wrapMethod("transporterSend", this.tx.send, this.tx);
-				this.tx.receive = this.broker.wrapMethod("transporterReceive", this.tx.receive, this.tx, { reverse: true });
+				this.tx.receive = this.broker.wrapMethod(
+					"transporterReceive",
+					this.tx.receive,
+					this.tx,
+					{ reverse: true }
+				);
 			}
 
 			this.__connectResolve = null;
@@ -3719,13 +6123,39 @@
 		registerMoleculerMetrics() {
 			if (!this.broker.isMetricsEnabled()) return;
 
-			this.metrics.register({ name: METRIC.MOLECULER_TRANSIT_READY, type: METRIC.TYPE_GAUGE, description: "Transit is ready" }).set(0);
-			this.metrics.register({ name: METRIC.MOLECULER_TRANSIT_CONNECTED, type: METRIC.TYPE_GAUGE, description: "Transit is connected" }).set(0);
+			this.metrics
+				.register({
+					name: METRIC.MOLECULER_TRANSIT_READY,
+					type: METRIC.TYPE_GAUGE,
+					description: "Transit is ready"
+				})
+				?.set(0);
+			this.metrics
+				.register({
+					name: METRIC.MOLECULER_TRANSIT_CONNECTED,
+					type: METRIC.TYPE_GAUGE,
+					description: "Transit is connected"
+				})
+				?.set(0);
 
-			this.metrics.register({ name: METRIC.MOLECULER_TRANSIT_PONG_TIME, type: METRIC.TYPE_GAUGE, labelNames: ["targetNodeID"], description: "Ping time" });
-			this.metrics.register({ name: METRIC.MOLECULER_TRANSIT_PONG_SYSTIME_DIFF, type: METRIC.TYPE_GAUGE, labelNames: ["targetNodeID"], description: "System time difference between nodes" });
+			this.metrics.register({
+				name: METRIC.MOLECULER_TRANSIT_PONG_TIME,
+				type: METRIC.TYPE_GAUGE,
+				labelNames: ["targetNodeID"],
+				description: "Ping time"
+			});
+			this.metrics.register({
+				name: METRIC.MOLECULER_TRANSIT_PONG_SYSTIME_DIFF,
+				type: METRIC.TYPE_GAUGE,
+				labelNames: ["targetNodeID"],
+				description: "System time difference between nodes"
+			});
 
-			this.metrics.register({ name: METRIC.MOLECULER_TRANSIT_ORPHAN_RESPONSE_TOTAL, type: METRIC.TYPE_COUNTER, description: "Number of orphan responses" });
+			this.metrics.register({
+				name: METRIC.MOLECULER_TRANSIT_ORPHAN_RESPONSE_TOTAL,
+				type: METRIC.TYPE_COUNTER,
+				description: "Number of orphan responses"
+			});
 		}
 
 		/**
@@ -3757,10 +6187,13 @@
 					this.connected = true;
 					this.metrics.set(METRIC.MOLECULER_TRANSIT_CONNECTED, 1);
 
-					this.broker.broadcastLocal("$transporter.connected", { wasReconnect: !!wasReconnect });
+					this.broker.broadcastLocal("$transporter.connected", {
+						wasReconnect: !!wasReconnect
+					});
 
 					if (this.__connectResolve) {
-						this.__connectResolve();
+						this.isReady = true;
+						this.__connectResolve(null);
 						this.__connectResolve = null;
 					}
 
@@ -3782,11 +6215,14 @@
 					let reconnectStarted = false;
 
 					/* istanbul ignore next */
-					const errorHandler = (err) => {
+					const errorHandler = err => {
 						if (this.disconnecting) return;
 						if (reconnectStarted) return;
 
-						this.logger.warn("Connection is failed.", err && err.message || "Unknown error");
+						this.logger.warn(
+							"Connection is failed.",
+							(err && err.message) || "Unknown error"
+						);
 						this.logger.debug(err);
 
 						if (this.opts.disableReconnect) {
@@ -3805,7 +6241,6 @@
 				};
 
 				doConnect();
-
 			});
 		}
 
@@ -3824,12 +6259,10 @@
 
 			return this.Promise.resolve()
 				.then(() => {
-					if (this.tx.connected) {
-						return this.discoverer.localNodeDisconnected()
-							.then(() => this.tx.disconnect());
-					}
+					return this.tx.connected && this.discoverer.localNodeDisconnected();
 				})
-				.then(() => this.disconnecting = false);
+				.then(() => this.tx.disconnect())
+				.then(() => (this.disconnecting = false));
 		}
 
 		/**
@@ -3838,9 +6271,9 @@
 		 */
 		ready() {
 			if (this.connected) {
-				this.isReady = true;
 				this.metrics.set(METRIC.MOLECULER_TRANSIT_READY, 1);
-				return this.discoverer.localNodeReady();
+				// We do nothing here because INFO packets are sent during the starting process.
+				return;
 			}
 		}
 
@@ -3852,7 +6285,10 @@
 		 * @memberof Transit
 		 */
 		sendDisconnectPacket() {
-			return this.publish(new Packet$1(packets.PACKET_DISCONNECT)).catch(/* istanbul ignore next */ err => this.logger.debug("Unable to send DISCONNECT packet.", err));
+			return this.publish(new Packet$1(packets.PACKET_DISCONNECT)).catch(
+				/* istanbul ignore next */ err =>
+					this.logger.debug("Unable to send DISCONNECT packet.", err)
+			);
 		}
 
 		/**
@@ -3861,41 +6297,41 @@
 		 * @memberof Transit
 		 */
 		makeSubscriptions() {
-			this.subscribing = this.tx.makeSubscriptions([
+			this.subscribing = this.tx
+				.makeSubscriptions([
+					// Subscribe to broadcast events
+					{ cmd: packets.PACKET_EVENT, nodeID: this.nodeID },
 
-				// Subscribe to broadcast events
-				{ cmd: packets.PACKET_EVENT, nodeID: this.nodeID },
+					// Subscribe to requests
+					{ cmd: packets.PACKET_REQUEST, nodeID: this.nodeID },
 
-				// Subscribe to requests
-				{ cmd: packets.PACKET_REQUEST, nodeID: this.nodeID },
+					// Subscribe to node responses of requests
+					{ cmd: packets.PACKET_RESPONSE, nodeID: this.nodeID },
 
-				// Subscribe to node responses of requests
-				{ cmd: packets.PACKET_RESPONSE, nodeID: this.nodeID },
+					// Discover handler
+					{ cmd: packets.PACKET_DISCOVER },
+					{ cmd: packets.PACKET_DISCOVER, nodeID: this.nodeID },
 
-				// Discover handler
-				{ cmd: packets.PACKET_DISCOVER },
-				{ cmd: packets.PACKET_DISCOVER, nodeID: this.nodeID },
+					// NodeInfo handler
+					{ cmd: packets.PACKET_INFO }, // Broadcasted INFO. If a new node connected
+					{ cmd: packets.PACKET_INFO, nodeID: this.nodeID }, // Response INFO to DISCOVER packet
 
-				// NodeInfo handler
-				{ cmd: packets.PACKET_INFO }, // Broadcasted INFO. If a new node connected
-				{ cmd: packets.PACKET_INFO, nodeID: this.nodeID }, // Response INFO to DISCOVER packet
+					// Disconnect handler
+					{ cmd: packets.PACKET_DISCONNECT },
 
-				// Disconnect handler
-				{ cmd: packets.PACKET_DISCONNECT },
+					// Heartbeat handler
+					{ cmd: packets.PACKET_HEARTBEAT },
 
-				// Heartbeat handler
-				{ cmd: packets.PACKET_HEARTBEAT },
+					// Ping handler
+					{ cmd: packets.PACKET_PING }, // Broadcasted
+					{ cmd: packets.PACKET_PING, nodeID: this.nodeID }, // Targeted
 
-				// Ping handler
-				{ cmd: packets.PACKET_PING }, // Broadcasted
-				{ cmd: packets.PACKET_PING, nodeID: this.nodeID }, // Targeted
-
-				// Pong handler
-				{ cmd: packets.PACKET_PONG, nodeID: this.nodeID }
-
-			]).then(() => {
-				this.subscribing = null;
-			});
+					// Pong handler
+					{ cmd: packets.PACKET_PONG, nodeID: this.nodeID }
+				])
+				.then(() => {
+					this.subscribing = null;
+				});
 
 			return this.subscribing;
 		}
@@ -3903,9 +6339,9 @@
 		/**
 		 * Message handler for incoming packets
 		 *
-		 * @param {Array} topic
-		 * @param {String} msg
-		 * @returns {Boolean} If packet is processed return with `true`
+		 * @param {string} cmd
+		 * @param {Packet} packet
+		 * @returns {Promise} If packet is processed resolve with `true` else `false`
 		 *
 		 * @memberof Transit
 		 */
@@ -3916,7 +6352,11 @@
 				// Check payload
 				if (!payload) {
 					/* istanbul ignore next */
-					throw new errors.MoleculerServerError("Missing response payload.", 500, "MISSING_PAYLOAD");
+					throw new errors.MoleculerServerError(
+						"Missing response payload.",
+						500,
+						"MISSING_PAYLOAD"
+					);
 				}
 
 				// Check protocol version
@@ -3929,30 +6369,36 @@
 				}
 
 				if (payload.sender === this.nodeID) {
-
 					// Detect nodeID conflict
-					if (cmd === packets.PACKET_INFO && payload.instanceID !== this.instanceID) {
-						return this.broker.fatal("ServiceBroker has detected a nodeID conflict, use unique nodeIDs. ServiceBroker stopped.");
+					if (cmd === packets.PACKET_INFO) {
+						if (/** @type {PacketInfoPayload} */ (payload).instanceID !== this.instanceID) {
+							this.broker.fatal(
+								"ServiceBroker has detected a nodeID conflict, use unique nodeIDs. ServiceBroker stopped."
+							);
+							return this.Promise.resolve(false);
+						}
 					}
 
 					// Skip own packets (if only built-in balancer disabled)
 					if (cmd !== packets.PACKET_EVENT && cmd !== packets.PACKET_REQUEST && cmd !== packets.PACKET_RESPONSE)
-						return;
+						return this.Promise.resolve(false);
 				}
 
 				// Request
 				if (cmd === packets.PACKET_REQUEST) {
-					return this.requestHandler(payload);
+					return this.requestHandler(/** @type {PacketRequestPayload} */ (payload)).then(
+						() => true
+					);
 				}
 
 				// Response
 				else if (cmd === packets.PACKET_RESPONSE) {
-					this.responseHandler(payload);
+					this.responseHandler(/** @type {PacketResponsePayload} */ (payload));
 				}
 
 				// Event
 				else if (cmd === packets.PACKET_EVENT) {
-					this.eventHandler(payload);
+					return this.eventHandler(/** @type {PacketEventPayload} */ (payload));
 				}
 
 				// Discover
@@ -3977,33 +6423,47 @@
 
 				// Ping
 				else if (cmd === packets.PACKET_PING) {
-					this.sendPong(payload);
+					this.sendPong(/** @type {PacketPingPayload} */ (payload));
 				}
 
 				// Pong
 				else if (cmd === packets.PACKET_PONG) {
-					this.processPong(payload);
+					this.processPong(/** @type {PacketPongPayload} */ (payload));
 				}
 
-				return true;
+				return this.Promise.resolve(true);
 			} catch (err) {
 				this.logger.error(err, cmd, packet);
+
+				this.broker.broadcastLocal("$transit.error", {
+					error: err,
+					module: "transit",
+					type: constants.FAILED_PROCESSING_PACKET
+				});
 			}
-			return false;
+			return this.Promise.resolve(false);
 		}
 
 		/**
 		 * Handle incoming event
 		 *
-		 * @param {any} payload
+		 * @param {PacketEventPayload} payload
+		 * @returns {Promise<boolean>}
 		 * @memberof Transit
 		 */
 		eventHandler(payload) {
-			this.logger.debug(`Event '${payload.event}' received from '${payload.sender}' node` + (payload.groups ? ` in '${payload.groups.join(", ")}' group(s)` : "") + ".");
+			this.logger.debug(
+				`Event '${payload.event}' received from '${payload.sender}' node` +
+					(payload.groups ? ` in '${payload.groups.join(", ")}' group(s)` : "") +
+					"."
+			);
 
-			if (!this.broker.started) {
-				this.logger.warn(`Incoming '${payload.event}' event from '${payload.sender}' node is dropped, because broker is stopped.`);
-				return;
+			if (this.broker.stopping) {
+				this.logger.warn(
+					`Incoming '${payload.event}' event from '${payload.sender}' node is dropped, because broker is stopped.`
+				);
+				// return false so the transporter knows this event wasn't handled.
+				return this.Promise.resolve(false);
 			}
 
 			// Create caller context
@@ -4014,6 +6474,7 @@
 			ctx.eventGroups = payload.groups;
 			ctx.eventType = payload.broadcast ? "broadcast" : "emit";
 			ctx.meta = payload.meta || {};
+			ctx.headers = payload.headers || {};
 			ctx.level = payload.level;
 			ctx.tracing = !!payload.tracing;
 			ctx.parentID = payload.parentID;
@@ -4021,30 +6482,45 @@
 			ctx.caller = payload.caller;
 			ctx.nodeID = payload.sender;
 
-			this.broker.emitLocalServices(ctx);
+			// ensure the eventHandler resolves true when the event was handled successfully
+			return this.broker
+				.emitLocalServices(ctx)
+				.then(() => true)
+				.catch(err => {
+					this.logger.error(err);
+
+					return false;
+				});
 		}
 
 		/**
 		 * Handle incoming request
 		 *
-		 * @param {Object} payload
-		 *
+		 * @param {PacketRequestPayload} payload
+		 * @returns {Promise<any>}
 		 * @memberof Transit
 		 */
 		requestHandler(payload) {
-			this.logger.debug(`<= Request '${payload.action}' received from '${payload.sender}' node.`);
+			const requestID = payload.requestID ? "with requestID '" + payload.requestID + "' " : "";
+			this.logger.debug(
+				`<= Request '${payload.action}' ${requestID}received from '${payload.sender}' node.`
+			);
 
 			try {
-				if (!this.broker.started) {
-					this.logger.warn(`Incoming '${payload.action}' request from '${payload.sender}' node is dropped because broker is stopped.`);
-					throw new errors.ServiceNotAvailableError({ action: payload.action, nodeID: this.nodeID });
+				if (this.broker.stopping) {
+					this.logger.warn(
+						`Incoming '${payload.action}' ${requestID}request from '${payload.sender}' node is dropped because broker is stopped.`
+					);
+					throw new errors.ServiceNotAvailableError({
+						action: payload.action,
+						nodeID: this.nodeID
+					});
 				}
 
-				let pass;
+				let stream;
 				if (payload.stream !== undefined) {
-					pass = this._handleIncomingRequestStream(payload);
-					if (pass === null) // eslint-disable-line security/detect-possible-timing-attacks
-						return this.Promise.resolve();
+					stream = this._handleIncomingRequestStream(payload);
+					if (stream === null) return this.Promise.resolve();
 				}
 
 				const endpoint = this.broker._getLocalActionEndpoint(payload.action);
@@ -4053,28 +6529,48 @@
 				const ctx = new this.broker.ContextFactory(this.broker);
 				ctx.setEndpoint(endpoint);
 				ctx.id = payload.id;
-				ctx.setParams(pass ? pass : payload.params, this.broker.options.contextParamsCloning);
+				ctx.setParams(payload.params, this.broker.options.contextParamsCloning);
+				if (stream) {
+					ctx.stream = stream;
+				}
 				ctx.parentID = payload.parentID;
 				ctx.requestID = payload.requestID;
 				ctx.caller = payload.caller;
 				ctx.meta = payload.meta || {};
+				ctx.headers = payload.headers || {};
 				ctx.level = payload.level;
 				ctx.tracing = payload.tracing;
 				ctx.nodeID = payload.sender;
 
-				if (payload.timeout != null)
-					ctx.options.timeout = payload.timeout;
+				if (payload.timeout != null) ctx.options.timeout = payload.timeout;
 
 				const p = endpoint.action.handler(ctx);
 				// Pointer to Context
 				p.ctx = ctx;
 
 				return p
-					.then(res => this.sendResponse(payload.sender, payload.id, ctx.meta, res, null))
-					.catch(err => this.sendResponse(payload.sender, payload.id, ctx.meta, null, err));
-
+					.then(res =>
+						this.sendResponse(
+							payload.sender,
+							payload.id,
+							ctx.meta,
+							ctx.responseHeaders,
+							res,
+							null
+						)
+					)
+					.catch(err =>
+						this.sendResponse(
+							payload.sender,
+							payload.id,
+							ctx.meta,
+							ctx.responseHeaders,
+							null,
+							err
+						)
+					);
 			} catch (err) {
-				return this.sendResponse(payload.sender, payload.id, payload.meta, null, err);
+				return this.sendResponse(payload.sender, payload.id, payload.meta, null, null, err);
 			}
 		}
 
@@ -4082,117 +6578,131 @@
 		 * Handle incoming request stream.
 		 *
 		 * @param {Object} payload
-		 * @returns {Stream}
+		 * @returns {Stream|false|null}
 		 */
 		_handleIncomingRequestStream(payload) {
-			let pass = this.pendingReqStreams.get(payload.id);
-			let isNew = false;
+			const reqStream = this.pendingReqStreams.get(payload.id);
+			let stream = reqStream ? reqStream.stream : undefined;
 
-			if (!payload.stream && !pass) {
+			if (!payload.stream && !stream && !payload.seq) {
 				// It is not a stream data
 				return false;
 			}
 
-			if (!pass) {
-				isNew = true;
-				this.logger.debug(`<= New stream is received from '${payload.sender}'. Seq: ${payload.seq}`);
+			if (!stream) {
+				this.logger.debug(
+					`<= New stream is received from '${payload.sender}'. Seq: ${payload.seq}`
+				);
 
 				// Create a new pass stream
-				pass = new Transform({
-					objectMode: payload.meta && payload.meta["$streamObjectMode"],
-					transform: function(chunk, encoding, done) {
+				stream = new Transform({
+					// TODO: It's incorrect because the chunks may receive in random order, so it processes an empty meta.
+					// Meta is filled correctly only in the 0. chunk.
+					objectMode: payload.headers?.$streamObjectMode,
+					transform: function (chunk, encoding, done) {
 						this.push(chunk);
 						return done();
 					}
 				});
 
-				pass.$prevSeq = -1;
-				pass.$pool = new Map();
+				delete payload.headers?.$streamObjectMode;
 
-				this.pendingReqStreams.set(payload.id, pass);
+				stream.$prevSeq = -1;
+				stream.$pool = new Map();
+
+				this.pendingReqStreams.set(payload.id, { sender: payload.sender, stream });
+
+				stream.on("moleculer-timeout-middleware", timeout => {
+					timersBrowserify.setTimeout(() => {
+						this.pendingReqStreams.delete(payload.id);
+						this._destroyStreamIfPossible(
+							stream,
+							`Pending request stream ${payload.id} have been closed by timeout ${timeout} ms`
+						);
+					}, 1000);
+				});
 			}
 
-			if (payload.seq > pass.$prevSeq + 1) {
+			if (payload.seq > stream.$prevSeq + 1) {
 				// Some chunks are late. Store these chunks.
-				this.logger.info(`Put the chunk into pool (size: ${pass.$pool.size}). Seq: ${payload.seq}`);
+				this.logger.debug(
+					`Put the chunk into pool (size: ${stream.$pool.size}). Seq: ${payload.seq}`
+				);
 
-				pass.$pool.set(payload.seq, payload);
+				stream.$pool.set(payload.seq, payload);
 
 				// TODO: start timer.
 				// TODO: check length of pool.
 				// TODO: reset seq
 
-				return isNew ? pass : null;
+				return null;
 			}
 
 			// the next stream chunk received
-			pass.$prevSeq = payload.seq;
+			stream.$prevSeq = payload.seq;
 
-			if (pass.$prevSeq > 0) {
+			if (stream.$prevSeq > 0) {
 				if (!payload.stream) {
-
 					// Check stream error
-					if (payload.meta && payload.meta["$streamError"]) {
-						pass.emit("error", this._createErrFromPayload(payload.meta["$streamError"], payload.sender));
+					if (payload.headers?.$streamError) {
+						stream.emit(
+							"error",
+							this._createErrFromPayload(payload.headers.$streamError, payload)
+						);
+						delete payload.headers.$streamError;
 					}
 
-					this.logger.debug(`<= Stream closing is received from '${payload.sender}'. Seq: ${payload.seq}`);
+					this.logger.debug(
+						`<= Stream closing is received from '${payload.sender}'. Seq: ${payload.seq}`
+					);
 
 					// End of stream
-					pass.end();
+					stream.end();
 
 					// Remove pending request stream
 					this.pendingReqStreams.delete(payload.id);
 
 					return null;
-
 				} else {
-					this.logger.debug(`<= Stream chunk is received from '${payload.sender}'. Seq: ${payload.seq}`);
-					pass.write(payload.params.type === "Buffer" ? Buffer.from(payload.params.data) : payload.params);
+					this.logger.debug(
+						`<= Stream chunk is received from '${payload.sender}'. Seq: ${payload.seq}`
+					);
+					stream.write(
+						payload.params?.type === "Buffer"
+							? Buffer.from(payload.params.data)
+							: payload.params
+					);
 				}
 			}
 
 			// Check newer chunks in the pool
-			if (pass.$pool.size > 0) {
-				this.logger.warn(`Has stored packets. Size: ${pass.$pool.size}`);
-				const nextSeq = pass.$prevSeq + 1;
-				const nextPacket = pass.$pool.get(nextSeq);
+			if (stream.$pool.size > 0) {
+				this.logger.debug(`Has stored packets. Size: ${stream.$pool.size}`);
+				const nextSeq = stream.$prevSeq + 1;
+				const nextPacket = stream.$pool.get(nextSeq);
 				if (nextPacket) {
-					pass.$pool.delete(nextSeq);
+					stream.$pool.delete(nextSeq);
 					setImmediate(() => this.requestHandler(nextPacket));
 				}
 			}
 
-			return isNew ? pass : null;
+			return stream && payload.seq === 0 ? stream : null;
 		}
 
 		/**
 		 * Create an Error instance from payload ata
 		 * @param {Object} error
-		 * @param {String} sender
+		 * @param {Object} payload
+		 * @returns {Error}
 		 */
-		_createErrFromPayload(error, sender) {
-			let err = errors.recreateError(error);
-			if (!err) {
-				err = new Error(error.message);
-				err.name = error.name;
-				err.code = error.code;
-				err.type = error.type;
-				err.data = error.data;
-			}
-			err.retryable = error.retryable;
-			err.nodeID = error.nodeID || sender;
-
-			if (error.stack)
-				err.stack = error.stack;
-
-			return err;
+		_createErrFromPayload(error, payload) {
+			return this.errorRegenerator?.restore(error, payload);
 		}
 
 		/**
 		 * Process incoming response of request
 		 *
-		 * @param {Object} packet
+		 * @param {PacketResponsePayload} packet
 		 *
 		 * @memberof Transit
 		 */
@@ -4202,7 +6712,12 @@
 
 			// If not exists (timed out), we skip response processing
 			if (req == null) {
-				this.logger.debug("Orphan response is received. Maybe the request is timed out earlier. ID:", packet.id, ", Sender:", packet.sender);
+				this.logger.debug(
+					"Orphan response is received. Maybe the request is timed out earlier. ID:",
+					packet.id,
+					", Sender:",
+					packet.sender
+				);
 				this.metrics.increment(METRIC.MOLECULER_TRANSIT_ORPHAN_RESPONSE_TOTAL);
 				return;
 			}
@@ -4217,15 +6732,14 @@
 
 			// Handle stream response
 			if (packet.stream != null) {
-				if (this._handleIncomingResponseStream(packet, req))
-					return;
+				if (this._handleIncomingResponseStream(packet, req)) return;
 			}
 
 			// Remove pending request
 			this.removePendingRequest(id);
 
 			if (!packet.success) {
-				req.reject(this._createErrFromPayload(packet.error, packet.sender));
+				req.reject(this._createErrFromPayload(packet.error, packet));
 			} else {
 				req.resolve(packet.data);
 			}
@@ -4238,34 +6752,39 @@
 		 * @param {Object} req
 		 */
 		_handleIncomingResponseStream(packet, req) {
-			let pass = this.pendingResStreams.get(packet.id);
-			if (!pass && !packet.stream)
-				return false;
+			let stream = this.pendingResStreams.get(packet.id);
+			if (!stream && !packet.stream && !packet.seq) return false;
 
-			if (!pass) {
-				this.logger.debug(`<= New stream is received from '${packet.sender}'. Seq: ${packet.seq}`);
+			if (!stream) {
+				this.logger.debug(
+					`<= New stream is received from '${packet.sender}'. Seq: ${packet.seq}`
+				);
 
-				pass = new Transform({
-					objectMode: packet.meta && packet.meta["$streamObjectMode"],
-					transform: function(chunk, encoding, done) {
+				stream = new Transform({
+					// TODO: It's incorrect because the chunks may receive in random order, so it processes an empty meta.
+					// Meta is filled correctly only in the 0. chunk.
+					objectMode: packet.headers?.$streamObjectMode,
+					transform: function (chunk, encoding, done) {
 						this.push(chunk);
 						return done();
 					}
 				});
 
-				pass.$prevSeq = -1;
-				pass.$pool = new Map();
+				delete packet.headers?.$streamObjectMode;
 
-				this.pendingResStreams.set(packet.id, pass);
+				stream.$prevSeq = -1;
+				stream.$pool = new Map();
 
-				req.resolve(pass);
+				this.pendingResStreams.set(packet.id, stream);
 			}
 
-			if (packet.seq > pass.$prevSeq + 1) {
+			if (packet.seq > stream.$prevSeq + 1) {
 				// Some chunks are late. Store these chunks.
-				this.logger.info(`Put the chunk into pool (size: ${pass.$pool.size}). Seq: ${packet.seq}`);
+				this.logger.debug(
+					`Put the chunk into pool (size: ${stream.$pool.size}). Seq: ${packet.seq}`
+				);
 
-				pass.$pool.set(packet.seq, packet);
+				stream.$pool.set(packet.seq, packet);
 
 				// TODO: start timer.
 				// TODO: check length of pool.
@@ -4275,39 +6794,47 @@
 			}
 
 			// the next stream chunk received
-			pass.$prevSeq = packet.seq;
+			stream.$prevSeq = packet.seq;
 
-			if (pass.$prevSeq > 0) {
+			if (stream && packet.seq === 0) {
+				req.resolve(stream);
+			}
 
+			if (stream.$prevSeq > 0) {
 				if (!packet.stream) {
 					// Received error?
 					if (!packet.success)
-						pass.emit("error", this._createErrFromPayload(packet.error, packet.sender));
+						stream.emit("error", this._createErrFromPayload(packet.error, packet));
 
-					this.logger.debug(`<= Stream closing is received from '${packet.sender}'. Seq: ${packet.seq}`);
+					this.logger.debug(
+						`<= Stream closing is received from '${packet.sender}'. Seq: ${packet.seq}`
+					);
 
 					// End of stream
-					pass.end();
+					stream.end();
 
 					// Remove pending request
 					this.removePendingRequest(packet.id);
 
 					return true;
-
 				} else {
 					// stream chunk
-					this.logger.debug(`<= Stream chunk is received from '${packet.sender}'. Seq: ${packet.seq}`);
-					pass.write(packet.data.type === "Buffer" ? Buffer.from(packet.data.data):packet.data);
+					this.logger.debug(
+						`<= Stream chunk is received from '${packet.sender}'. Seq: ${packet.seq}`
+					);
+					stream.write(
+						packet.data?.type === "Buffer" ? Buffer.from(packet.data.data) : packet.data
+					);
 				}
 			}
 
 			// Check newer chunks in the pool
-			if (pass.$pool.size > 0) {
-				this.logger.warn(`Has stored packets. Size: ${pass.$pool.size}`);
-				const nextSeq = pass.$prevSeq + 1;
-				const nextPacket = pass.$pool.get(nextSeq);
+			if (stream.$pool.size > 0) {
+				this.logger.debug(`Has stored packets. Size: ${stream.$pool.size}`);
+				const nextSeq = stream.$prevSeq + 1;
+				const nextPacket = stream.$pool.get(nextSeq);
 				if (nextPacket) {
-					pass.$pool.delete(nextSeq);
+					stream.$pool.delete(nextSeq);
 					setImmediate(() => this.responseHandler(nextPacket));
 				}
 			}
@@ -4315,12 +6842,11 @@
 			return true;
 		}
 
-
 		/**
 		 * Send a request to a remote service. It returns a Promise
 		 * what will be resolved when the response received.
 		 *
-		 * @param {<Context>} ctx Context of request
+		 * @param {Context} ctx Context of request
 		 * @returns {Promise}
 		 *
 		 * @memberof Transit
@@ -4328,12 +6854,14 @@
 		request(ctx) {
 			if (this.opts.maxQueueSize && this.pendingRequests.size >= this.opts.maxQueueSize)
 				/* istanbul ignore next */
-				return this.Promise.reject(new errors.QueueIsFullError({
-					action: ctx.action.name,
-					nodeID: this.nodeID,
-					size: this.pendingRequests.size,
-					limit: this.opts.maxQueueSize
-				}));
+				return this.Promise.reject(
+					new errors.QueueIsFullError({
+						action: ctx.action.name,
+						nodeID: this.nodeID,
+						size: this.pendingRequests.size,
+						limit: this.opts.maxQueueSize
+					})
+				);
 
 			// Expanded the code that v8 can optimize it.  (TryCatchStatement disable optimizing)
 			return new this.Promise((resolve, reject) => this._sendRequest(ctx, resolve, reject));
@@ -4342,14 +6870,17 @@
 		/**
 		 * Send a remote request
 		 *
-		 * @param {<Context>} ctx      Context of request
+		 * @param {Context} ctx      Context of request
 		 * @param {Function} resolve   Resolve of Promise
 		 * @param {Function} reject    Reject of Promise
 		 *
 		 * @memberof Transit
 		 */
 		_sendRequest(ctx, resolve, reject) {
-			const isStream = ctx.params && ctx.params.readable === true && typeof ctx.params.on === "function" && typeof ctx.params.pipe === "function";
+			const isStream =
+				ctx.options?.stream?.readable === true &&
+				typeof ctx.options.stream.on === "function" &&
+				typeof ctx.options.stream.pipe === "function";
 
 			const request = {
 				action: ctx.action,
@@ -4357,27 +6888,30 @@
 				ctx,
 				resolve,
 				reject,
-				stream: isStream // ???
+				stream: isStream
 			};
 
 			const payload = {
 				id: ctx.id,
-				action: ctx.action.name,
-				params: isStream ? null : ctx.params,
+				action: ctx.action?.name,
+				params: ctx.params,
 				meta: ctx.meta,
+				headers: ctx.headers,
 				timeout: ctx.options.timeout,
 				level: ctx.level,
 				tracing: ctx.tracing,
 				parentID: ctx.parentID,
 				requestID: ctx.requestID,
 				caller: ctx.caller,
-				stream: isStream,
+				stream: isStream
 			};
 
-			if (payload.stream) {
-				if (ctx.params.readableObjectMode === true || (ctx.params._readableState && ctx.params._readableState.objectMode === true)) {
-					payload.meta = payload.meta || {};
-					payload.meta["$streamObjectMode"] = true;
+			if (isStream) {
+				/** @type {Readable} */
+				const s = ctx.options.stream;
+				if (s.readableObjectMode === true) {
+					payload.headers = payload.headers ?? {};
+					payload.headers.$streamObjectMode = true;
 				}
 				payload.seq = 0;
 			}
@@ -4385,50 +6919,83 @@
 			const packet = new Packet$1(packets.PACKET_REQUEST, ctx.nodeID, payload);
 
 			const nodeName = ctx.nodeID ? `'${ctx.nodeID}'` : "someone";
-			this.logger.debug(`=> Send '${ctx.action.name}' request to ${nodeName} node.`);
+			const requestID = ctx.requestID ? "with requestID '" + ctx.requestID + "' " : "";
+			this.logger.debug(`=> Send '${ctx.action?.name}' request ${requestID}to ${nodeName} node.`);
 
-			const publishCatch = /* istanbul ignore next */ err => this.logger.error(`Unable to send '${ctx.action.name}' request to ${nodeName} node.`, err);
+			const publishCatch = /* istanbul ignore next */ err => {
+				this.logger.error(
+					`Unable to send '${ctx.action?.name}' request ${requestID}to ${nodeName} node.`,
+					err
+				);
+
+				this.broker.broadcastLocal("$transit.error", {
+					error: err,
+					module: "transit",
+					type: constants.FAILED_SEND_REQUEST_PACKET
+				});
+			};
 
 			// Add to pendings
 			this.pendingRequests.set(ctx.id, request);
+
+			if (isStream) {
+				const pass = ctx.options.stream;
+
+				pass.on("moleculer-timeout-middleware", timeout => {
+					this._destroyStreamIfPossible(
+						pass,
+						`Request stream ${ctx.id} have been closed by timeout ${timeout} ms`
+					);
+				});
+			}
 
 			// Publish request
 			return this.publish(packet)
 				.then(() => {
 					if (isStream) {
-						// Skip to send ctx.meta with chunks because it doesn't appear on the remote side.
+						const { stream } = ctx.options;
+
+						// Skip to send ctx.meta after the first packet because it doesn't appear on the remote side.
 						payload.meta = {};
 						// Still send information about objectMode in case of packets are received in wrong order
-						if (ctx.params.readableObjectMode === true || (ctx.params._readableState && ctx.params._readableState.objectMode === true)) {
-							payload.meta["$streamObjectMode"] = true;
+						if (stream.readableObjectMode === true) {
+							payload.headers = payload.headers ?? {};
+							payload.headers.$streamObjectMode = true;
 						}
 
-						const stream = ctx.params;
-						stream.on("data", (chunk) => {
+						stream.on("data", chunk => {
 							stream.pause();
 							const chunks = [];
-							if (chunk instanceof Buffer && this.opts.maxChunkSize > 0 && chunk.length > this.opts.maxChunkSize) {
+							if (
+								chunk instanceof Buffer &&
+								this.opts.maxChunkSize > 0 &&
+								chunk.length > this.opts.maxChunkSize
+							) {
 								let len = chunk.length;
 								let i = 0;
 								while (i < len) {
-									chunks.push(chunk.slice(i, i += this.opts.maxChunkSize));
+									chunks.push(chunk.subarray(i, (i += this.opts.maxChunkSize)));
 								}
 							} else {
 								chunks.push(chunk);
 							}
-							for (const ch of chunks) {
-								const copy = Object.assign({}, payload);
-								copy.seq = ++payload.seq;
-								copy.stream = true;
-								copy.params = ch;
 
-								this.logger.debug(`=> Send stream chunk to ${nodeName} node. Seq: ${copy.seq}`);
+							return this.Promise.all(
+								chunks.map(ch => {
+									const copy = Object.assign({}, payload);
+									copy.seq = ++payload.seq;
+									copy.stream = true;
+									copy.params = ch;
 
-								this.publish(new Packet$1(packets.PACKET_REQUEST, ctx.nodeID, copy))
-									.catch(publishCatch);
-							}
-							stream.resume();
-							return;
+									this.logger.debug(
+										`=> Send stream chunk ${requestID}to ${nodeName} node. Seq: ${copy.seq}`
+									);
+
+									return this.publish(new Packet$1(packets.PACKET_REQUEST, ctx.nodeID, copy));
+								})
+							)
+								.then(() => stream.resume())
+								.catch(publishCatch);
 						});
 
 						stream.on("end", () => {
@@ -4437,23 +7004,30 @@
 							copy.params = null;
 							copy.stream = false;
 
-							this.logger.debug(`=> Send stream closing to ${nodeName} node. Seq: ${copy.seq}`);
+							this.logger.debug(
+								`=> Send stream closing ${requestID}to ${nodeName} node. Seq: ${copy.seq}`
+							);
 
-							return this.publish(new Packet$1(packets.PACKET_REQUEST, ctx.nodeID, copy))
-								.catch(publishCatch);
+							return this.publish(new Packet$1(packets.PACKET_REQUEST, ctx.nodeID, copy)).catch(
+								publishCatch
+							);
 						});
 
 						stream.on("error", err => {
 							const copy = Object.assign({}, payload);
 							copy.seq = ++payload.seq;
 							copy.stream = false;
-							copy.meta["$streamError"] = this._createPayloadErrorField(err);
+							copy.headers.$streamError = this._createPayloadErrorField(err, payload);
 							copy.params = null;
 
-							this.logger.debug(`=> Send stream error to ${nodeName} node.`, copy.meta["$streamError"]);
+							this.logger.debug(
+								`=> Send stream error ${requestID}to ${nodeName} node.`,
+								copy.headers.$streamError
+							);
 
-							return this.publish(new Packet$1(packets.PACKET_REQUEST, ctx.nodeID, copy))
-								.catch(publishCatch);
+							return this.publish(new Packet$1(packets.PACKET_REQUEST, ctx.nodeID, copy)).catch(
+								publishCatch
+							);
 						});
 					}
 				})
@@ -4473,31 +7047,56 @@
 		 */
 		sendEvent(ctx) {
 			const groups = ctx.eventGroups;
+			const requestID = ctx.requestID ? "with requestID '" + ctx.requestID + "' " : "";
 			if (ctx.endpoint)
-				this.logger.debug(`=> Send '${ctx.eventName}' event to '${ctx.nodeID}' node` + (groups ? ` in '${groups.join(", ")}' group(s)` : "") + ".");
+				this.logger.debug(
+					`=> Send '${ctx.eventName}' event ${requestID}to '${ctx.nodeID}' node` +
+						(groups ? ` in '${groups.join(", ")}' group(s)` : "") +
+						"."
+				);
 			else
-				this.logger.debug(`=> Send '${ctx.eventName}' event to '${groups.join(", ")}' group(s).`);
+				this.logger.debug(
+					`=> Send '${ctx.eventName}' event ${requestID}to '${groups?.join(", ")}' group(s).`
+				);
 
-			return this.publish(new Packet$1(packets.PACKET_EVENT, ctx.endpoint ? ctx.nodeID : null, {
-				id: ctx.id,
-				event: ctx.eventName,
-				data: ctx.params,
-				groups,
-				broadcast: ctx.eventType == "broadcast",
-				meta: ctx.meta,
-				level: ctx.level,
-				tracing: ctx.tracing,
-				parentID: ctx.parentID,
-				requestID: ctx.requestID,
-				caller: ctx.caller,
-				needAck: ctx.needAck
-			})).catch(/* istanbul ignore next */ err => this.logger.error(`Unable to send '${ctx.eventName}' event to groups.`, err));
+			return this.publish(
+				new Packet$1(packets.PACKET_EVENT, ctx.endpoint ? ctx.nodeID : null, {
+					id: ctx.id,
+					event: ctx.eventName,
+					data: ctx.params,
+					groups,
+					broadcast: ctx.eventType == "broadcast",
+					meta: ctx.meta,
+					headers: ctx.headers,
+					level: ctx.level,
+					tracing: ctx.tracing,
+					parentID: ctx.parentID,
+					requestID: ctx.requestID,
+					caller: ctx.caller,
+					needAck: ctx.needAck
+				})
+			).catch(
+				/* istanbul ignore next */ err => {
+					this.logger.error(
+						`Unable to send '${ctx.eventName}' event ${requestID}to groups.`,
+						err
+					);
+
+					this.broker.broadcastLocal("$transit.error", {
+						error: err,
+						module: "transit",
+						type: constants.FAILED_SEND_EVENT_PACKET
+					});
+
+					return Promise.reject(err);
+				}
+			);
 		}
 
 		/**
 		 * Remove a pending request
 		 *
-		 * @param {any} id
+		 * @param {String} id
 		 *
 		 * @memberof Transit
 		 */
@@ -4517,40 +7116,95 @@
 		 */
 		removePendingRequestByNodeID(nodeID) {
 			this.logger.debug(`Remove pending requests of '${nodeID}' node.`);
+
+			// Close pending request streams of the node
+			this.pendingReqStreams.forEach(({ sender, stream }, id) => {
+				if (sender === nodeID) {
+					this.pendingReqStreams.delete(id);
+					this._destroyStreamIfPossible(stream, `Stream closed by ${nodeID}`);
+				}
+			});
+
 			this.pendingRequests.forEach((req, id) => {
 				if (req.nodeID === nodeID) {
 					this.pendingRequests.delete(id);
 
 					// Reject the request
-					req.reject(new errors.RequestRejectedError({
-						action: req.action.name,
-						nodeID: req.nodeID
-					}));
+					req.reject(
+						new errors.RequestRejectedError({
+							action: req.action.name,
+							nodeID: req.nodeID
+						})
+					);
 
-					this.pendingReqStreams.delete(id);
-					this.pendingResStreams.delete(id);
+					this._deletePendingReqStream(id, nodeID);
+					this._deletePendingResStream(id, nodeID);
 				}
 			});
+		}
+
+		/**
+		 * Internal method to delete a pending response stream from `pendingResStreams`
+		 * and destroy it (if not already destroyed) with error.
+		 *
+		 * @param {String} id ID of the stream in `pendingResStreams`
+		 * @param {String} origin NodeID of the origin of the destroy request
+		 *
+		 * @memberof Transit
+		 */
+		_deletePendingResStream(id, origin) {
+			const stream = this.pendingResStreams.get(id);
+			this.pendingResStreams.delete(id);
+
+			if (stream) {
+				this._destroyStreamIfPossible(stream, `Stream closed by ${origin}`);
+			}
+		}
+
+		/**
+		 * Internal method to delete a pending request stream from `pendingReqStreams`
+		 * and destroy it (if not already ended) with error.
+		 *
+		 * @param {String} id ID of the stream in `pendingReqStreams`
+		 * @param {String} origin NodeID of the origin of the destroy request
+		 *
+		 * @memberof Transit
+		 */
+		_deletePendingReqStream(id, origin) {
+			const reqStream = this.pendingReqStreams.get(id);
+			const pass = reqStream ? reqStream.stream : undefined;
+			this.pendingReqStreams.delete(id);
+
+			if (pass) {
+				this._destroyStreamIfPossible(pass, `Stream closed by ${origin}`);
+			}
+		}
+
+		/**
+		 * Internal method to destroy a stream if it is not already destroyed.
+		 *
+		 * @param {DuplexStream} stream - The stream to be destroyed.
+		 * @param {String} errorMessage - The error message to be used when destroying.
+		 *
+		 * @memberof Transit
+		 */
+		_destroyStreamIfPossible(stream, errorMessage) {
+			if (!stream.destroyed && stream.destroy) {
+				stream.on("error", err => this.logger.error(err.message));
+				stream.destroy(new Error(errorMessage));
+			}
 		}
 
 		/**
 		 * Create error field in outgoing payload
 		 *
 		 * @param {Error} err
+		 * @param {Object} payload
 		 * @returns {Object}
 		 * @memberof Transit
 		 */
-		_createPayloadErrorField(err) {
-			return {
-				name: err.name,
-				message: err.message,
-				nodeID: err.nodeID || this.nodeID,
-				code: err.code,
-				type: err.type,
-				retryable: err.retryable,
-				stack: err.stack,
-				data: err.data
-			};
+		_createPayloadErrorField(err, payload) {
+			return this.errorRegenerator?.extractPlainError(err, payload);
 		}
 
 		/**
@@ -4558,63 +7212,85 @@
 		 *
 		 * @param {String} nodeID
 		 * @param {String} id
-		 * @param {any} meta
+		 * @param {Object} meta
+		 * @param {Object} headers
 		 * @param {any} data
-		 * @param {Error} err
+		 * @param {Error?} err
 		 *
 		 * @memberof Transit
 		 */
-		sendResponse(nodeID, id, meta, data, err) {
+		sendResponse(nodeID, id, meta, headers, data, err) {
 			// Publish the response
 			const payload = {
 				id: id,
 				meta: meta,
+				headers,
 				success: err == null,
 				data: data
 			};
 
-			if (err)
-				payload.error = this._createPayloadErrorField(err);
+			if (err) payload.error = this._createPayloadErrorField(err, payload);
 
-			const publishCatch = /* istanbul ignore next */ err => this.logger.error(`Unable to send '${id}' response to '${nodeID}' node.`, err);
+			const publishCatch = /* istanbul ignore next */ err => {
+				this.logger.error(`Unable to send '${id}' response to '${nodeID}' node.`, err);
 
-			if (data && data.readable === true && typeof data.on === "function" && typeof data.pipe === "function") {
+				this.broker.broadcastLocal("$transit.error", {
+					error: err,
+					module: "transit",
+					type: constants.FAILED_SEND_RESPONSE_PACKET
+				});
+			};
+
+			if (
+				data &&
+				data.readable === true &&
+				typeof data.on === "function" &&
+				typeof data.pipe === "function"
+			) {
 				// Streaming response
 				payload.stream = true;
-				if (data.readableObjectMode === true || (data._readableState && data._readableState.objectMode === true)) {
-					payload.meta = payload.meta || {};
-					payload.meta["$streamObjectMode"] = true;
+				if (data.readableObjectMode === true || data._readableState?.objectMode === true) {
+					payload.headers = payload.headers || {};
+					payload.headers.$streamObjectMode = true;
 				}
 				payload.seq = 0;
 
 				const stream = data;
 				stream.pause();
 
-				stream.on("data", (chunk) => {
+				stream.on("data", chunk => {
 					stream.pause();
 					const chunks = [];
-					if (chunk instanceof Buffer && this.opts.maxChunkSize > 0 && chunk.length > this.opts.maxChunkSize) {
+					if (
+						chunk instanceof Buffer &&
+						this.opts.maxChunkSize > 0 &&
+						chunk.length > this.opts.maxChunkSize
+					) {
 						let len = chunk.length;
 						let i = 0;
 						while (i < len) {
-							chunks.push(chunk.slice(i, i += this.opts.maxChunkSize));
+							chunks.push(chunk.subarray(i, (i += this.opts.maxChunkSize)));
 						}
 					} else {
 						chunks.push(chunk);
 					}
-					for (const ch of chunks) {
-						const copy = Object.assign({}, payload);
-						copy.seq = ++payload.seq;
-						copy.stream = true;
-						copy.data = ch;
 
-						this.logger.debug(`=> Send stream chunk to ${nodeID} node. Seq: ${copy.seq}`);
+					return this.Promise.all(
+						chunks.map(ch => {
+							const copy = Object.assign({}, payload);
+							copy.seq = ++payload.seq;
+							copy.stream = true;
+							copy.data = ch;
 
-						this.publish(new Packet$1(packets.PACKET_RESPONSE, nodeID, copy))
-							.catch(publishCatch);
-					}
-					stream.resume();
-					return;
+							this.logger.debug(
+								`=> Send stream chunk to ${nodeID} node. Seq: ${copy.seq}`
+							);
+
+							return this.publish(new Packet$1(packets.PACKET_RESPONSE, nodeID, copy));
+						})
+					)
+						.then(() => stream.resume())
+						.catch(publishCatch);
 				});
 
 				stream.on("end", () => {
@@ -4625,8 +7301,9 @@
 
 					this.logger.debug(`=> Send stream closing to ${nodeID} node. Seq: ${copy.seq}`);
 
-					return this.publish(new Packet$1(packets.PACKET_RESPONSE, nodeID, copy))
-						.catch(publishCatch);
+					return this.publish(new Packet$1(packets.PACKET_RESPONSE, nodeID, copy)).catch(
+						publishCatch
+					);
 				});
 
 				stream.on("error", err => {
@@ -4635,27 +7312,25 @@
 					copy.seq = ++payload.seq;
 					if (err) {
 						copy.success = false;
-						copy.error = this._createPayloadErrorField(err);
+						copy.error = this._createPayloadErrorField(err, payload);
 					}
 
 					this.logger.debug(`=> Send stream error to ${nodeID} node.`, copy.error);
 
-					return this.publish(new Packet$1(packets.PACKET_RESPONSE, nodeID, copy))
-						.catch(publishCatch);
+					return this.publish(new Packet$1(packets.PACKET_RESPONSE, nodeID, copy)).catch(
+						publishCatch
+					);
 				});
 
 				payload.data = null;
 				return this.publish(new Packet$1(packets.PACKET_RESPONSE, nodeID, payload))
 					.then(() => {
-						if (payload.stream)
-							stream.resume();
+						if (payload.stream) stream.resume();
 					})
 					.catch(publishCatch);
-
 			}
 
-			return this.publish(new Packet$1(packets.PACKET_RESPONSE, nodeID, payload))
-				.catch(publishCatch);
+			return this.publish(new Packet$1(packets.PACKET_RESPONSE, nodeID, payload)).catch(publishCatch);
 		}
 
 		/**
@@ -4664,8 +7339,17 @@
 		 * @memberof Transit
 		 */
 		discoverNodes() {
-			return this.publish(new Packet$1(packets.PACKET_DISCOVER))
-				.catch(/* istanbul ignore next */ err => this.logger.error("Unable to send DISCOVER packet.", err));
+			return this.publish(new Packet$1(packets.PACKET_DISCOVER)).catch(
+				/* istanbul ignore next */ err => {
+					this.logger.error("Unable to send DISCOVER packet.", err);
+
+					this.broker.broadcastLocal("$transit.error", {
+						error: err,
+						module: "transit",
+						type: constants.FAILED_NODES_DISCOVERY
+					});
+				}
+			);
 		}
 
 		/**
@@ -4674,65 +7358,112 @@
 		 * @memberof Transit
 		 */
 		discoverNode(nodeID) {
-			return this.publish(new Packet$1(packets.PACKET_DISCOVER, nodeID))
-				.catch(/* istanbul ignore next */ err => this.logger.error(`Unable to send DISCOVER packet to '${nodeID}' node.`, err));
+			return this.publish(new Packet$1(packets.PACKET_DISCOVER, nodeID)).catch(
+				/* istanbul ignore next */ err => {
+					this.logger.error(`Unable to send DISCOVER packet to '${nodeID}' node.`, err);
+
+					this.broker.broadcastLocal("$transit.error", {
+						error: err,
+						module: "transit",
+						type: constants.FAILED_NODE_DISCOVERY
+					});
+				}
+			);
 		}
 
 		/**
 		 * Send node info package to other nodes.
 		 *
+		 * @param {NodeRawInfo} info
+		 * @param {String} nodeID
 		 * @memberof Transit
 		 */
 		sendNodeInfo(info, nodeID) {
 			if (!this.connected || !this.isReady) return this.Promise.resolve();
 
-			const p = !nodeID && this.broker.options.disableBalancer ? this.tx.makeBalancedSubscriptions() : this.Promise.resolve();
-			return p.then(() => this.publish(new Packet$1(packets.PACKET_INFO, nodeID, {
-				services: info.services,
-				ipList: info.ipList,
-				hostname: info.hostname,
-				client: info.client,
-				config: info.config,
-				instanceID: this.broker.instanceID,
-				metadata: info.metadata,
-				seq: info.seq
-			}))).catch(/* istanbul ignore next */ err => this.logger.error(`Unable to send INFO packet to '${nodeID}' node.`, err));
+			return this.publish(
+				new Packet$1(packets.PACKET_INFO, nodeID, {
+					services: info.services,
+					ipList: info.ipList,
+					hostname: info.hostname,
+					client: info.client,
+					config: info.config,
+					instanceID: this.broker.instanceID,
+					metadata: info.metadata,
+					seq: info.seq
+				})
+			).catch(
+				/* istanbul ignore next */ err => {
+					this.logger.error(`Unable to send INFO packet to '${nodeID}' node.`, err);
 
+					this.broker.broadcastLocal("$transit.error", {
+						error: err,
+						module: "transit",
+						type: constants.FAILED_SEND_INFO_PACKET
+					});
+				}
+			);
 		}
 
 		/**
 		 * Send ping to a node (or all nodes if nodeID is null)
 		 *
 		 * @param {String} nodeID
-		 * @param {String} id
+		 * @param {String=} id
 		 * @returns
 		 * @memberof Transit
 		 */
 		sendPing(nodeID, id) {
-			return this.publish(new Packet$1(packets.PACKET_PING, nodeID, { time: Date.now(), id: id || this.broker.generateUid() }))
-				.catch(/* istanbul ignore next */ err => this.logger.error(`Unable to send PING packet to '${nodeID}' node.`, err));
+			return this.publish(
+				new Packet$1(packets.PACKET_PING, nodeID, {
+					time: Date.now(),
+					id: id || this.broker.generateUid()
+				})
+			).catch(
+				/* istanbul ignore next */ err => {
+					this.logger.error(`Unable to send PING packet to '${nodeID}' node.`, err);
+
+					this.broker.broadcastLocal("$transit.error", {
+						error: err,
+						module: "transit",
+						type: constants.FAILED_SEND_PING_PACKET
+					});
+				}
+			);
 		}
 
 		/**
 		 * Send back pong response
 		 *
-		 * @param {Object} payload
+		 * @param {PacketPingPayload} payload
 		 * @returns
 		 * @memberof Transit
 		 */
 		sendPong(payload) {
-			return this.publish(new Packet$1(packets.PACKET_PONG, payload.sender, {
-				time: payload.time,
-				id: payload.id,
-				arrived: Date.now()
-			})).catch(/* istanbul ignore next */ err => this.logger.error(`Unable to send PONG packet to '${payload.sender}' node.`, err));
+			return this.publish(
+				new Packet$1(packets.PACKET_PONG, payload.sender, {
+					time: payload.time,
+					id: payload.id,
+					arrived: Date.now()
+				})
+			).catch(
+				/* istanbul ignore next */ err => {
+					this.logger.error(`Unable to send PONG packet to '${payload.sender}' node.`, err);
+
+					this.broker.broadcastLocal("$transit.error", {
+						error: err,
+						module: "transit",
+						type: constants.FAILED_SEND_PONG_PACKET
+					});
+				}
+			);
 		}
 
 		/**
 		 * Process incoming PONG packet.
 		 * Measure ping time & current time difference.
 		 *
-		 * @param {Object} payload
+		 * @param {PacketPongPayload} payload
 		 * @memberof Transit
 		 */
 		processPong(payload) {
@@ -4742,10 +7473,19 @@
 
 			// this.logger.debug(`PING-PONG from '${payload.sender}' - Time: ${elapsedTime}ms, Time difference: ${timeDiff}ms`);
 
-			this.broker.broadcastLocal("$node.pong", { nodeID: payload.sender, elapsedTime, timeDiff, id: payload.id });
+			this.broker.broadcastLocal("$node.pong", {
+				nodeID: payload.sender,
+				elapsedTime,
+				timeDiff,
+				id: payload.id
+			});
 
-			this.metrics.set(METRIC.MOLECULER_TRANSIT_PONG_TIME, elapsedTime, { targetNodeID: payload.sender });
-			this.metrics.set(METRIC.MOLECULER_TRANSIT_PONG_SYSTIME_DIFF, timeDiff, { targetNodeID: payload.sender });
+			this.metrics.set(METRIC.MOLECULER_TRANSIT_PONG_TIME, elapsedTime, {
+				targetNodeID: payload.sender
+			});
+			this.metrics.set(METRIC.MOLECULER_TRANSIT_PONG_SYSTIME_DIFF, timeDiff, {
+				targetNodeID: payload.sender
+			});
 		}
 
 		/**
@@ -4755,65 +7495,70 @@
 		 * @memberof Transit
 		 */
 		sendHeartbeat(localNode) {
-			return this.publish(new Packet$1(packets.PACKET_HEARTBEAT, null, {
-				cpu: localNode.cpu
-			})).catch(/* istanbul ignore next */ err => this.logger.error("Unable to send HEARTBEAT packet.", err));
+			return this.publish(
+				new Packet$1(packets.PACKET_HEARTBEAT, null, {
+					cpu: localNode.cpu
+				})
+			).catch(
+				/* istanbul ignore next */ err => {
+					this.logger.error("Unable to send HEARTBEAT packet.", err);
 
-		}
-
-		/**
-		 * Subscribe via transporter
-		 *
-		 * @param {String} topic
-		 * @param {String=} nodeID
-		 *
-		 * @deprecated
-		 * @memberof Transit
-		 */
-		subscribe(topic, nodeID) {
-			return this.tx.subscribe(topic, nodeID);
+					this.broker.broadcastLocal("$transit.error", {
+						error: err,
+						module: "transit",
+						type: constants.FAILED_SEND_HEARTBEAT_PACKET
+					});
+				}
+			);
 		}
 
 		/**
 		 * Publish via transporter
 		 *
-		 * @param {Packet} Packet
+		 * @param {Packet} packet
 		 *
 		 * @memberof Transit
 		 */
 		publish(packet) {
 			if (this.subscribing) {
-				return this.subscribing
-					.then(() => {
-						return this.tx.prepublish(packet);
-					});
+				return this.subscribing.then(() => {
+					return this.tx.prepublish(packet);
+				});
 			}
 			return this.tx.prepublish(packet);
 		}
-
 	}
 
 	var transit = Transit;
 
 	/*
 	 * moleculer
-	 * Copyright (c) 2019 MoleculerJS (https://github.com/moleculerjs/moleculer)
+	 * Copyright (c) 2023 MoleculerJS (https://github.com/moleculerjs/moleculer)
 	 * MIT Licensed
+	 */
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 * @typedef {import("../context")} Context
+	 * @typedef {import("../registry")} Registry
+	 * @typedef {import("../registry/endpoint")} Endpoint
+	 * @typedef {import("./base")} BaseStrategyClass
 	 */
 
 	/**
 	 * Base strategy class
 	 *
-	 * @class BaseStrategy
+	 * @implements {BaseStrategyClass}
 	 */
 	class BaseStrategy {
-
 		/**
 		 * Constructor
 		 *
-		 * @param {ServiceRegistry} registry
+		 * @param {Registry} registry
 		 * @param {ServiceBroker} broker
-		 * @param {Object?} opts
+		 * @param {Record<string, any>?} opts
 		 */
 		constructor(registry, broker, opts) {
 			this.registry = registry;
@@ -4824,33 +7569,48 @@
 		/**
 		 * Select an endpoint.
 		 *
-		 * @param {Array<Endpoint>} list
+		 * @param {Endpoint[]} list
 		 * @param {Context?} ctx
-		 *
+		 * @returns {Endpoint}
 		 * @memberof BaseStrategy
 		 */
-		select(/*list, ctx*/) {
+		select(list, ctx) {
 			/* istanbul ignore next */
 			throw new Error("Not implemented method!");
 		}
-
 	}
 
 	var base$2 = BaseStrategy;
 
 	/**
+	 * Import types
+	 *
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 * @typedef {import("../registry")} Registry
+	 * @typedef {import("../registry/endpoint")} Endpoint
+	 * @typedef {import("./round-robin")} RoundRobinStrategyClass
+	 */
+
+	/**
 	 * Round-robin strategy class
 	 *
-	 * @class RoundRobinStrategy
+	 * @implements {RoundRobinStrategyClass}
 	 */
 	class RoundRobinStrategy extends base$2 {
-
 		constructor(registry, broker, opts) {
 			super(registry, broker, opts);
 
 			this.counter = 0;
 		}
 
+		/**
+		 * Select an endpoint.
+		 *
+		 * @param {Endpoint[]} list
+		 *
+		 * @returns {Endpoint}
+		 * @memberof BaseStrategy
+		 */
 		select(list) {
 			// Reset counter
 			if (this.counter >= list.length) {
@@ -4858,7 +7618,6 @@
 			}
 			return list[this.counter++];
 		}
-
 	}
 
 	var roundRobin = RoundRobinStrategy;
@@ -4867,11 +7626,28 @@
 
 
 	/**
+	 * Import types
+	 *
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 * @typedef {import("../registry")} Registry
+	 * @typedef {import("../registry/endpoint")} Endpoint
+	 * @typedef {import("./random")} RandomStrategyClass
+	 */
+
+	/**
 	 * Random strategy class
 	 *
-	 * @class RandomStrategy
+	 * @implements {RandomStrategyClass}
 	 */
 	class RandomStrategy extends base$2 {
+		/**
+		 * Select an endpoint.
+		 *
+		 * @param {Endpoint[]} list
+		 *
+		 * @returns {Endpoint}
+		 * @memberof BaseStrategy
+		 */
 		select(list) {
 			return list[random(0, list.length - 1)];
 		}
@@ -4881,6 +7657,16 @@
 
 	const { random: random$1 } = ___default;
 
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 * @typedef {import("../registry")} Registry
+	 * @typedef {import("../registry/endpoint")} Endpoint
+	 * @typedef {import("./latency")} LatencyStrategyClass
+	 * @typedef {import("./latency").LatencyStrategyOptions} LatencyStrategyOptions
+	 */
 
 	/**
 	 * Lowest latency invocation strategy
@@ -4904,13 +7690,20 @@
 	 * 	}
 	 * });
 	 *
-	 * @class LatencyStrategy
+	 * @implements {LatencyStrategyClass}
 	 */
 	class LatencyStrategy extends base$2 {
-
+		/**
+		 * Creates an instance of CborSerializer.
+		 *
+		 * @param {Registry} registry
+		 * @param {ServiceBroker} broker
+		 * @param {LatencyStrategyOptions} opts
+		 */
 		constructor(registry, broker, opts) {
 			super(registry, broker, opts);
 
+			/** @type {LatencyStrategyOptions} */
 			this.opts = ___default.defaultsDeep(opts, {
 				sampleCount: 5,
 				lowLatency: 10,
@@ -4935,7 +7728,7 @@
 
 			if (this.broker.localBus.listenerCount("$node.latencyMaster") === 0) {
 				// claim as master
-				this.broker.localBus.on("$node.latencyMaster", function() {});
+				this.broker.localBus.on("$node.latencyMaster", function () {});
 				// respond to PONG
 				this.broker.localBus.on("$node.pong", this.processPong.bind(this));
 				// dynamically add new node
@@ -4945,10 +7738,13 @@
 				// try to discovery all nodes on start up
 				this.broker.localBus.on("$broker.started", this.discovery.bind(this));
 				// clean up ourselves
-				this.broker.localBus.on("$broker.stopped", () => this.brokerStopped = true);
+				this.broker.localBus.on("$broker.stopped", () => (this.brokerStopped = true));
 			} else {
 				// remove node if we are told by master
-				this.broker.localBus.on("$node.latencySlave.removeHost", this.removeHostLatency.bind(this));
+				this.broker.localBus.on(
+					"$node.latencySlave.removeHost",
+					this.removeHostLatency.bind(this)
+				);
 			}
 
 			this.broker.localBus.on("$node.latencySlave", this.updateLatency.bind(this));
@@ -4964,7 +7760,6 @@
 
 		// Master
 		pingHosts() {
-
 			/* istanbul ignore next */
 			if (this.brokerStopped) return;
 			/*
@@ -4975,11 +7770,14 @@
 			*/
 			const hosts = Array.from(this.hostMap.values());
 
-			return this.broker.Promise.all(hosts.map(host => { // TODO: missing concurency: 5, here was bluebird Promise.map
-				// Select a nodeID randomly
-				const nodeID = host.nodeList[random$1(0, host.nodeList.length - 1)];
-				return this.broker.transit.sendPing(nodeID);
-			})).then(() => {
+			return this.broker.Promise.all(
+				hosts.map(host => {
+					// TODO: missing concurency: 5, here was bluebird Promise.map
+					// Select a nodeID randomly
+					const nodeID = host.nodeList[random$1(0, host.nodeList.length - 1)];
+					return this.broker.transit.sendPing(nodeID);
+				})
+			).then(() => {
 				const timer = timersBrowserify.setTimeout(() => this.pingHosts(), 1000 * this.opts.pingInterval);
 				timer.unref();
 			});
@@ -4994,12 +7792,13 @@
 
 			let info = this.getHostLatency(node);
 
-			if (info.historicLatency.length > (this.opts.collectCount - 1))
-				info.historicLatency.shift();
+			if (info.historicLatency.length > this.opts.collectCount - 1) info.historicLatency.shift();
 
 			info.historicLatency.push(payload.elapsedTime);
 
-			const avgLatency = info.historicLatency.reduce((sum, latency) => sum + latency, 0) / info.historicLatency.length;
+			const avgLatency =
+				info.historicLatency.reduce((sum, latency) => sum + latency, 0) /
+				info.historicLatency.length;
 
 			this.broker.localBus.emit("$node.latencySlave", {
 				hostname: node.hostname,
@@ -5013,7 +7812,7 @@
 			if (typeof info === "undefined") {
 				info = {
 					historicLatency: [],
-					nodeList: [ node.id ]
+					nodeList: [node.id]
 				};
 				this.hostMap.set(node.hostname, info);
 			}
@@ -5043,7 +7842,7 @@
 
 			info.nodeList = info.nodeList.filter(id => id !== node.id);
 
-			if (info.nodeList.length == 0) {
+			if (info.nodeList.length === 0) {
 				// only remove the host if the last node disconnected
 				this.broker.localBus.emit("$node.latencySlave.removeHost", node.hostname);
 				this.hostMap.delete(node.hostname);
@@ -5061,11 +7860,12 @@
 		}
 
 		/**
-		 * Select an endpoint by network latency
+		 * Select an endpoint.
 		 *
-		 * @param {Array<Endpoint>} list
+		 * @param {Endpoint[]} list
+		 *
 		 * @returns {Endpoint}
-		 * @memberof LatencyStrategy
+		 * @memberof BaseStrategy
 		 */
 		select(list) {
 			let minEp = null;
@@ -5086,9 +7886,7 @@
 
 				// Check latency of endpoint
 				if (typeof epLatency !== "undefined") {
-
-					if (epLatency < this.opts.lowLatency)
-						return ep;
+					if (epLatency < this.opts.lowLatency) return ep;
 
 					if (!minEp || !minLatency || epLatency < minLatency) {
 						minLatency = epLatency;
@@ -5109,20 +7907,1267 @@
 
 	var latency = LatencyStrategy;
 
-	const { isFunction: isFunction$2 } = utils_1;
+	const perf =
+	  typeof performance === 'object' &&
+	  performance &&
+	  typeof performance.now === 'function'
+	    ? performance
+	    : Date;
+
+	const hasAbortController = typeof AbortController === 'function';
+
+	// minimal backwards-compatibility polyfill
+	// this doesn't have nearly all the checks and whatnot that
+	// actual AbortController/Signal has, but it's enough for
+	// our purposes, and if used properly, behaves the same.
+	const AC = hasAbortController
+	  ? AbortController
+	  : class AbortController {
+	      constructor() {
+	        this.signal = new AS();
+	      }
+	      abort(reason = new Error('This operation was aborted')) {
+	        this.signal.reason = this.signal.reason || reason;
+	        this.signal.aborted = true;
+	        this.signal.dispatchEvent({
+	          type: 'abort',
+	          target: this.signal,
+	        });
+	      }
+	    };
+
+	const hasAbortSignal = typeof AbortSignal === 'function';
+	// Some polyfills put this on the AC class, not global
+	const hasACAbortSignal = typeof AC.AbortSignal === 'function';
+	const AS = hasAbortSignal
+	  ? AbortSignal
+	  : hasACAbortSignal
+	  ? AC.AbortController
+	  : class AbortSignal {
+	      constructor() {
+	        this.reason = undefined;
+	        this.aborted = false;
+	        this._listeners = [];
+	      }
+	      dispatchEvent(e) {
+	        if (e.type === 'abort') {
+	          this.aborted = true;
+	          this.onabort(e);
+	          this._listeners.forEach(f => f(e), this);
+	        }
+	      }
+	      onabort() {}
+	      addEventListener(ev, fn) {
+	        if (ev === 'abort') {
+	          this._listeners.push(fn);
+	        }
+	      }
+	      removeEventListener(ev, fn) {
+	        if (ev === 'abort') {
+	          this._listeners = this._listeners.filter(f => f !== fn);
+	        }
+	      }
+	    };
+
+	const warned = new Set();
+	const deprecatedOption = (opt, instead) => {
+	  const code = `LRU_CACHE_OPTION_${opt}`;
+	  if (shouldWarn(code)) {
+	    warn(code, `${opt} option`, `options.${instead}`, LRUCache);
+	  }
+	};
+	const deprecatedMethod = (method, instead) => {
+	  const code = `LRU_CACHE_METHOD_${method}`;
+	  if (shouldWarn(code)) {
+	    const { prototype } = LRUCache;
+	    const { get } = Object.getOwnPropertyDescriptor(prototype, method);
+	    warn(code, `${method} method`, `cache.${instead}()`, get);
+	  }
+	};
+	const deprecatedProperty = (field, instead) => {
+	  const code = `LRU_CACHE_PROPERTY_${field}`;
+	  if (shouldWarn(code)) {
+	    const { prototype } = LRUCache;
+	    const { get } = Object.getOwnPropertyDescriptor(prototype, field);
+	    warn(code, `${field} property`, `cache.${instead}`, get);
+	  }
+	};
+
+	const emitWarning = (...a) => {
+	  typeof process === 'object' &&
+	  process &&
+	  typeof process.emitWarning === 'function'
+	    ? process.emitWarning(...a)
+	    : console.error(...a);
+	};
+
+	const shouldWarn = code => !warned.has(code);
+
+	const warn = (code, what, instead, fn) => {
+	  warned.add(code);
+	  const msg = `The ${what} is deprecated. Please use ${instead} instead.`;
+	  emitWarning(msg, 'DeprecationWarning', code, fn);
+	};
+
+	const isPosInt = n => n && n === Math.floor(n) && n > 0 && isFinite(n);
+
+	/* istanbul ignore next - This is a little bit ridiculous, tbh.
+	 * The maximum array length is 2^32-1 or thereabouts on most JS impls.
+	 * And well before that point, you're caching the entire world, I mean,
+	 * that's ~32GB of just integers for the next/prev links, plus whatever
+	 * else to hold that many keys and values.  Just filling the memory with
+	 * zeroes at init time is brutal when you get that big.
+	 * But why not be complete?
+	 * Maybe in the future, these limits will have expanded. */
+	const getUintArray = max =>
+	  !isPosInt(max)
+	    ? null
+	    : max <= Math.pow(2, 8)
+	    ? Uint8Array
+	    : max <= Math.pow(2, 16)
+	    ? Uint16Array
+	    : max <= Math.pow(2, 32)
+	    ? Uint32Array
+	    : max <= Number.MAX_SAFE_INTEGER
+	    ? ZeroArray
+	    : null;
+
+	class ZeroArray extends Array {
+	  constructor(size) {
+	    super(size);
+	    this.fill(0);
+	  }
+	}
+
+	class Stack {
+	  constructor(max) {
+	    if (max === 0) {
+	      return []
+	    }
+	    const UintArray = getUintArray(max);
+	    this.heap = new UintArray(max);
+	    this.length = 0;
+	  }
+	  push(n) {
+	    this.heap[this.length++] = n;
+	  }
+	  pop() {
+	    return this.heap[--this.length]
+	  }
+	}
+
+	class LRUCache {
+	  constructor(options = {}) {
+	    const {
+	      max = 0,
+	      ttl,
+	      ttlResolution = 1,
+	      ttlAutopurge,
+	      updateAgeOnGet,
+	      updateAgeOnHas,
+	      allowStale,
+	      dispose,
+	      disposeAfter,
+	      noDisposeOnSet,
+	      noUpdateTTL,
+	      maxSize = 0,
+	      maxEntrySize = 0,
+	      sizeCalculation,
+	      fetchMethod,
+	      fetchContext,
+	      noDeleteOnFetchRejection,
+	      noDeleteOnStaleGet,
+	      allowStaleOnFetchRejection,
+	      allowStaleOnFetchAbort,
+	      ignoreFetchAbort,
+	    } = options;
+
+	    // deprecated options, don't trigger a warning for getting them if
+	    // the thing being passed in is another LRUCache we're copying.
+	    const { length, maxAge, stale } =
+	      options instanceof LRUCache ? {} : options;
+
+	    if (max !== 0 && !isPosInt(max)) {
+	      throw new TypeError('max option must be a nonnegative integer')
+	    }
+
+	    const UintArray = max ? getUintArray(max) : Array;
+	    if (!UintArray) {
+	      throw new Error('invalid max value: ' + max)
+	    }
+
+	    this.max = max;
+	    this.maxSize = maxSize;
+	    this.maxEntrySize = maxEntrySize || this.maxSize;
+	    this.sizeCalculation = sizeCalculation || length;
+	    if (this.sizeCalculation) {
+	      if (!this.maxSize && !this.maxEntrySize) {
+	        throw new TypeError(
+	          'cannot set sizeCalculation without setting maxSize or maxEntrySize'
+	        )
+	      }
+	      if (typeof this.sizeCalculation !== 'function') {
+	        throw new TypeError('sizeCalculation set to non-function')
+	      }
+	    }
+
+	    this.fetchMethod = fetchMethod || null;
+	    if (this.fetchMethod && typeof this.fetchMethod !== 'function') {
+	      throw new TypeError(
+	        'fetchMethod must be a function if specified'
+	      )
+	    }
+
+	    this.fetchContext = fetchContext;
+	    if (!this.fetchMethod && fetchContext !== undefined) {
+	      throw new TypeError(
+	        'cannot set fetchContext without fetchMethod'
+	      )
+	    }
+
+	    this.keyMap = new Map();
+	    this.keyList = new Array(max).fill(null);
+	    this.valList = new Array(max).fill(null);
+	    this.next = new UintArray(max);
+	    this.prev = new UintArray(max);
+	    this.head = 0;
+	    this.tail = 0;
+	    this.free = new Stack(max);
+	    this.initialFill = 1;
+	    this.size = 0;
+
+	    if (typeof dispose === 'function') {
+	      this.dispose = dispose;
+	    }
+	    if (typeof disposeAfter === 'function') {
+	      this.disposeAfter = disposeAfter;
+	      this.disposed = [];
+	    } else {
+	      this.disposeAfter = null;
+	      this.disposed = null;
+	    }
+	    this.noDisposeOnSet = !!noDisposeOnSet;
+	    this.noUpdateTTL = !!noUpdateTTL;
+	    this.noDeleteOnFetchRejection = !!noDeleteOnFetchRejection;
+	    this.allowStaleOnFetchRejection = !!allowStaleOnFetchRejection;
+	    this.allowStaleOnFetchAbort = !!allowStaleOnFetchAbort;
+	    this.ignoreFetchAbort = !!ignoreFetchAbort;
+
+	    // NB: maxEntrySize is set to maxSize if it's set
+	    if (this.maxEntrySize !== 0) {
+	      if (this.maxSize !== 0) {
+	        if (!isPosInt(this.maxSize)) {
+	          throw new TypeError(
+	            'maxSize must be a positive integer if specified'
+	          )
+	        }
+	      }
+	      if (!isPosInt(this.maxEntrySize)) {
+	        throw new TypeError(
+	          'maxEntrySize must be a positive integer if specified'
+	        )
+	      }
+	      this.initializeSizeTracking();
+	    }
+
+	    this.allowStale = !!allowStale || !!stale;
+	    this.noDeleteOnStaleGet = !!noDeleteOnStaleGet;
+	    this.updateAgeOnGet = !!updateAgeOnGet;
+	    this.updateAgeOnHas = !!updateAgeOnHas;
+	    this.ttlResolution =
+	      isPosInt(ttlResolution) || ttlResolution === 0
+	        ? ttlResolution
+	        : 1;
+	    this.ttlAutopurge = !!ttlAutopurge;
+	    this.ttl = ttl || maxAge || 0;
+	    if (this.ttl) {
+	      if (!isPosInt(this.ttl)) {
+	        throw new TypeError(
+	          'ttl must be a positive integer if specified'
+	        )
+	      }
+	      this.initializeTTLTracking();
+	    }
+
+	    // do not allow completely unbounded caches
+	    if (this.max === 0 && this.ttl === 0 && this.maxSize === 0) {
+	      throw new TypeError(
+	        'At least one of max, maxSize, or ttl is required'
+	      )
+	    }
+	    if (!this.ttlAutopurge && !this.max && !this.maxSize) {
+	      const code = 'LRU_CACHE_UNBOUNDED';
+	      if (shouldWarn(code)) {
+	        warned.add(code);
+	        const msg =
+	          'TTL caching without ttlAutopurge, max, or maxSize can ' +
+	          'result in unbounded memory consumption.';
+	        emitWarning(msg, 'UnboundedCacheWarning', code, LRUCache);
+	      }
+	    }
+
+	    if (stale) {
+	      deprecatedOption('stale', 'allowStale');
+	    }
+	    if (maxAge) {
+	      deprecatedOption('maxAge', 'ttl');
+	    }
+	    if (length) {
+	      deprecatedOption('length', 'sizeCalculation');
+	    }
+	  }
+
+	  getRemainingTTL(key) {
+	    return this.has(key, { updateAgeOnHas: false }) ? Infinity : 0
+	  }
+
+	  initializeTTLTracking() {
+	    this.ttls = new ZeroArray(this.max);
+	    this.starts = new ZeroArray(this.max);
+
+	    this.setItemTTL = (index, ttl, start = perf.now()) => {
+	      this.starts[index] = ttl !== 0 ? start : 0;
+	      this.ttls[index] = ttl;
+	      if (ttl !== 0 && this.ttlAutopurge) {
+	        const t = setTimeout(() => {
+	          if (this.isStale(index)) {
+	            this.delete(this.keyList[index]);
+	          }
+	        }, ttl + 1);
+	        /* istanbul ignore else - unref() not supported on all platforms */
+	        if (t.unref) {
+	          t.unref();
+	        }
+	      }
+	    };
+
+	    this.updateItemAge = index => {
+	      this.starts[index] = this.ttls[index] !== 0 ? perf.now() : 0;
+	    };
+
+	    this.statusTTL = (status, index) => {
+	      if (status) {
+	        status.ttl = this.ttls[index];
+	        status.start = this.starts[index];
+	        status.now = cachedNow || getNow();
+	        status.remainingTTL = status.now + status.ttl - status.start;
+	      }
+	    };
+
+	    // debounce calls to perf.now() to 1s so we're not hitting
+	    // that costly call repeatedly.
+	    let cachedNow = 0;
+	    const getNow = () => {
+	      const n = perf.now();
+	      if (this.ttlResolution > 0) {
+	        cachedNow = n;
+	        const t = setTimeout(
+	          () => (cachedNow = 0),
+	          this.ttlResolution
+	        );
+	        /* istanbul ignore else - not available on all platforms */
+	        if (t.unref) {
+	          t.unref();
+	        }
+	      }
+	      return n
+	    };
+
+	    this.getRemainingTTL = key => {
+	      const index = this.keyMap.get(key);
+	      if (index === undefined) {
+	        return 0
+	      }
+	      return this.ttls[index] === 0 || this.starts[index] === 0
+	        ? Infinity
+	        : this.starts[index] +
+	            this.ttls[index] -
+	            (cachedNow || getNow())
+	    };
+
+	    this.isStale = index => {
+	      return (
+	        this.ttls[index] !== 0 &&
+	        this.starts[index] !== 0 &&
+	        (cachedNow || getNow()) - this.starts[index] >
+	          this.ttls[index]
+	      )
+	    };
+	  }
+	  updateItemAge(_index) {}
+	  statusTTL(_status, _index) {}
+	  setItemTTL(_index, _ttl, _start) {}
+	  isStale(_index) {
+	    return false
+	  }
+
+	  initializeSizeTracking() {
+	    this.calculatedSize = 0;
+	    this.sizes = new ZeroArray(this.max);
+	    this.removeItemSize = index => {
+	      this.calculatedSize -= this.sizes[index];
+	      this.sizes[index] = 0;
+	    };
+	    this.requireSize = (k, v, size, sizeCalculation) => {
+	      // provisionally accept background fetches.
+	      // actual value size will be checked when they return.
+	      if (this.isBackgroundFetch(v)) {
+	        return 0
+	      }
+	      if (!isPosInt(size)) {
+	        if (sizeCalculation) {
+	          if (typeof sizeCalculation !== 'function') {
+	            throw new TypeError('sizeCalculation must be a function')
+	          }
+	          size = sizeCalculation(v, k);
+	          if (!isPosInt(size)) {
+	            throw new TypeError(
+	              'sizeCalculation return invalid (expect positive integer)'
+	            )
+	          }
+	        } else {
+	          throw new TypeError(
+	            'invalid size value (must be positive integer). ' +
+	              'When maxSize or maxEntrySize is used, sizeCalculation or size ' +
+	              'must be set.'
+	          )
+	        }
+	      }
+	      return size
+	    };
+	    this.addItemSize = (index, size, status) => {
+	      this.sizes[index] = size;
+	      if (this.maxSize) {
+	        const maxSize = this.maxSize - this.sizes[index];
+	        while (this.calculatedSize > maxSize) {
+	          this.evict(true);
+	        }
+	      }
+	      this.calculatedSize += this.sizes[index];
+	      if (status) {
+	        status.entrySize = size;
+	        status.totalCalculatedSize = this.calculatedSize;
+	      }
+	    };
+	  }
+	  removeItemSize(_index) {}
+	  addItemSize(_index, _size) {}
+	  requireSize(_k, _v, size, sizeCalculation) {
+	    if (size || sizeCalculation) {
+	      throw new TypeError(
+	        'cannot set size without setting maxSize or maxEntrySize on cache'
+	      )
+	    }
+	  }
+
+	  *indexes({ allowStale = this.allowStale } = {}) {
+	    if (this.size) {
+	      for (let i = this.tail; true; ) {
+	        if (!this.isValidIndex(i)) {
+	          break
+	        }
+	        if (allowStale || !this.isStale(i)) {
+	          yield i;
+	        }
+	        if (i === this.head) {
+	          break
+	        } else {
+	          i = this.prev[i];
+	        }
+	      }
+	    }
+	  }
+
+	  *rindexes({ allowStale = this.allowStale } = {}) {
+	    if (this.size) {
+	      for (let i = this.head; true; ) {
+	        if (!this.isValidIndex(i)) {
+	          break
+	        }
+	        if (allowStale || !this.isStale(i)) {
+	          yield i;
+	        }
+	        if (i === this.tail) {
+	          break
+	        } else {
+	          i = this.next[i];
+	        }
+	      }
+	    }
+	  }
+
+	  isValidIndex(index) {
+	    return (
+	      index !== undefined &&
+	      this.keyMap.get(this.keyList[index]) === index
+	    )
+	  }
+
+	  *entries() {
+	    for (const i of this.indexes()) {
+	      if (
+	        this.valList[i] !== undefined &&
+	        this.keyList[i] !== undefined &&
+	        !this.isBackgroundFetch(this.valList[i])
+	      ) {
+	        yield [this.keyList[i], this.valList[i]];
+	      }
+	    }
+	  }
+	  *rentries() {
+	    for (const i of this.rindexes()) {
+	      if (
+	        this.valList[i] !== undefined &&
+	        this.keyList[i] !== undefined &&
+	        !this.isBackgroundFetch(this.valList[i])
+	      ) {
+	        yield [this.keyList[i], this.valList[i]];
+	      }
+	    }
+	  }
+
+	  *keys() {
+	    for (const i of this.indexes()) {
+	      if (
+	        this.keyList[i] !== undefined &&
+	        !this.isBackgroundFetch(this.valList[i])
+	      ) {
+	        yield this.keyList[i];
+	      }
+	    }
+	  }
+	  *rkeys() {
+	    for (const i of this.rindexes()) {
+	      if (
+	        this.keyList[i] !== undefined &&
+	        !this.isBackgroundFetch(this.valList[i])
+	      ) {
+	        yield this.keyList[i];
+	      }
+	    }
+	  }
+
+	  *values() {
+	    for (const i of this.indexes()) {
+	      if (
+	        this.valList[i] !== undefined &&
+	        !this.isBackgroundFetch(this.valList[i])
+	      ) {
+	        yield this.valList[i];
+	      }
+	    }
+	  }
+	  *rvalues() {
+	    for (const i of this.rindexes()) {
+	      if (
+	        this.valList[i] !== undefined &&
+	        !this.isBackgroundFetch(this.valList[i])
+	      ) {
+	        yield this.valList[i];
+	      }
+	    }
+	  }
+
+	  [Symbol.iterator]() {
+	    return this.entries()
+	  }
+
+	  find(fn, getOptions) {
+	    for (const i of this.indexes()) {
+	      const v = this.valList[i];
+	      const value = this.isBackgroundFetch(v)
+	        ? v.__staleWhileFetching
+	        : v;
+	      if (value === undefined) continue
+	      if (fn(value, this.keyList[i], this)) {
+	        return this.get(this.keyList[i], getOptions)
+	      }
+	    }
+	  }
+
+	  forEach(fn, thisp = this) {
+	    for (const i of this.indexes()) {
+	      const v = this.valList[i];
+	      const value = this.isBackgroundFetch(v)
+	        ? v.__staleWhileFetching
+	        : v;
+	      if (value === undefined) continue
+	      fn.call(thisp, value, this.keyList[i], this);
+	    }
+	  }
+
+	  rforEach(fn, thisp = this) {
+	    for (const i of this.rindexes()) {
+	      const v = this.valList[i];
+	      const value = this.isBackgroundFetch(v)
+	        ? v.__staleWhileFetching
+	        : v;
+	      if (value === undefined) continue
+	      fn.call(thisp, value, this.keyList[i], this);
+	    }
+	  }
+
+	  get prune() {
+	    deprecatedMethod('prune', 'purgeStale');
+	    return this.purgeStale
+	  }
+
+	  purgeStale() {
+	    let deleted = false;
+	    for (const i of this.rindexes({ allowStale: true })) {
+	      if (this.isStale(i)) {
+	        this.delete(this.keyList[i]);
+	        deleted = true;
+	      }
+	    }
+	    return deleted
+	  }
+
+	  dump() {
+	    const arr = [];
+	    for (const i of this.indexes({ allowStale: true })) {
+	      const key = this.keyList[i];
+	      const v = this.valList[i];
+	      const value = this.isBackgroundFetch(v)
+	        ? v.__staleWhileFetching
+	        : v;
+	      if (value === undefined) continue
+	      const entry = { value };
+	      if (this.ttls) {
+	        entry.ttl = this.ttls[i];
+	        // always dump the start relative to a portable timestamp
+	        // it's ok for this to be a bit slow, it's a rare operation.
+	        const age = perf.now() - this.starts[i];
+	        entry.start = Math.floor(Date.now() - age);
+	      }
+	      if (this.sizes) {
+	        entry.size = this.sizes[i];
+	      }
+	      arr.unshift([key, entry]);
+	    }
+	    return arr
+	  }
+
+	  load(arr) {
+	    this.clear();
+	    for (const [key, entry] of arr) {
+	      if (entry.start) {
+	        // entry.start is a portable timestamp, but we may be using
+	        // node's performance.now(), so calculate the offset.
+	        // it's ok for this to be a bit slow, it's a rare operation.
+	        const age = Date.now() - entry.start;
+	        entry.start = perf.now() - age;
+	      }
+	      this.set(key, entry.value, entry);
+	    }
+	  }
+
+	  dispose(_v, _k, _reason) {}
+
+	  set(
+	    k,
+	    v,
+	    {
+	      ttl = this.ttl,
+	      start,
+	      noDisposeOnSet = this.noDisposeOnSet,
+	      size = 0,
+	      sizeCalculation = this.sizeCalculation,
+	      noUpdateTTL = this.noUpdateTTL,
+	      status,
+	    } = {}
+	  ) {
+	    size = this.requireSize(k, v, size, sizeCalculation);
+	    // if the item doesn't fit, don't do anything
+	    // NB: maxEntrySize set to maxSize by default
+	    if (this.maxEntrySize && size > this.maxEntrySize) {
+	      if (status) {
+	        status.set = 'miss';
+	        status.maxEntrySizeExceeded = true;
+	      }
+	      // have to delete, in case a background fetch is there already.
+	      // in non-async cases, this is a no-op
+	      this.delete(k);
+	      return this
+	    }
+	    let index = this.size === 0 ? undefined : this.keyMap.get(k);
+	    if (index === undefined) {
+	      // addition
+	      index = this.newIndex();
+	      this.keyList[index] = k;
+	      this.valList[index] = v;
+	      this.keyMap.set(k, index);
+	      this.next[this.tail] = index;
+	      this.prev[index] = this.tail;
+	      this.tail = index;
+	      this.size++;
+	      this.addItemSize(index, size, status);
+	      if (status) {
+	        status.set = 'add';
+	      }
+	      noUpdateTTL = false;
+	    } else {
+	      // update
+	      this.moveToTail(index);
+	      const oldVal = this.valList[index];
+	      if (v !== oldVal) {
+	        if (this.isBackgroundFetch(oldVal)) {
+	          oldVal.__abortController.abort(new Error('replaced'));
+	        } else {
+	          if (!noDisposeOnSet) {
+	            this.dispose(oldVal, k, 'set');
+	            if (this.disposeAfter) {
+	              this.disposed.push([oldVal, k, 'set']);
+	            }
+	          }
+	        }
+	        this.removeItemSize(index);
+	        this.valList[index] = v;
+	        this.addItemSize(index, size, status);
+	        if (status) {
+	          status.set = 'replace';
+	          const oldValue =
+	            oldVal && this.isBackgroundFetch(oldVal)
+	              ? oldVal.__staleWhileFetching
+	              : oldVal;
+	          if (oldValue !== undefined) status.oldValue = oldValue;
+	        }
+	      } else if (status) {
+	        status.set = 'update';
+	      }
+	    }
+	    if (ttl !== 0 && this.ttl === 0 && !this.ttls) {
+	      this.initializeTTLTracking();
+	    }
+	    if (!noUpdateTTL) {
+	      this.setItemTTL(index, ttl, start);
+	    }
+	    this.statusTTL(status, index);
+	    if (this.disposeAfter) {
+	      while (this.disposed.length) {
+	        this.disposeAfter(...this.disposed.shift());
+	      }
+	    }
+	    return this
+	  }
+
+	  newIndex() {
+	    if (this.size === 0) {
+	      return this.tail
+	    }
+	    if (this.size === this.max && this.max !== 0) {
+	      return this.evict(false)
+	    }
+	    if (this.free.length !== 0) {
+	      return this.free.pop()
+	    }
+	    // initial fill, just keep writing down the list
+	    return this.initialFill++
+	  }
+
+	  pop() {
+	    if (this.size) {
+	      const val = this.valList[this.head];
+	      this.evict(true);
+	      return val
+	    }
+	  }
+
+	  evict(free) {
+	    const head = this.head;
+	    const k = this.keyList[head];
+	    const v = this.valList[head];
+	    if (this.isBackgroundFetch(v)) {
+	      v.__abortController.abort(new Error('evicted'));
+	    } else {
+	      this.dispose(v, k, 'evict');
+	      if (this.disposeAfter) {
+	        this.disposed.push([v, k, 'evict']);
+	      }
+	    }
+	    this.removeItemSize(head);
+	    // if we aren't about to use the index, then null these out
+	    if (free) {
+	      this.keyList[head] = null;
+	      this.valList[head] = null;
+	      this.free.push(head);
+	    }
+	    this.head = this.next[head];
+	    this.keyMap.delete(k);
+	    this.size--;
+	    return head
+	  }
+
+	  has(k, { updateAgeOnHas = this.updateAgeOnHas, status } = {}) {
+	    const index = this.keyMap.get(k);
+	    if (index !== undefined) {
+	      if (!this.isStale(index)) {
+	        if (updateAgeOnHas) {
+	          this.updateItemAge(index);
+	        }
+	        if (status) status.has = 'hit';
+	        this.statusTTL(status, index);
+	        return true
+	      } else if (status) {
+	        status.has = 'stale';
+	        this.statusTTL(status, index);
+	      }
+	    } else if (status) {
+	      status.has = 'miss';
+	    }
+	    return false
+	  }
+
+	  // like get(), but without any LRU updating or TTL expiration
+	  peek(k, { allowStale = this.allowStale } = {}) {
+	    const index = this.keyMap.get(k);
+	    if (index !== undefined && (allowStale || !this.isStale(index))) {
+	      const v = this.valList[index];
+	      // either stale and allowed, or forcing a refresh of non-stale value
+	      return this.isBackgroundFetch(v) ? v.__staleWhileFetching : v
+	    }
+	  }
+
+	  backgroundFetch(k, index, options, context) {
+	    const v = index === undefined ? undefined : this.valList[index];
+	    if (this.isBackgroundFetch(v)) {
+	      return v
+	    }
+	    const ac = new AC();
+	    if (options.signal) {
+	      options.signal.addEventListener('abort', () =>
+	        ac.abort(options.signal.reason)
+	      );
+	    }
+	    const fetchOpts = {
+	      signal: ac.signal,
+	      options,
+	      context,
+	    };
+	    const cb = (v, updateCache = false) => {
+	      const { aborted } = ac.signal;
+	      const ignoreAbort = options.ignoreFetchAbort && v !== undefined;
+	      if (options.status) {
+	        if (aborted && !updateCache) {
+	          options.status.fetchAborted = true;
+	          options.status.fetchError = ac.signal.reason;
+	          if (ignoreAbort) options.status.fetchAbortIgnored = true;
+	        } else {
+	          options.status.fetchResolved = true;
+	        }
+	      }
+	      if (aborted && !ignoreAbort && !updateCache) {
+	        return fetchFail(ac.signal.reason)
+	      }
+	      // either we didn't abort, and are still here, or we did, and ignored
+	      if (this.valList[index] === p) {
+	        if (v === undefined) {
+	          if (p.__staleWhileFetching) {
+	            this.valList[index] = p.__staleWhileFetching;
+	          } else {
+	            this.delete(k);
+	          }
+	        } else {
+	          if (options.status) options.status.fetchUpdated = true;
+	          this.set(k, v, fetchOpts.options);
+	        }
+	      }
+	      return v
+	    };
+	    const eb = er => {
+	      if (options.status) {
+	        options.status.fetchRejected = true;
+	        options.status.fetchError = er;
+	      }
+	      return fetchFail(er)
+	    };
+	    const fetchFail = er => {
+	      const { aborted } = ac.signal;
+	      const allowStaleAborted =
+	        aborted && options.allowStaleOnFetchAbort;
+	      const allowStale =
+	        allowStaleAborted || options.allowStaleOnFetchRejection;
+	      const noDelete = allowStale || options.noDeleteOnFetchRejection;
+	      if (this.valList[index] === p) {
+	        // if we allow stale on fetch rejections, then we need to ensure that
+	        // the stale value is not removed from the cache when the fetch fails.
+	        const del = !noDelete || p.__staleWhileFetching === undefined;
+	        if (del) {
+	          this.delete(k);
+	        } else if (!allowStaleAborted) {
+	          // still replace the *promise* with the stale value,
+	          // since we are done with the promise at this point.
+	          // leave it untouched if we're still waiting for an
+	          // aborted background fetch that hasn't yet returned.
+	          this.valList[index] = p.__staleWhileFetching;
+	        }
+	      }
+	      if (allowStale) {
+	        if (options.status && p.__staleWhileFetching !== undefined) {
+	          options.status.returnedStale = true;
+	        }
+	        return p.__staleWhileFetching
+	      } else if (p.__returned === p) {
+	        throw er
+	      }
+	    };
+	    const pcall = (res, rej) => {
+	      this.fetchMethod(k, v, fetchOpts).then(v => res(v), rej);
+	      // ignored, we go until we finish, regardless.
+	      // defer check until we are actually aborting,
+	      // so fetchMethod can override.
+	      ac.signal.addEventListener('abort', () => {
+	        if (
+	          !options.ignoreFetchAbort ||
+	          options.allowStaleOnFetchAbort
+	        ) {
+	          res();
+	          // when it eventually resolves, update the cache.
+	          if (options.allowStaleOnFetchAbort) {
+	            res = v => cb(v, true);
+	          }
+	        }
+	      });
+	    };
+	    if (options.status) options.status.fetchDispatched = true;
+	    const p = new Promise(pcall).then(cb, eb);
+	    p.__abortController = ac;
+	    p.__staleWhileFetching = v;
+	    p.__returned = null;
+	    if (index === undefined) {
+	      // internal, don't expose status.
+	      this.set(k, p, { ...fetchOpts.options, status: undefined });
+	      index = this.keyMap.get(k);
+	    } else {
+	      this.valList[index] = p;
+	    }
+	    return p
+	  }
+
+	  isBackgroundFetch(p) {
+	    return (
+	      p &&
+	      typeof p === 'object' &&
+	      typeof p.then === 'function' &&
+	      Object.prototype.hasOwnProperty.call(
+	        p,
+	        '__staleWhileFetching'
+	      ) &&
+	      Object.prototype.hasOwnProperty.call(p, '__returned') &&
+	      (p.__returned === p || p.__returned === null)
+	    )
+	  }
+
+	  // this takes the union of get() and set() opts, because it does both
+	  async fetch(
+	    k,
+	    {
+	      // get options
+	      allowStale = this.allowStale,
+	      updateAgeOnGet = this.updateAgeOnGet,
+	      noDeleteOnStaleGet = this.noDeleteOnStaleGet,
+	      // set options
+	      ttl = this.ttl,
+	      noDisposeOnSet = this.noDisposeOnSet,
+	      size = 0,
+	      sizeCalculation = this.sizeCalculation,
+	      noUpdateTTL = this.noUpdateTTL,
+	      // fetch exclusive options
+	      noDeleteOnFetchRejection = this.noDeleteOnFetchRejection,
+	      allowStaleOnFetchRejection = this.allowStaleOnFetchRejection,
+	      ignoreFetchAbort = this.ignoreFetchAbort,
+	      allowStaleOnFetchAbort = this.allowStaleOnFetchAbort,
+	      fetchContext = this.fetchContext,
+	      forceRefresh = false,
+	      status,
+	      signal,
+	    } = {}
+	  ) {
+	    if (!this.fetchMethod) {
+	      if (status) status.fetch = 'get';
+	      return this.get(k, {
+	        allowStale,
+	        updateAgeOnGet,
+	        noDeleteOnStaleGet,
+	        status,
+	      })
+	    }
+
+	    const options = {
+	      allowStale,
+	      updateAgeOnGet,
+	      noDeleteOnStaleGet,
+	      ttl,
+	      noDisposeOnSet,
+	      size,
+	      sizeCalculation,
+	      noUpdateTTL,
+	      noDeleteOnFetchRejection,
+	      allowStaleOnFetchRejection,
+	      allowStaleOnFetchAbort,
+	      ignoreFetchAbort,
+	      status,
+	      signal,
+	    };
+
+	    let index = this.keyMap.get(k);
+	    if (index === undefined) {
+	      if (status) status.fetch = 'miss';
+	      const p = this.backgroundFetch(k, index, options, fetchContext);
+	      return (p.__returned = p)
+	    } else {
+	      // in cache, maybe already fetching
+	      const v = this.valList[index];
+	      if (this.isBackgroundFetch(v)) {
+	        const stale =
+	          allowStale && v.__staleWhileFetching !== undefined;
+	        if (status) {
+	          status.fetch = 'inflight';
+	          if (stale) status.returnedStale = true;
+	        }
+	        return stale ? v.__staleWhileFetching : (v.__returned = v)
+	      }
+
+	      // if we force a refresh, that means do NOT serve the cached value,
+	      // unless we are already in the process of refreshing the cache.
+	      const isStale = this.isStale(index);
+	      if (!forceRefresh && !isStale) {
+	        if (status) status.fetch = 'hit';
+	        this.moveToTail(index);
+	        if (updateAgeOnGet) {
+	          this.updateItemAge(index);
+	        }
+	        this.statusTTL(status, index);
+	        return v
+	      }
+
+	      // ok, it is stale or a forced refresh, and not already fetching.
+	      // refresh the cache.
+	      const p = this.backgroundFetch(k, index, options, fetchContext);
+	      const hasStale = p.__staleWhileFetching !== undefined;
+	      const staleVal = hasStale && allowStale;
+	      if (status) {
+	        status.fetch = hasStale && isStale ? 'stale' : 'refresh';
+	        if (staleVal && isStale) status.returnedStale = true;
+	      }
+	      return staleVal ? p.__staleWhileFetching : (p.__returned = p)
+	    }
+	  }
+
+	  get(
+	    k,
+	    {
+	      allowStale = this.allowStale,
+	      updateAgeOnGet = this.updateAgeOnGet,
+	      noDeleteOnStaleGet = this.noDeleteOnStaleGet,
+	      status,
+	    } = {}
+	  ) {
+	    const index = this.keyMap.get(k);
+	    if (index !== undefined) {
+	      const value = this.valList[index];
+	      const fetching = this.isBackgroundFetch(value);
+	      this.statusTTL(status, index);
+	      if (this.isStale(index)) {
+	        if (status) status.get = 'stale';
+	        // delete only if not an in-flight background fetch
+	        if (!fetching) {
+	          if (!noDeleteOnStaleGet) {
+	            this.delete(k);
+	          }
+	          if (status) status.returnedStale = allowStale;
+	          return allowStale ? value : undefined
+	        } else {
+	          if (status) {
+	            status.returnedStale =
+	              allowStale && value.__staleWhileFetching !== undefined;
+	          }
+	          return allowStale ? value.__staleWhileFetching : undefined
+	        }
+	      } else {
+	        if (status) status.get = 'hit';
+	        // if we're currently fetching it, we don't actually have it yet
+	        // it's not stale, which means this isn't a staleWhileRefetching.
+	        // If it's not stale, and fetching, AND has a __staleWhileFetching
+	        // value, then that means the user fetched with {forceRefresh:true},
+	        // so it's safe to return that value.
+	        if (fetching) {
+	          return value.__staleWhileFetching
+	        }
+	        this.moveToTail(index);
+	        if (updateAgeOnGet) {
+	          this.updateItemAge(index);
+	        }
+	        return value
+	      }
+	    } else if (status) {
+	      status.get = 'miss';
+	    }
+	  }
+
+	  connect(p, n) {
+	    this.prev[n] = p;
+	    this.next[p] = n;
+	  }
+
+	  moveToTail(index) {
+	    // if tail already, nothing to do
+	    // if head, move head to next[index]
+	    // else
+	    //   move next[prev[index]] to next[index] (head has no prev)
+	    //   move prev[next[index]] to prev[index]
+	    // prev[index] = tail
+	    // next[tail] = index
+	    // tail = index
+	    if (index !== this.tail) {
+	      if (index === this.head) {
+	        this.head = this.next[index];
+	      } else {
+	        this.connect(this.prev[index], this.next[index]);
+	      }
+	      this.connect(this.tail, index);
+	      this.tail = index;
+	    }
+	  }
+
+	  get del() {
+	    deprecatedMethod('del', 'delete');
+	    return this.delete
+	  }
+
+	  delete(k) {
+	    let deleted = false;
+	    if (this.size !== 0) {
+	      const index = this.keyMap.get(k);
+	      if (index !== undefined) {
+	        deleted = true;
+	        if (this.size === 1) {
+	          this.clear();
+	        } else {
+	          this.removeItemSize(index);
+	          const v = this.valList[index];
+	          if (this.isBackgroundFetch(v)) {
+	            v.__abortController.abort(new Error('deleted'));
+	          } else {
+	            this.dispose(v, k, 'delete');
+	            if (this.disposeAfter) {
+	              this.disposed.push([v, k, 'delete']);
+	            }
+	          }
+	          this.keyMap.delete(k);
+	          this.keyList[index] = null;
+	          this.valList[index] = null;
+	          if (index === this.tail) {
+	            this.tail = this.prev[index];
+	          } else if (index === this.head) {
+	            this.head = this.next[index];
+	          } else {
+	            this.next[this.prev[index]] = this.next[index];
+	            this.prev[this.next[index]] = this.prev[index];
+	          }
+	          this.size--;
+	          this.free.push(index);
+	        }
+	      }
+	    }
+	    if (this.disposed) {
+	      while (this.disposed.length) {
+	        this.disposeAfter(...this.disposed.shift());
+	      }
+	    }
+	    return deleted
+	  }
+
+	  clear() {
+	    for (const index of this.rindexes({ allowStale: true })) {
+	      const v = this.valList[index];
+	      if (this.isBackgroundFetch(v)) {
+	        v.__abortController.abort(new Error('deleted'));
+	      } else {
+	        const k = this.keyList[index];
+	        this.dispose(v, k, 'delete');
+	        if (this.disposeAfter) {
+	          this.disposed.push([v, k, 'delete']);
+	        }
+	      }
+	    }
+
+	    this.keyMap.clear();
+	    this.valList.fill(null);
+	    this.keyList.fill(null);
+	    if (this.ttls) {
+	      this.ttls.fill(0);
+	      this.starts.fill(0);
+	    }
+	    if (this.sizes) {
+	      this.sizes.fill(0);
+	    }
+	    this.head = 0;
+	    this.tail = 0;
+	    this.initialFill = 1;
+	    this.free.length = 0;
+	    this.calculatedSize = 0;
+	    this.size = 0;
+	    if (this.disposed) {
+	      while (this.disposed.length) {
+	        this.disposeAfter(...this.disposed.shift());
+	      }
+	    }
+	  }
+
+	  get reset() {
+	    deprecatedMethod('reset', 'clear');
+	    return this.clear
+	  }
+
+	  get length() {
+	    deprecatedProperty('length', 'size');
+	    return this.size
+	  }
+
+	  static get AbortController() {
+	    return AC
+	  }
+	  static get AbortSignal() {
+	    return AS
+	  }
+	}
+
+	var lruCache = LRUCache;
+
+	const { LRUCache: LRUCache$1 } = lruCache;
+	const { isFunction: isFunction$2, randomInt } = utils_1;
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 * @typedef {import("../context")} Context
+	 * @typedef {import("../registry")} Registry
+	 * @typedef {import("../registry/endpoint")} Endpoint
+	 * @typedef {import("./shard")} ShardStrategyClass
+	 * @typedef {import("./shard").ShardStrategyOptions} ShardStrategyOptions
+	 */
 
 	/**
 	 * Sharding invocation strategy
 	 *
 	 * Using consistent-hashing. More info: https://www.toptal.com/big-data/consistent-hashing
 	 *
-	 * @class ShardStrategy
+	 * @implements {ShardStrategyClass}
 	 */
 	class ShardStrategy extends base$2 {
-
+		/**
+		 * Creates an instance of CborSerializer.
+		 *
+		 * @param {Registry} registry
+		 * @param {ServiceBroker} broker
+		 * @param {ShardStrategyOptions} opts
+		 */
 		constructor(registry, broker, opts) {
 			super(registry, broker, opts);
 
+			/** @type {ShardStrategyOptions} */
 			this.opts = ___default.defaultsDeep(opts, {
 				shardKey: null,
 				vnodes: 10,
@@ -5130,15 +9175,15 @@
 				cacheSize: 1000
 			});
 
-			this.cache = new LRU__default({
-				max: this.opts.cacheSize,
-				maxAge: null
+			/** @type {LRUCache<string>} */
+			this.cache = new LRUCache$1({
+				max: this.opts.cacheSize
 			});
 
 			this.needRebuild = true;
 			this.ring = [];
 
-			broker.localBus.on("$node.**", () => this.needRebuild = true);
+			broker.localBus.on("$node.**", () => (this.needRebuild = true));
 		}
 
 		/**
@@ -5149,13 +9194,11 @@
 		 * @memberof ShardStrategy
 		 */
 		getKeyFromContext(ctx) {
-			if (!this.opts.shardKey)  return null;
+			if (!this.opts.shardKey) return null;
 
-			if (isFunction$2(this.opts.shardKey))
-				return this.opts.shardKey.call(this, ctx);
+			if (isFunction$2(this.opts.shardKey)) return this.opts.shardKey.call(this, ctx);
 
-			if (this.opts.shardKey.startsWith("#"))
-				return ___default.get(ctx.meta, this.opts.shardKey.slice(1));
+			if (this.opts.shardKey.startsWith("#")) return ___default.get(ctx.meta, this.opts.shardKey.slice(1));
 
 			return ___default.get(ctx.params, this.opts.shardKey);
 		}
@@ -5169,24 +9212,23 @@
 		 * @memberof ShardStrategy
 		 */
 		select(list, ctx) {
-			let key = this.getKeyFromContext(ctx);
+			const key = this.getKeyFromContext(ctx);
+
 			if (key != null) {
-				if (this.needRebuild)
-					this.rebuild(list);
+				if (this.needRebuild) this.rebuild(list);
 
 				const nodeID = this.getNodeIDByKey(key);
-				if (nodeID)
-					return list.find(ep => ep.id == nodeID);
+				if (nodeID) return list.find(ep => ep.id == nodeID);
 			}
 
 			// Return a random item (no key)
-			return list[___default.random(0, list.length - 1)];
+			return list[randomInt(0, list.length - 1)];
 		}
 
 		/**
 		 * Get nodeID by a hashed numeric key.
 		 *
-		 * @param {Number} key
+		 * @param {string} key
 		 * @returns {String}
 		 * @memberof ShardStrategy
 		 */
@@ -5200,7 +9242,7 @@
 
 			let found;
 			const ringLen = this.ring.length;
-			for(let i = 0; i < ringLen; i++) {
+			for (let i = 0; i < ringLen; i++) {
 				if (hashNum <= this.ring[i].key) {
 					found = this.ring[i];
 					break;
@@ -5208,8 +9250,7 @@
 			}
 
 			if (found) {
-				if (this.cache)
-					this.cache.set(key, found.nodeID);
+				if (this.cache) this.cache.set(key, found.nodeID);
 				return found.nodeID;
 			}
 			return null;
@@ -5224,7 +9265,7 @@
 		 */
 		getHash(key) {
 			const hash = crypto__default.createHash("md5").update(key).digest("hex");
-			const hashNum = parseInt(hash.substring(0,8), 16);
+			const hashNum = parseInt(hash.substring(0, 8), 16);
 			return this.opts.ringSize ? hashNum % this.opts.ringSize : hashNum;
 		}
 
@@ -5235,12 +9276,10 @@
 		 * @memberof ShardStrategy
 		 */
 		rebuild(list) {
-			this.cache.reset();
+			this.cache.clear();
 			this.ring = [];
 
-			const arr = list
-				.map(ep => ep.id)
-				.sort();
+			const arr = list.map(ep => ep.id).sort();
 
 			const total = arr.length * this.opts.vnodes;
 			const ringSize = this.opts.ringSize ? this.opts.ringSize : Math.pow(2, 32);
@@ -5261,7 +9300,6 @@
 
 			this.needRebuild = false;
 		}
-
 	}
 
 	var shard = ShardStrategy;
@@ -5280,42 +9318,36 @@
 
 	function getByName$2(name) {
 		/* istanbul ignore next */
-		if (!name)
-			return null;
+		if (!name) return null;
 
 		let n = Object.keys(Strategies).find(n => n.toLowerCase() == name.toLowerCase());
-		if (n)
-			return Strategies[n];
+		if (n) return Strategies[n];
 	}
 
 	/**
 	 * Resolve strategy by name
 	 *
-	 * @param {object|string} opt
-	 * @returns {Strategy}
-	 * @memberof ServiceBroker
+	 * @param {Record<string, any>|string} opt
+	 * @returns {any}
 	 */
 	function resolve$2(opt) {
 		if (Object.prototype.isPrototypeOf.call(Strategies.Base, opt)) {
 			return opt;
 		} else if (isString$3(opt)) {
 			let StrategyClass = getByName$2(opt);
-			if (StrategyClass)
-				return StrategyClass;
-			else
-				throw new BrokerOptionsError$2(`Invalid strategy type '${opt}'.`, { type: opt });
-
+			if (StrategyClass) return StrategyClass;
+			else throw new BrokerOptionsError$2(`Invalid strategy type '${opt}'.`, { type: opt });
 		} else if (isObject$1(opt)) {
 			let StrategyClass = getByName$2(opt.type || "RoundRobin");
-			if (StrategyClass)
-				return StrategyClass;
+			if (StrategyClass) return StrategyClass;
 			else
-				throw new BrokerOptionsError$2(`Invalid strategy type '${opt.type}'.`, { type: opt.type });
+				throw new BrokerOptionsError$2(`Invalid strategy type '${opt.type}'.`, {
+					type: opt.type
+				});
 		}
 
 		return Strategies.RoundRobin;
 	}
-
 
 	function register$2(name, value) {
 		Strategies[name] = value;
@@ -5324,12 +9356,20 @@
 	var strategies = Object.assign(Strategies, { resolve: resolve$2, register: register$2 });
 
 	/**
+	 * Import types
+	 *
+	 * @typedef {import("./base")} BaseDiscovererClass
+	 * @typedef {import("../registry")} ServiceRegistry
+	 * @typedef {import("../node")} Node
+	 */
+
+	/**
 	 * Abstract Discoverer class
 	 *
 	 * @class BaseDiscoverer
+	 * @implements {BaseDiscovererClass}
 	 */
 	class BaseDiscoverer {
-
 		/**
 		 * Creates an instance of Discoverer.
 		 *
@@ -5344,7 +9384,7 @@
 
 				disableHeartbeatChecks: false,
 				disableOfflineNodeRemoving: false,
-				cleanOfflineNodesTimeout: 10 * 60, // 10 minutes
+				cleanOfflineNodesTimeout: 10 * 60 // 10 minutes
 			});
 
 			// Timer variables
@@ -5410,12 +9450,16 @@
 
 			if (this.opts.heartbeatInterval > 0) {
 				// HB timer
-				const time = this.opts.heartbeatInterval * 1000 + (Math.round(Math.random() * 1000) - 500); // random +/- 500ms
+				const time =
+					this.opts.heartbeatInterval * 1000 + (Math.round(Math.random() * 1000) - 500); // random +/- 500ms
 				this.heartbeatTimer = timersBrowserify.setInterval(() => this.beat(), time);
 				this.heartbeatTimer.unref();
 
 				// Check expired heartbeats of remote nodes timer
-				this.checkNodesTimer = timersBrowserify.setInterval(() => this.checkRemoteNodes(), this.opts.heartbeatTimeout * 1000);
+				this.checkNodesTimer = timersBrowserify.setInterval(
+					() => this.checkRemoteNodes(),
+					this.opts.heartbeatTimeout * 1000
+				);
 				this.checkNodesTimer.unref();
 
 				// Clean offline nodes timer
@@ -5457,7 +9501,8 @@
 		 */
 		beat() {
 			// Update the local CPU usage before sending heartbeat.
-			return this.localNode.updateLocalInfo(this.broker.getCpuUsage)
+			return this.localNode
+				.updateLocalInfo(this.broker.getCpuUsage)
 				.then(() => this.sendHeartbeat());
 		}
 
@@ -5465,18 +9510,18 @@
 		 * Check all registered remote nodes are available.
 		 */
 		checkRemoteNodes() {
-			if (this.disableHeartbeatChecks) return;
+			if (this.opts.disableHeartbeatChecks) return;
 
 			const now = Math.round(_process.uptime());
 			this.registry.nodes.toArray().forEach(node => {
 				if (node.local || !node.available) return;
 				if (!node.lastHeartbeatTime) {
-					// Még nem jött be az első heartbeat.
+					// Not received the first heartbeat yet
 					node.lastHeartbeatTime = now;
 					return;
 				}
 
-				if (now - node.lastHeartbeatTime > this.broker.options.heartbeatTimeout) {
+				if (now - node.lastHeartbeatTime > this.opts.heartbeatTimeout) {
 					this.logger.warn(`Heartbeat is not received from '${node.id}' node.`);
 					this.registry.nodes.disconnected(node.id, true);
 				}
@@ -5487,19 +9532,21 @@
 		 * Check offline nodes. Remove which is older than 10 minutes.
 		 */
 		checkOfflineNodes() {
-			if (this.disableOfflineNodeRemoving || !this.opts.cleanOfflineNodesTimeout) return;
+			if (this.opts.disableOfflineNodeRemoving || !this.opts.cleanOfflineNodesTimeout) return;
 
 			const now = Math.round(_process.uptime());
 			this.registry.nodes.toArray().forEach(node => {
 				if (node.local || node.available) return;
 				if (!node.lastHeartbeatTime) {
-					// Még nem jött be az első heartbeat.
+					// Not received the first
 					node.lastHeartbeatTime = now;
 					return;
 				}
 
 				if (now - node.lastHeartbeatTime > this.opts.cleanOfflineNodesTimeout) {
-					this.logger.warn(`Removing offline '${node.id}' node from registry because it hasn't submitted heartbeat signal for 10 minutes.`);
+					this.logger.warn(
+						`Removing offline '${node.id}' node from registry because it hasn't submitted heartbeat signal for 10 minutes.`
+					);
 					this.registry.nodes.delete(node.id);
 				}
 			});
@@ -5521,7 +9568,10 @@
 					if (payload.seq != null && node.seq !== payload.seq) {
 						// Some services changed on the remote node. Request a new INFO
 						this.discoverNode(nodeID);
-					} else if (payload.instanceID != null && !node.instanceID.startsWith(payload.instanceID)) {
+					} else if (
+						payload.instanceID != null &&
+						!node.instanceID.startsWith(payload.instanceID)
+					) {
 						// The node has been restarted. Request a new INFO
 						this.discoverNode(nodeID);
 					} else {
@@ -5556,14 +9606,16 @@
 		 * Discover a new or old node by nodeID
 		 *
 		 * @param {String} nodeID
+		 * @returns {Promise<Node | void>}
 		 */
-		discoverNode() {
+		discoverNode(nodeID) {
 			/* istanbul ignore next */
 			throw new Error("Not implemented");
 		}
 
 		/**
 		 * Discover all nodes (after connected)
+		 * @returns {Promise<Node[] | void>}
 		 */
 		discoverAllNodes() {
 			/* istanbul ignore next */
@@ -5571,20 +9623,12 @@
 		}
 
 		/**
-		 * Called when the local node is ready (transporter connected)
-		 */
-		localNodeReady() {
-			// Local node has started all local services. We send a new INFO packet
-			// which contains the local services because we are ready to accept incoming requests.
-			return this.sendLocalNodeInfo();
-		}
-
-		/**
 		 * Local service registry has been changed. We should notify remote nodes.
 		 *
-		 * @param {String} nodeID
+		 * @param {String=} nodeID
+		 * @returns {Promise<void>}
 		 */
-		sendLocalNodeInfo() {
+		sendLocalNodeInfo(nodeID) {
 			/* istanbul ignore next */
 			throw new Error("Not implemented");
 		}
@@ -5608,21 +9652,29 @@
 		remoteNodeDisconnected(nodeID, isUnexpected) {
 			return this.registry.nodes.disconnected(nodeID, isUnexpected);
 		}
-
 	}
 
 	var base$3 = BaseDiscoverer;
 
 	/**
+	 * Import types
+	 *
+	 * @typedef {import("./local")} LocalDiscovererClass
+	 * @typedef {import("./local").LocalDiscovererOptions} LocalDiscovererOptions
+	 * @typedef {import("../node")} Node
+	 */
+
+	/**
 	 * Local (built-in) Discoverer class
 	 *
 	 * @class Discoverer
+	 * @implements {LocalDiscovererClass}
 	 */
 	class LocalDiscoverer extends base$3 {
-
 		/**
 		 * Creates an instance of Discoverer.
 		 *
+		 * @param {LocalDiscovererOptions?} opts
 		 * @memberof LocalDiscoverer
 		 */
 		constructor(opts) {
@@ -5644,6 +9696,7 @@
 		 * Discover a new or old node.
 		 *
 		 * @param {String} nodeID
+		 * @returns {Promise<Node | void>}
 		 */
 		discoverNode(nodeID) {
 			if (!this.transit) return this.Promise.resolve();
@@ -5652,6 +9705,7 @@
 
 		/**
 		 * Discover all nodes (after connected)
+		 * @returns {Promise<Node[] | void>}
 		 */
 		discoverAllNodes() {
 			if (!this.transit) return this.Promise.resolve();
@@ -5661,21 +9715,26 @@
 		/**
 		 * Local service registry has been changed. We should notify remote nodes.
 		 *
-		 * @param {String} nodeID
+		 * @param {String=} nodeID
+		 * @returns {Promise<void>}
 		 */
 		sendLocalNodeInfo(nodeID) {
 			if (!this.transit) return this.Promise.resolve();
 
 			const info = this.broker.getLocalNodeInfo();
-			return this.transit.sendNodeInfo(info, nodeID);
-		}
 
+			const p =
+				!nodeID && this.broker.options.disableBalancer
+					? this.transit.tx.makeBalancedSubscriptions()
+					: this.Promise.resolve();
+			return p.then(() => this.transit.sendNodeInfo(info, nodeID));
+		}
 	}
 
 	var local = LocalDiscoverer;
 
 	const { BrokerOptionsError: BrokerOptionsError$3 } = errors;
-	const { isObject: isObject$2, isString: isString$4 } = utils_1;
+	const { isObject: isObject$2, isString: isString$4, isInheritedClass: isInheritedClass$1 } = utils_1;
 
 	const Discoverers = {
 		Base: base$3,
@@ -5686,43 +9745,38 @@
 
 	function getByName$3(name) {
 		/* istanbul ignore next */
-		if (!name)
-			return null;
+		if (!name) return null;
 
 		let n = Object.keys(Discoverers).find(n => n.toLowerCase() == name.toLowerCase());
-		if (n)
-			return Discoverers[n];
+		if (n) return Discoverers[n];
 	}
 
 	/**
 	 * Resolve discoverer by name
 	 *
-	 * @param {object|string} opt
-	 * @returns {Discoverer}
-	 * @memberof ServiceBroker
+	 * @param {Record<string, any>|string} opt
+	 * @returns {any}
 	 */
 	function resolve$3(opt) {
-		if (opt instanceof Discoverers.Base) {
+		if (isObject$2(opt) && isInheritedClass$1(opt, Discoverers.Base)) {
 			return opt;
 		} else if (isString$4(opt)) {
 			let DiscovererClass = getByName$3(opt);
-			if (DiscovererClass)
-				return new DiscovererClass();
+			if (DiscovererClass) return new DiscovererClass();
 
-			if (opt.startsWith("redis://"))
+			if (opt.startsWith("redis://") || opt.startsWith("rediss://"))
 				return new Discoverers.Redis(opt);
 
-			if (opt.startsWith("etcd3://"))
-				return new Discoverers.Etcd3(opt);
+			if (opt.startsWith("etcd3://")) return new Discoverers.Etcd3(opt);
 
 			throw new BrokerOptionsError$3(`Invalid Discoverer type '${opt}'.`, { type: opt });
-
 		} else if (isObject$2(opt)) {
 			let DiscovererClass = getByName$3(opt.type || "Local");
-			if (DiscovererClass)
-				return new DiscovererClass(opt.options);
+			if (DiscovererClass) return new DiscovererClass(opt.options);
 			else
-				throw new BrokerOptionsError$3(`Invalid Discoverer type '${opt.type}'.`, { type: opt.type });
+				throw new BrokerOptionsError$3(`Invalid Discoverer type '${opt.type}'.`, {
+					type: opt.type
+				});
 		}
 
 		return new Discoverers.Local();
@@ -5735,9 +9789,17 @@
 	var discoverers = Object.assign(Discoverers, { resolve: resolve$3, register: register$3 });
 
 	/**
+	 * Import types
+	 *
+	 * @typedef {import("./node")} NodeClass
+	 * @typedef {import("./registry").NodeRawInfo} NodeRawInfo
+	 */
+
+	/**
 	 * Node class
 	 *
 	 * @class Node
+	 * @implements {NodeClass}
 	 */
 	class Node {
 		/**
@@ -5775,7 +9837,7 @@
 		/**
 		 * Update properties
 		 *
-		 * @param {object} payload
+		 * @param {NodeRawInfo} payload
 		 * @param {boolean} isReconnected
 		 * @memberof Node
 		 */
@@ -5787,14 +9849,13 @@
 			this.port = payload.port;
 			this.client = payload.client || {};
 			this.config = payload.config || {};
-			this.instanceID = payload.instanceID;
 
-			// Process services & events
 			this.services = payload.services;
 			this.rawInfo = payload;
 
 			const newSeq = payload.seq || 1;
-			if (newSeq > this.seq || isReconnected) {
+			if (newSeq > this.seq || isReconnected || payload.instanceID !== this.instanceID) {
+				this.instanceID = payload.instanceID;
 				this.seq = newSeq;
 				return true;
 			}
@@ -5803,23 +9864,27 @@
 		/**
 		 * Update local properties.
 		 *
-		 * @memberof Node
 		 * @param {Function} cpuUsage
+		 * @memberof Node
 		 */
 		updateLocalInfo(cpuUsage) {
-			return cpuUsage().then(res => {
-				const newVal = Math.round(res.avg);
-				if (this.cpu != newVal) {
-					this.cpu = newVal;
-					this.cpuSeq++;
-				}
-			}).catch(() => { /* silent */ });
+			return cpuUsage()
+				.then(res => {
+					const newVal = Math.round(res.avg);
+					if (this.cpu != newVal) {
+						this.cpu = newVal;
+						this.cpuSeq++;
+					}
+				})
+				.catch(() => {
+					/* silent */
+				});
 		}
 
 		/**
 		 * Update heartbeat properties
 		 *
-		 * @param {any} payload
+		 * @param {object} payload
 		 * @memberof Node
 		 */
 		heartbeat(payload) {
@@ -5856,12 +9921,22 @@
 	const { getIpList } = utils_1;
 
 	/**
+	 * Import types
+	 *
+	 * @typedef {import("./registry")} Registry
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 * @typedef {import("./node-catalog")} NodeCatalogClass
+	 * @typedef {import("./node-catalog").NodeCatalogListOptions} NodeCatalogListOptions
+	 * @typedef {import("./node-catalog").NodeCatalogListResult} NodeCatalogListResult
+	 */
+
+	/**
 	 * Catalog for nodes
 	 *
 	 * @class NodeCatalog
+	 * @implements {NodeCatalogClass}
 	 */
 	class NodeCatalog {
-
 		/**
 		 * Creates an instance of NodeCatalog.
 		 *
@@ -5875,6 +9950,7 @@
 			this.broker = broker;
 			this.logger = registry.logger;
 
+			this.localNode = null;
 			this.nodes = new Map();
 
 			this.createLocalNode();
@@ -5910,7 +9986,7 @@
 		 * Add a new node
 		 *
 		 * @param {String} id
-		 * @param {any} node
+		 * @param {Node} node
 		 * @memberof NodeCatalog
 		 */
 		add(id, node) {
@@ -5932,7 +10008,7 @@
 		 * Get a node by nodeID
 		 *
 		 * @param {String} id
-		 * @returns
+		 * @returns {Node}
 		 * @memberof NodeCatalog
 		 */
 		get(id) {
@@ -5963,8 +10039,7 @@
 		onlineCount() {
 			let count = 0;
 			this.nodes.forEach(node => {
-				if (node.available)
-					count++;
+				if (node.available) count++;
 			});
 
 			return count;
@@ -5974,6 +10049,7 @@
 		 * Process incoming INFO packet payload
 		 *
 		 * @param {any} payload
+		 * @returns {Node}
 		 * @memberof NodeCatalog
 		 */
 		processNodeInfo(payload) {
@@ -6038,31 +10114,27 @@
 
 				this.registry.updateMetrics();
 
-				this.logger.warn(`Node '${node.id}' disconnected${isUnexpected ? " unexpectedly" : ""}.`);
+				if (isUnexpected) this.logger.warn(`Node '${node.id}' disconnected unexpectedly.`);
+				else this.logger.info(`Node '${node.id}' disconnected.`);
 
-				if (this.broker.transit)
-					this.broker.transit.removePendingRequestByNodeID(nodeID);
+				if (this.broker.transit) this.broker.transit.removePendingRequestByNodeID(nodeID);
 			}
 		}
-
 
 		/**
 		 * Get a node list
 		 *
-		 * @param {Object} {onlyAvailable = false, withServices = false}
-		 * @returns
+		 * @param {NodeCatalogListOptions} opts
+		 * @returns {NodeCatalogListResult[]}
 		 * @memberof NodeCatalog
 		 */
-		list({ onlyAvailable = false, withServices = false }) {
+		list({ onlyAvailable = false, withServices = false } = {}) {
 			let res = [];
 			this.nodes.forEach(node => {
-				if (onlyAvailable && !node.available)
-					return;
+				if (onlyAvailable && !node.available) return;
 
-				if (withServices)
-					res.push(___default.omit(node, ["rawInfo"]));
-				else
-					res.push(___default.omit(node, ["services", "rawInfo"]));
+				if (withServices) res.push(___default.omit(node, ["rawInfo"]));
+				else res.push(___default.omit(node, ["services", "rawInfo"]));
 			});
 
 			return res;
@@ -6080,22 +10152,31 @@
 
 	/*
 	 * moleculer
-	 * Copyright (c) 2018 MoleculerJS (https://github.com/moleculerjs/moleculer)
+	 * Copyright (c) 2023 MoleculerJS (https://github.com/moleculerjs/moleculer)
 	 * MIT Licensed
+	 */
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("./service-item")} ServiceItemClass
+	 * @typedef {import("./node")} Node
+	 * @typedef {import("../service").ActionSchema} ActionSchema
+	 * @typedef {import("../service").EventSchema} EventSchema
 	 */
 
 	/**
 	 * Service class
 	 *
 	 * @class ServiceItem
+	 * @implements {ServiceItemClass}
 	 */
 	class ServiceItem {
-
 		/**
 		 * Creates an instance of ServiceItem.
 		 *
 		 * @param {Node} node
-		 * @param {Object} service
+		 * @param {object} service
 		 * @param {Boolean} local
 		 * @memberof ServiceItem
 		 */
@@ -6117,7 +10198,7 @@
 		 * Check the service equals params
 		 *
 		 * @param {String} fullName
-		 * @param {String} nodeID
+		 * @param {String=} nodeID
 		 * @returns
 		 * @memberof ServiceItem
 		 */
@@ -6128,7 +10209,7 @@
 		/**
 		 * Update service properties
 		 *
-		 * @param {any} svc
+		 * @param {object} svc
 		 * @memberof ServiceItem
 		 */
 		update(svc) {
@@ -6141,7 +10222,7 @@
 		/**
 		 * Add action to service
 		 *
-		 * @param {any} action
+		 * @param {ActionSchema} action
 		 * @memberof ServiceItem
 		 */
 		addAction(action) {
@@ -6151,7 +10232,7 @@
 		/**
 		 * Add event to service
 		 *
-		 * @param {any} event
+		 * @param {EventSchema} event
 		 * @memberof ServiceItem
 		 */
 		addEvent(event) {
@@ -6164,12 +10245,24 @@
 	const { removeFromArray } = utils_1;
 
 	/**
+	 * Import types
+	 *
+	 * @typedef {import("./service-catalog")} ServiceCatalogClass
+	 * @typedef {import("./service-catalog").ServiceCatalogListOptions} ServiceCatalogListOptions
+	 * @typedef {import("./service-catalog").ServiceCatalogListResult} ServiceCatalogListResult
+	 * @typedef {import("./service-catalog").ServiceCatalogLocalNodeServicesResult} ServiceCatalogLocalNodeServicesResult
+	 * @typedef {import("./registry")} Registry
+	 * @typedef {import("./node")} Node
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 */
+
+	/**
 	 * Catalog for services
 	 *
 	 * @class ServiceCatalog
+	 * @implements {ServiceCatalogClass}
 	 */
 	class ServiceCatalog {
-
 		/**
 		 * Creates an instance of ServiceCatalog.
 		 *
@@ -6207,7 +10300,7 @@
 		 *
 		 * @param {String} fullName
 		 * @param {String} nodeID
-		 * @returns
+		 * @returns {Boolean}
 		 * @memberof ServiceCatalog
 		 */
 		has(fullName, nodeID) {
@@ -6219,7 +10312,7 @@
 		 *
 		 * @param {String} fullName
 		 * @param {String} nodeID
-		 * @returns
+		 * @returns {ServiceItem}
 		 * @memberof ServiceCatalog
 		 */
 		get(fullName, nodeID) {
@@ -6229,26 +10322,29 @@
 		/**
 		 * Get a filtered list of services with actions
 		 *
-		 * @param {Object} {onlyLocal = false,  onlyAvailable = false, skipInternal = false, withActions = false, withEvents = false, grouping = false}
-		 * @returns {Array}
+		 * @param {ServiceCatalogListOptions} opts
+		 * @returns {ServiceCatalogListResult[]}
 		 *
 		 * @memberof Registry
 		 */
-		list({ onlyLocal = false, onlyAvailable = false, skipInternal = false, withActions = false, withEvents = false, grouping = false }) {
+		list({
+			onlyLocal = false,
+			onlyAvailable = false,
+			skipInternal = false,
+			withActions = false,
+			withEvents = false,
+			grouping = false
+		} = {}) {
 			let res = [];
 			this.services.forEach(service => {
-				if (skipInternal && /^\$/.test(service.name))
-					return;
+				if (skipInternal && /^\$/.test(service.name)) return;
 
-				if (onlyLocal && !service.local)
-					return;
+				if (onlyLocal && !service.local) return;
 
-				if (onlyAvailable && !service.node.available)
-					return;
+				if (onlyAvailable && !service.node.available) return;
 
 				let item;
-				if (grouping)
-					item = res.find(svc => svc.fullName == service.fullName);
+				if (grouping) item = res.find(svc => svc.fullName == service.fullName);
 
 				if (!item) {
 					let item = {
@@ -6259,13 +10355,11 @@
 						metadata: service.metadata,
 
 						local: service.local,
-						available: service.node.available,
+						available: service.node.available
 					};
 
-					if (grouping)
-						item.nodes = [service.node.id];
-					else
-						item.nodeID = service.node.id;
+					if (grouping) item.nodes = [service.node.id];
+					else item.nodeID = service.node.id;
 
 					if (withActions) {
 						item.actions = {};
@@ -6273,7 +10367,11 @@
 						___default.forIn(service.actions, action => {
 							if (action.protected) return;
 
-							item.actions[action.name] = ___default.omit(action, ["handler", "remoteHandler", "service"]);
+							item.actions[action.name] = ___default.omit(action, [
+								"handler",
+								"remoteHandler",
+								"service"
+							]);
 						});
 					}
 
@@ -6284,15 +10382,17 @@
 							// Skip internal event handlers
 							if (/^\$/.test(event.name)) return;
 
-							item.events[event.name] = ___default.omit(event, ["handler", "remoteHandler", "service"]);
+							item.events[event.name] = ___default.omit(event, [
+								"handler",
+								"remoteHandler",
+								"service"
+							]);
 						});
 					}
 
 					res.push(item);
-
 				} else {
-					if (item.nodes.indexOf(service.node.id) === -1)
-						item.nodes.push(service.node.id);
+					if (item.nodes.indexOf(service.node.id) === -1) item.nodes.push(service.node.id);
 				}
 			});
 
@@ -6302,14 +10402,13 @@
 		/**
 		 * Get local service list for INFO packet
 		 *
-		 * @returns {Object}
+		 * @returns {ServiceCatalogLocalNodeServicesResult[]}
 		 * @memberof ServiceCatalog
 		 */
 		getLocalNodeServices() {
 			let res = [];
 			this.services.forEach(service => {
-				if (!service.local)
-					return;
+				if (!service.local) return;
 
 				let item = {
 					name: service.name,
@@ -6382,20 +10481,34 @@
 	const { MoleculerServerError } = errors;
 
 	/**
+	 * Import types
+	 *
+	 * @typedef {import("./registry")} Registry
+	 * @typedef {import("../strategies/base")} Strategy
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 * @typedef {import("./endpoint-list")} EndpointListClass
+	 * @typedef {import("../context")} Context
+	 * @typedef {import("./node")} Node
+	 * @typedef {import("./endpoint")} Endpoint
+	 * @typedef {import("./service-item")} ServiceItem
+	 */
+
+	/**
 	 * Endpoint list class
 	 *
+	 * @template TEndpoint
 	 * @class EndpointList
+	 * @implements {EndpointListClass}
 	 */
 	class EndpointList {
-
 		/**
 		 * Creates an instance of EndpointList.
 		 * @param {Registry} registry
 		 * @param {ServiceBroker} broker
 		 * @param {String} name
 		 * @param {String} group
-		 * @param {EndPointClass} EndPointFactory
-		 * @param {StrategyClass} StrategyFactory
+		 * @param {typeof import("./endpoint")} EndPointFactory
+		 * @param {typeof import("../strategies/base")} StrategyFactory
 		 * @param {Object?} strategyOptions
 		 * @memberof EndpointList
 		 */
@@ -6403,6 +10516,7 @@
 			this.registry = registry;
 			this.broker = broker;
 			this.logger = registry.logger;
+			// @ts-ignore
 			this.strategy = new StrategyFactory(registry, broker, strategyOptions);
 			this.name = name;
 			this.group = group;
@@ -6419,9 +10533,9 @@
 		 * Add a new endpoint
 		 *
 		 * @param {Node} node
-		 * @param {Service} service
+		 * @param {ServiceItem} service
 		 * @param {any} data
-		 * @returns
+		 * @returns {Endpoint}
 		 * @memberof EndpointList
 		 */
 		add(node, service, data) {
@@ -6431,6 +10545,7 @@
 				return found;
 			}
 
+			// @ts-ignore
 			const ep = new this.EndPointFactory(this.registry, this.broker, node, service, data);
 			this.endpoints.push(ep);
 
@@ -6442,12 +10557,11 @@
 		/**
 		 * Get first endpoint
 		 *
-		 * @returns {Endpoint}
+		 * @returns {Endpoint | null}
 		 * @memberof EndpointList
 		 */
 		getFirst() {
-			if (this.endpoints.length > 0)
-				return this.endpoints[0];
+			if (this.endpoints.length > 0) return this.endpoints[0];
 
 			return null;
 		}
@@ -6464,7 +10578,12 @@
 			const ret = this.strategy.select(list, ctx);
 			if (!ret) {
 				/* istanbul ignore next */
-				throw new MoleculerServerError("Strategy returned an invalid endpoint.", 500, "INVALID_ENDPOINT", { strategy: typeof(this.strategy) });
+				throw new MoleculerServerError(
+					"Strategy returned an invalid endpoint.",
+					500,
+					"INVALID_ENDPOINT",
+					{ strategy: typeof this.strategy }
+				);
 			}
 			return ret;
 		}
@@ -6473,7 +10592,7 @@
 		 * Get next endpoint
 		 *
 		 * @param {Context} ctx
-		 * @returns
+		 * @returns {Endpoint | null}
 		 * @memberof EndpointList
 		 */
 		next(ctx) {
@@ -6484,15 +10603,14 @@
 
 			// If internal (service), return the local always
 			if (this.internal && this.hasLocal()) {
-				return this.nextLocal();
+				return this.nextLocal(ctx);
 			}
 
 			// Only 1 item
 			if (this.endpoints.length === 1) {
 				// No need to select a node, return the only one
 				const item = this.endpoints[0];
-				if (item.isAvailable)
-					return item;
+				if (item.isAvailable) return item;
 
 				return null;
 			}
@@ -6500,13 +10618,11 @@
 			// Search local item
 			if (this.registry.opts.preferLocal === true && this.hasLocal()) {
 				const ep = this.nextLocal(ctx);
-				if (ep && ep.isAvailable)
-					return ep;
+				if (ep && ep.isAvailable) return ep;
 			}
 
 			const epList = this.endpoints.filter(ep => ep.isAvailable);
-			if (epList.length == 0)
-				return null;
+			if (epList.length === 0) return null;
 
 			return this.select(epList, ctx);
 		}
@@ -6528,15 +10644,13 @@
 			if (this.localEndpoints.length === 1) {
 				// No need to select a node, return the only one
 				const item = this.localEndpoints[0];
-				if (item.isAvailable)
-					return item;
+				if (item.isAvailable) return item;
 
 				return null;
 			}
 
 			const epList = this.localEndpoints.filter(ep => ep.isAvailable);
-			if (epList.length == 0)
-				return null;
+			if (epList.length === 0) return null;
 
 			return this.select(epList, ctx);
 		}
@@ -6544,7 +10658,7 @@
 		/**
 		 * Check there is available endpoint
 		 *
-		 * @returns
+		 * @returns {boolean}
 		 * @memberof EndpointList
 		 */
 		hasAvailable() {
@@ -6554,7 +10668,7 @@
 		/**
 		 * Check there is local endpoint
 		 *
-		 * @returns
+		 * @returns {boolean}
 		 * @memberof EndpointList
 		 */
 		hasLocal() {
@@ -6573,7 +10687,7 @@
 		/**
 		 * Get count of endpoints
 		 *
-		 * @returns
+		 * @returns {Number}
 		 * @memberof EndpointList
 		 */
 		count() {
@@ -6584,13 +10698,12 @@
 		 * Get endpoint on a specified node
 		 *
 		 * @param {String} nodeID
-		 * @returns
+		 * @returns {Endpoint | null}
 		 * @memberof EndpointList
 		 */
 		getEndpointByNodeID(nodeID) {
 			const ep = this.endpoints.find(ep => ep.id == nodeID);
-			if (ep && ep.isAvailable)
-				return ep;
+			if (ep && ep.isAvailable) return ep;
 
 			return null;
 		}
@@ -6599,7 +10712,7 @@
 		 * Check nodeID in the endpoint list
 		 *
 		 * @param {String} nodeID
-		 * @returns
+		 * @returns {boolean}
 		 * @memberof EndpointList
 		 */
 		hasNodeID(nodeID) {
@@ -6645,14 +10758,24 @@
 
 	/*
 	 * moleculer
-	 * Copyright (c) 2018 MoleculerJS (https://github.com/moleculerjs/moleculer)
+	 * Copyright (c) 2023 MoleculerJS (https://github.com/moleculerjs/moleculer)
 	 * MIT Licensed
+	 */
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("./registry")} Registry
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 * @typedef {import("./endpoint")} EndpointClass
+	 * @typedef {import("./node")} Node
 	 */
 
 	/**
 	 * Endpoint class
 	 *
 	 * @class Endpoint
+	 * @implements {EndpointClass}
 	 */
 	class Endpoint {
 		/**
@@ -6673,9 +10796,7 @@
 			this.state = true;
 		}
 
-		destroy() {
-
-		}
+		destroy() {}
 
 		/**
 		 * Get availability
@@ -6687,28 +10808,37 @@
 			return this.state;
 		}
 
-		update() {
-
-		}
+		update() {}
 	}
 
 	var endpoint = Endpoint;
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("./registry")} Registry
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 * @typedef {import("./endpoint-event")} EventEndpointClass
+	 * @typedef {import("./node")} Node
+	 * @typedef {import("../service")} Service
+	 * @typedef {import("../service").EventSchema} EventSchema
+	 */
 
 	/**
 	 * Endpoint class for events
 	 *
 	 * @class EventEndpoint
 	 * @extends {Endpoint}
+	 * @implements {EventEndpointClass}
 	 */
 	class EventEndpoint extends endpoint {
-
 		/**
 		 * Creates an instance of EventEndpoint.
 		 * @param {Registry} registry
 		 * @param {ServiceBroker} broker
 		 * @param {Node} node
 		 * @param {Service} service
-		 * @param {any} event
+		 * @param {EventSchema} event
 		 * @memberof EventEndpoint
 		 */
 		constructor(registry, broker, node, service, event) {
@@ -6721,7 +10851,7 @@
 		/**
 		 * Update properties
 		 *
-		 * @param {any} event
+		 * @param {EventSchema} event
 		 * @memberof EventEndpoint
 		 */
 		update(event) {
@@ -6732,18 +10862,33 @@
 	var endpointEvent = EventEndpoint;
 
 	/**
+	 * Import types
+	 *
+	 * @typedef {import("./event-catalog")} EventCatalogClass
+	 * @typedef {import("./event-catalog").EventCatalogListOptions} EventCatalogListOptions
+	 * @typedef {import("./event-catalog").EventCatalogListResult} EventCatalogListResult
+	 * @typedef {import("./registry")} Registry
+	 * @typedef {import("./service-item")} ServiceItem
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 * @typedef {import("../context")} Context
+	 * @typedef {import("./node")} Node
+	 * @typedef {import("../strategies/base")} BaseStrategy
+	 * @typedef {import("../service").EventSchema} EventSchema
+	 */
+
+	/**
 	 * Catalog for events
 	 *
 	 * @class EventCatalog
+	 * @implements {EventCatalogClass}
 	 */
 	class EventCatalog {
-
 		/**
 		 * Creates an instance of EventCatalog.
 		 *
 		 * @param {Registry} registry
 		 * @param {ServiceBroker} broker
-		 * @param {any} StrategyFactory
+		 * @param {typeof import("../strategies/base")} StrategyFactory
 		 * @memberof EventCatalog
 		 */
 		constructor(registry, broker, StrategyFactory) {
@@ -6752,6 +10897,7 @@
 			this.logger = registry.logger;
 			this.StrategyFactory = StrategyFactory;
 
+			/** @type EndpointList<EventEndpoint>[] */
 			this.events = [];
 
 			this.EndpointFactory = endpointEvent;
@@ -6762,8 +10908,8 @@
 		 *
 		 * @param {Node} node
 		 * @param {ServiceItem} service
-		 * @param {any} event
-		 * @returns
+		 * @param {EventSchema} event
+		 * @returns {EndpointList<EventEndpoint>}
 		 * @memberof EventCatalog
 		 */
 		add(node, service, event) {
@@ -6771,10 +10917,23 @@
 			const groupName = event.group || service.name;
 			let list = this.get(eventName, groupName);
 			if (!list) {
-				const strategyFactory = event.strategy ? (strategies.resolve(event.strategy) || this.StrategyFactory) : this.StrategyFactory;
-				const strategyOptions = event.strategyOptions ? event.strategyOptions : this.registry.opts.strategyOptions;
+				const strategyFactory = event.strategy
+					? strategies.resolve(event.strategy) || this.StrategyFactory
+					: this.StrategyFactory;
+				const strategyOptions = event.strategyOptions
+					? event.strategyOptions
+					: this.registry.opts.strategyOptions;
 				// Create a new EndpointList
-				list = new endpointList(this.registry, this.broker, eventName, groupName, this.EndpointFactory, strategyFactory, strategyOptions);
+				list = new endpointList(
+					this.registry,
+					this.broker,
+					eventName,
+					groupName,
+					this.EndpointFactory,
+					strategyFactory,
+					strategyOptions
+				);
+
 				this.events.push(list);
 			}
 
@@ -6788,11 +10947,11 @@
 		 *
 		 * @param {String} eventName
 		 * @param {String} groupName
-		 * @returns
+		 * @returns {EndpointList<EventEndpoint>}
 		 * @memberof EventCatalog
 		 */
 		get(eventName, groupName) {
-			return this.events.find(list => list.name == eventName && list.group == groupName);
+			return this.events.find(list => list.name === eventName && list.group === groupName);
 		}
 
 		/**
@@ -6800,19 +10959,19 @@
 		 *
 		 * @param {String} eventName
 		 * @param {String|Array?} groups
-		 * @returns
+		 * @param {Context} ctx
+		 * @returns {[EventEndpoint, string][]}
 		 * @memberof EventCatalog
 		 */
-		getBalancedEndpoints(eventName, groups) {
+		getBalancedEndpoints(eventName, groups, ctx) {
 			const res = [];
 
 			this.events.forEach(list => {
 				if (!utils_1.match(eventName, list.name)) return;
-				if (groups == null || groups.length == 0 || groups.indexOf(list.group) != -1) {
+				if (groups == null || groups.length === 0 || groups.indexOf(list.group) !== -1) {
 					// Use built-in balancer, get the next endpoint
-					const ep = list.next();
-					if (ep && ep.isAvailable)
-						res.push([ep, list.group]);
+					const ep = list.next(ctx);
+					if (ep && ep.isAvailable) res.push([ep, list.group]);
 				}
 			});
 
@@ -6822,12 +10981,14 @@
 		/**
 		 * Get all groups for event
 		 *
-		 * @param {String} eventName
-		 * @returns Array<String>
+		 * @param {string} eventName
+		 * @returns {string[]}
 		 * @memberof EventCatalog
 		 */
 		getGroups(eventName) {
-			return ___default.uniq(this.events.filter(list => utils_1.match(eventName, list.name)).map(item => item.group));
+			return utils_1.uniq(
+				this.events.filter(list => utils_1.match(eventName, list.name)).map(item => item.group)
+			);
 		}
 
 		/**
@@ -6835,17 +10996,20 @@
 		 *
 		 * @param {String} eventName
 		 * @param {Array<String>?} groupNames
-		 * @returns
+		 * @returns {EventEndpoint[]}
 		 * @memberof EventCatalog
 		 */
 		getAllEndpoints(eventName, groupNames) {
 			const res = [];
 			this.events.forEach(list => {
 				if (!utils_1.match(eventName, list.name)) return;
-				if (groupNames == null || groupNames.length == 0 || groupNames.indexOf(list.group) !== -1) {
+				if (
+					groupNames == null ||
+					groupNames.length === 0 ||
+					groupNames.indexOf(list.group) !== -1
+				) {
 					list.endpoints.forEach(ep => {
-						if (ep.isAvailable)
-							res.push(ep);
+						if (ep.isAvailable) res.push(ep);
 					});
 				}
 			});
@@ -6856,11 +11020,7 @@
 		/**
 		 * Call local service handlers
 		 *
-		 * @param {String} eventName
-		 * @param {any} payload
-		 * @param {Array<String>?} groupNames
-		 * @param {String} nodeID
-		 * @param {boolean} broadcast
+		 * @param {Context} ctx
 		 * @returns {Promise<any>}
 		 *
 		 * @memberof EventCatalog
@@ -6873,7 +11033,11 @@
 
 			this.events.forEach(list => {
 				if (!utils_1.match(ctx.eventName, list.name)) return;
-				if (ctx.eventGroups == null || ctx.eventGroups.length == 0 || ctx.eventGroups.indexOf(list.group) !== -1) {
+				if (
+					ctx.eventGroups == null ||
+					ctx.eventGroups.length === 0 ||
+					ctx.eventGroups.indexOf(list.group) !== -1
+				) {
 					if (isBroadcast) {
 						list.endpoints.forEach(ep => {
 							if (ep.local && ep.event.handler) {
@@ -6893,7 +11057,12 @@
 				}
 			});
 
-			return this.broker.Promise.all(promises);
+			return this.broker.Promise.allSettled(promises).then(results => {
+				const err = results.find(r => r.status == "rejected");
+				// @ts-ignore
+				if (err) return this.broker.Promise.reject(err.reason);
+				return true;
+			});
 		}
 
 		/**
@@ -6904,6 +11073,7 @@
 		 * @memberof EventCatalog
 		 */
 		callEventHandler(ctx) {
+			// @ts-ignore
 			return ctx.endpoint.event.handler(ctx);
 		}
 
@@ -6928,32 +11098,33 @@
 		 */
 		remove(eventName, nodeID) {
 			this.events.forEach(list => {
-				if (list.name == eventName)
-					list.removeByNodeID(nodeID);
+				if (list.name == eventName) list.removeByNodeID(nodeID);
 			});
 		}
 
 		/**
 		 * Get a filtered list of events
 		 *
-		 * @param {Object} {onlyLocal = false, onlyAvailable = false, skipInternal = false, withEndpoints = false}
-		 * @returns {Array}
+		 * @param {EventCatalogListOptions} opts
+		 * @returns {EventCatalogListResult[]}
 		 *
 		 * @memberof EventCatalog
 		 */
-		list({ onlyLocal = false, onlyAvailable = false, skipInternal = false, withEndpoints = false }) {
+		list({
+			onlyLocal = false,
+			onlyAvailable = false,
+			skipInternal = false,
+			withEndpoints = false
+		} = {}) {
 			let res = [];
 
 			this.events.forEach(list => {
 				/* istanbul ignore next */
-				if (skipInternal && /^\$/.test(list.name))
-					return;
+				if (skipInternal && /^\$/.test(list.name)) return;
 
-				if (onlyLocal && !list.hasLocal())
-					return;
+				if (onlyLocal && !list.hasLocal()) return;
 
-				if (onlyAvailable && !list.hasAvailable())
-					return;
+				if (onlyAvailable && !list.hasAvailable()) return;
 
 				let item = {
 					name: list.name,
@@ -6965,9 +11136,8 @@
 				};
 
 				if (item.count > 0) {
-					const ep = list.endpoints[0];
-					if (ep)
-						item.event = ___default.omit(ep.event, ["handler", "remoteHandler", "service"]);
+					const ep = /** @type {EventEndpoint} */ (list.endpoints[0]);
+					if (ep) item.event = ___default.omit(ep.event, ["handler", "remoteHandler", "service"]);
 				}
 
 				if (withEndpoints) {
@@ -6976,7 +11146,7 @@
 							return {
 								nodeID: ep.node.id,
 								state: ep.state,
-								available: ep.node.available,
+								available: ep.node.available
 							};
 						});
 					}
@@ -6992,20 +11162,31 @@
 	var eventCatalog = EventCatalog;
 
 	/**
+	 * Import types
+	 *
+	 * @typedef {import("./registry")} Registry
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 * @typedef {import("./endpoint-action")} ActionEndpointClass
+	 * @typedef {import("./node")} Node
+	 * @typedef {import("../service")} Service
+	 * @typedef {import("../service").ActionSchema} ActionSchema
+	 */
+
+	/**
 	 * Endpoint class for actions
 	 *
 	 * @class ActionEndpoint
 	 * @extends {Endpoint}
+	 * @implements {ActionEndpointClass}
 	 */
 	class ActionEndpoint extends endpoint {
-
 		/**
 		 * Creates an instance of ActionEndpoint.
 		 * @param {Registry} registry
 		 * @param {ServiceBroker} broker
 		 * @param {Node} node
-		 * @param {ServiceItem} service
-		 * @param {any} action
+		 * @param {Service} service
+		 * @param {ActionSchema} action
 		 * @memberof ActionEndpoint
 		 */
 		constructor(registry, broker, node, service, action) {
@@ -7020,7 +11201,7 @@
 		/**
 		 * Update properties
 		 *
-		 * @param {any} action
+		 * @param {ActionSchema} action
 		 * @memberof ActionEndpoint
 		 */
 		update(action) {
@@ -7031,18 +11212,31 @@
 	var endpointAction = ActionEndpoint;
 
 	/**
+	 * Import types
+	 *
+	 * @typedef {import("./action-catalog")} ActionCatalogClass
+	 * @typedef {import("./action-catalog").ActionCatalogListOptions} ActionCatalogListOptions
+	 * @typedef {import("./action-catalog").ActionCatalogListResult} ActionCatalogListResult
+	 * @typedef {import("./registry")} Registry
+	 * @typedef {import("./node")} Node
+	 * @typedef {import("./service-item")} ServiceItem
+	 * @typedef {import("../service").ActionSchema} ActionSchema
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 * @typedef {import("../strategies/base")} BaseStrategy
+	 */
+	/**
 	 * Catalog class to store service actions
 	 *
 	 * @class ActionCatalog
+	 * @implements {ActionCatalogClass}
 	 */
 	class ActionCatalog {
-
 		/**
 		 * Creates an instance of ActionCatalog.
 		 *
 		 * @param {Registry} registry
 		 * @param {ServiceBroker} broker
-		 * @param {Strategy} StrategyFactory
+		 * @param {typeof Strategies.Base} StrategyFactory
 		 * @memberof ActionCatalog
 		 */
 		constructor(registry, broker, StrategyFactory) {
@@ -7061,16 +11255,29 @@
 		 *
 		 * @param {Node} node
 		 * @param {ServiceItem} service
-		 * @param {Action} action
+		 * @param {ActionSchema} action
+		 * @returns {EndpointList}
 		 * @memberof ActionCatalog
 		 */
 		add(node, service, action) {
 			let list = this.actions.get(action.name);
 			if (!list) {
-				const strategyFactory = action.strategy ? (strategies.resolve(action.strategy) || this.StrategyFactory) : this.StrategyFactory;
-				const strategyOptions = action.strategyOptions ? action.strategyOptions : this.registry.opts.strategyOptions;
+				const strategyFactory = action.strategy
+					? strategies.resolve(action.strategy) || this.StrategyFactory
+					: this.StrategyFactory;
+				const strategyOptions = action.strategyOptions
+					? action.strategyOptions
+					: this.registry.opts.strategyOptions;
 				// Create a new EndpointList
-				list = new endpointList(this.registry, this.broker, action.name, null, this.EndpointFactory, strategyFactory, strategyOptions);
+				list = new endpointList(
+					this.registry,
+					this.broker,
+					action.name,
+					null,
+					this.EndpointFactory,
+					strategyFactory,
+					strategyOptions
+				);
 				this.actions.set(action.name, list);
 			}
 
@@ -7082,7 +11289,7 @@
 		/**
 		 * Get action by name
 		 *
-		 * @param {String} actionName
+		 * @param {string} actionName
 		 * @returns
 		 * @memberof ActionCatalog
 		 */
@@ -7093,14 +11300,13 @@
 		/**
 		 * Check the action is available (there is live endpoint)
 		 *
-		 * @param {String} actionName
-		 * @returns {Boolean}
+		 * @param {string} actionName
+		 * @returns {boolean}
 		 * @memberof ActionCatalog
 		 */
 		isAvailable(actionName) {
 			const list = this.actions.get(actionName);
-			if (list)
-				return list.hasAvailable();
+			if (list) return list.hasAvailable();
 
 			return false;
 		}
@@ -7120,36 +11326,37 @@
 		/**
 		 * Remove action by name & nodeID
 		 *
-		 * @param {String} actionName
-		 * @param {String} nodeID
+		 * @param {string} actionName
+		 * @param {string} nodeID
 		 * @memberof ActionCatalog
 		 */
 		remove(actionName, nodeID) {
 			const list = this.actions.get(actionName);
-			if (list)
-				list.removeByNodeID(nodeID);
+			if (list) list.removeByNodeID(nodeID);
 		}
 
 		/**
 		 * Get a filtered list of actions
 		 *
-		 * @param {Object} {onlyLocal = false, onlyAvailable = false, skipInternal = false, withEndpoints = false}
-		 * @returns {Array}
+		 * @param {ActionCatalogListOptions} opts
+		 * @returns {Array<ActionCatalogListResult>}
 		 *
 		 * @memberof ActionCatalog
 		 */
-		list({ onlyLocal = false, onlyAvailable = false, skipInternal = false, withEndpoints = false }) {
+		list({
+			onlyLocal = false,
+			onlyAvailable = false,
+			skipInternal = false,
+			withEndpoints = false
+		} = {}) {
 			let res = [];
 
 			this.actions.forEach((list, key) => {
-				if (skipInternal && /^\$/.test(key))
-					return;
+				if (skipInternal && /^\$/.test(key)) return;
 
-				if (onlyLocal && !list.hasLocal())
-					return;
+				if (onlyLocal && !list.hasLocal()) return;
 
-				if (onlyAvailable && !list.hasAvailable())
-					return;
+				if (onlyAvailable && !list.hasAvailable()) return;
 
 				let item = {
 					name: key,
@@ -7160,8 +11367,7 @@
 
 				if (item.count > 0) {
 					const ep = list.endpoints[0];
-					if (ep)
-						item.action = ___default.omit(ep.action, ["handler", "remoteHandler", "service"]);
+					if (ep) item.action = ___default.omit(ep.action, ["handler", "remoteHandler", "service"]);
 				}
 				if (item.action && item.action.protected === true) return;
 
@@ -7171,7 +11377,7 @@
 							return {
 								nodeID: ep.node.id,
 								state: ep.state,
-								available: ep.node.available,
+								available: ep.node.available
 							};
 						});
 					}
@@ -7186,19 +11392,37 @@
 
 	var actionCatalog = ActionCatalog;
 
-	const { METRIC: METRIC$1 }		= metrics;
+	const { METRIC: METRIC$1 } = metrics;
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("../context")} Context
+	 * @typedef {import("../service")} Service
+	 * @typedef {import("./service-item")} ServiceItem
+	 * @typedef {import("../service").ServiceAction} ServiceAction
+	 * @typedef {import("../service").ActionSchema} ActionSchema
+	 * @typedef {import("../service").EventSchema} EventSchema
+	 * @typedef {import("./registry")} RegistryClass
+	 * @typedef {import("./registry").NodeRawInfo} NodeRawInfo
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 * @typedef {import("./node")} Node
+	 * @typedef {import("./endpoint-list")} EndpointList
+	 * @typedef {import("./endpoint")} Endpoint
+	 * @typedef {import("../strategies/base")} BaseStrategy
+	 */
 
 	/**
 	 * Service Registry
 	 *
 	 * @class Registry
+	 * @implements {RegistryClass}
 	 */
 	class Registry {
-
 		/**
 		 * Creates an instance of Registry.
 		 *
-		 * @param {any} broker
+		 * @param {ServiceBroker} broker
 		 * @memberof Registry
 		 */
 		constructor(broker) {
@@ -7211,8 +11435,12 @@
 			this.StrategyFactory = strategies.resolve(this.opts.strategy);
 			this.logger.info(`Strategy: ${this.StrategyFactory.name}`);
 
+			/** @type {Discoverers.Base} */
 			this.discoverer = discoverers.resolve(this.opts.discoverer);
 			this.logger.info(`Discoverer: ${this.broker.getConstructorName(this.discoverer)}`);
+
+			/** @type {boolean|string} */
+			this.localNodeInfoInvalidated = true;
 
 			this.nodes = new nodeCatalog(this, broker);
 			this.services = new serviceCatalog(this, broker);
@@ -7223,7 +11451,7 @@
 			this.updateMetrics();
 		}
 
-		init(broker) {
+		init() {
 			this.discoverer.init(this);
 		}
 
@@ -7237,14 +11465,49 @@
 		registerMoleculerMetrics() {
 			if (!this.broker.isMetricsEnabled()) return;
 
-			this.metrics.register({ name: METRIC$1.MOLECULER_REGISTRY_NODES_TOTAL, type: METRIC$1.TYPE_GAUGE, description: "Number of registered nodes" });
-			this.metrics.register({ name: METRIC$1.MOLECULER_REGISTRY_NODES_ONLINE_TOTAL, type: METRIC$1.TYPE_GAUGE, description: "Number of online nodes" });
-			this.metrics.register({ name: METRIC$1.MOLECULER_REGISTRY_SERVICES_TOTAL, type: METRIC$1.TYPE_GAUGE, description: "Number of registered services" });
-			this.metrics.register({ name: METRIC$1.MOLECULER_REGISTRY_SERVICE_ENDPOINTS_TOTAL, type: METRIC$1.TYPE_GAUGE, labelNames: ["service"], description: "Number of service endpoints" });
-			this.metrics.register({ name: METRIC$1.MOLECULER_REGISTRY_ACTIONS_TOTAL, type: METRIC$1.TYPE_GAUGE, description: "Number of registered actions" });
-			this.metrics.register({ name: METRIC$1.MOLECULER_REGISTRY_ACTION_ENDPOINTS_TOTAL, type: METRIC$1.TYPE_GAUGE, labelNames: ["action"], description: "Number of action endpoints" });
-			this.metrics.register({ name: METRIC$1.MOLECULER_REGISTRY_EVENTS_TOTAL, type: METRIC$1.TYPE_GAUGE, description: "Number of registered events" });
-			this.metrics.register({ name: METRIC$1.MOLECULER_REGISTRY_EVENT_ENDPOINTS_TOTAL, type: METRIC$1.TYPE_GAUGE, labelNames: ["event"], description: "Number of event endpoints" });
+			this.metrics.register({
+				name: METRIC$1.MOLECULER_REGISTRY_NODES_TOTAL,
+				type: METRIC$1.TYPE_GAUGE,
+				description: "Number of registered nodes"
+			});
+			this.metrics.register({
+				name: METRIC$1.MOLECULER_REGISTRY_NODES_ONLINE_TOTAL,
+				type: METRIC$1.TYPE_GAUGE,
+				description: "Number of online nodes"
+			});
+			this.metrics.register({
+				name: METRIC$1.MOLECULER_REGISTRY_SERVICES_TOTAL,
+				type: METRIC$1.TYPE_GAUGE,
+				description: "Number of registered services"
+			});
+			this.metrics.register({
+				name: METRIC$1.MOLECULER_REGISTRY_SERVICE_ENDPOINTS_TOTAL,
+				type: METRIC$1.TYPE_GAUGE,
+				labelNames: ["service"],
+				description: "Number of service endpoints"
+			});
+			this.metrics.register({
+				name: METRIC$1.MOLECULER_REGISTRY_ACTIONS_TOTAL,
+				type: METRIC$1.TYPE_GAUGE,
+				description: "Number of registered actions"
+			});
+			this.metrics.register({
+				name: METRIC$1.MOLECULER_REGISTRY_ACTION_ENDPOINTS_TOTAL,
+				type: METRIC$1.TYPE_GAUGE,
+				labelNames: ["action"],
+				description: "Number of action endpoints"
+			});
+			this.metrics.register({
+				name: METRIC$1.MOLECULER_REGISTRY_EVENTS_TOTAL,
+				type: METRIC$1.TYPE_GAUGE,
+				description: "Number of registered events"
+			});
+			this.metrics.register({
+				name: METRIC$1.MOLECULER_REGISTRY_EVENT_ENDPOINTS_TOTAL,
+				type: METRIC$1.TYPE_GAUGE,
+				labelNames: ["event"],
+				description: "Number of event endpoints"
+			});
 		}
 
 		/**
@@ -7256,38 +11519,62 @@
 			this.metrics.set(METRIC$1.MOLECULER_REGISTRY_NODES_TOTAL, this.nodes.count());
 			this.metrics.set(METRIC$1.MOLECULER_REGISTRY_NODES_ONLINE_TOTAL, this.nodes.onlineCount());
 
-			const services = this.services.list({ grouping: true, onlyLocal: false, onlyAvailable: false, skipInternal: false, withActions: false, withEvents: false });
+			const services = this.services.list({
+				grouping: true,
+				onlyLocal: false,
+				onlyAvailable: false,
+				skipInternal: false,
+				withActions: false,
+				withEvents: false
+			});
 			this.metrics.set(METRIC$1.MOLECULER_REGISTRY_SERVICES_TOTAL, services.length);
-			services.forEach(svc => this.metrics.set(METRIC$1.MOLECULER_REGISTRY_SERVICE_ENDPOINTS_TOTAL, svc.nodes ? svc.nodes.length : 0, { service: svc.fullName }));
+			services.forEach(svc =>
+				this.metrics.set(
+					METRIC$1.MOLECULER_REGISTRY_SERVICE_ENDPOINTS_TOTAL,
+					svc.nodes ? svc.nodes.length : 0,
+					{ service: svc.fullName }
+				)
+			);
 
 			const actions = this.actions.list({ withEndpoints: true });
 			this.metrics.set(METRIC$1.MOLECULER_REGISTRY_ACTIONS_TOTAL, actions.length);
-			actions.forEach(item => this.metrics.set(METRIC$1.MOLECULER_REGISTRY_ACTION_ENDPOINTS_TOTAL, item.endpoints ? item.endpoints.length : 0, { action: item.name }));
+			actions.forEach(item =>
+				this.metrics.set(
+					METRIC$1.MOLECULER_REGISTRY_ACTION_ENDPOINTS_TOTAL,
+					item.endpoints ? item.endpoints.length : 0,
+					{ action: item.name }
+				)
+			);
 
 			const events = this.events.list({ withEndpoints: true });
 			this.metrics.set(METRIC$1.MOLECULER_REGISTRY_EVENTS_TOTAL, events.length);
-			events.forEach(item => this.metrics.set(METRIC$1.MOLECULER_REGISTRY_EVENT_ENDPOINTS_TOTAL, item.endpoints ? item.endpoints.length : 0, { event: item.name }));
+			events.forEach(item =>
+				this.metrics.set(
+					METRIC$1.MOLECULER_REGISTRY_EVENT_ENDPOINTS_TOTAL,
+					item.endpoints ? item.endpoints.length : 0,
+					{ event: item.name }
+				)
+			);
 		}
 
 		/**
 		 * Register local service
 		 *
-		 * @param {Service} svc
+		 * @param {ServiceItem} svc
 		 * @memberof Registry
 		 */
 		registerLocalService(svc) {
 			if (!this.services.has(svc.fullName, this.broker.nodeID)) {
 				const service = this.services.add(this.nodes.localNode, svc, true);
 
-				if (svc.actions)
-					this.registerActions(this.nodes.localNode, service, svc.actions);
+				if (svc.actions) this.registerActions(this.nodes.localNode, service, svc.actions);
 
-				if (svc.events)
-					this.registerEvents(this.nodes.localNode, service, svc.events);
+				if (svc.events) this.registerEvents(this.nodes.localNode, service, svc.events);
 
 				this.nodes.localNode.services.push(service);
 
-				this.regenerateLocalRawInfo(this.broker.started);
+				//this.regenerateLocalRawInfo(true);
+				this.localNodeInfoInvalidated = "seq";
 
 				this.logger.info(`'${svc.name}' service is registered.`);
 
@@ -7299,14 +11586,17 @@
 		/**
 		 * Register remote services
 		 *
-		 * @param {Nodeany} node
+		 * @param {Node} node
 		 * @param {Array} serviceList
 		 * @memberof Registry
 		 */
 		registerServices(node, serviceList) {
 			serviceList.forEach(svc => {
 				if (!svc.fullName)
-					svc.fullName = this.broker.ServiceFactory.getVersionedFullName(svc.name, svc.version);
+					svc.fullName = this.broker.ServiceFactory.getVersionedFullName(
+						svc.name,
+						svc.version
+					);
 
 				let prevActions, prevEvents;
 				let service = this.services.get(svc.fullName, node.id);
@@ -7355,8 +11645,7 @@
 
 				let exist = false;
 				serviceList.forEach(svc => {
-					if (service.equals(svc.fullName))
-						exist = true;
+					if (service.equals(svc.fullName)) exist = true;
 				});
 
 				// This service is removed on remote node!
@@ -7378,17 +11667,20 @@
 		 * 		- "protected": can be called from local services
 		 * 		- "private": can be called from internally via `this.actions.xy()` inside Service
 		 *
-		 * @param {*} action
-		 * @param {*} node
+		 * @param {ActionSchema} action
+		 * @param {Node} node
 		 * @returns
 		 * @memberof Registry
 		 */
 		checkActionVisibility(action, node) {
-			if (action.visibility == null || action.visibility == "published" || action.visibility == "public")
+			if (
+				action.visibility == null ||
+				action.visibility == "published" ||
+				action.visibility == "public"
+			)
 				return true;
 
-			if (action.visibility == "protected" && node.local)
-				return true;
+			if (action.visibility == "protected" && node.local) return true;
 
 			return false;
 		}
@@ -7397,33 +11689,46 @@
 		 * Register service actions
 		 *
 		 * @param {Node} node
-		 * @param {Service} service
-		 * @param {Object} actions
+		 * @param {ServiceItem} service
+		 * @param {Record<string, ActionSchema>} actions
 		 * @memberof Registry
 		 */
 		registerActions(node, service, actions) {
 			___default.forIn(actions, action => {
+				if (!this.checkActionVisibility(action, node)) return;
 
-				if (!this.checkActionVisibility(action, node))
-					return;
+				// Clone fields to have independent action object
+				const serviceAction = { ...action };
 
 				if (node.local) {
-					action.handler = this.broker.middlewares.wrapHandler("localAction", action.handler, action);
+					serviceAction.handler = this.broker.middlewares.wrapHandler(
+						"localAction",
+						action.handler,
+						action
+					);
 				} else if (this.broker.transit) {
-					action.handler = this.broker.middlewares.wrapHandler("remoteAction", this.broker.transit.request.bind(this.broker.transit), { ...action, service });
+					serviceAction.handler = this.broker.middlewares.wrapHandler(
+						"remoteAction",
+						this.broker.transit.request.bind(this.broker.transit),
+						{ ...action, service }
+					);
 				}
 				if (this.broker.options.disableBalancer && this.broker.transit)
-					action.remoteHandler = this.broker.middlewares.wrapHandler("remoteAction", this.broker.transit.request.bind(this.broker.transit), { ...action, service });
+					serviceAction.remoteHandler = this.broker.middlewares.wrapHandler(
+						"remoteAction",
+						this.broker.transit.request.bind(this.broker.transit),
+						{ ...action, service }
+					);
 
-				this.actions.add(node, service, action);
-				service.addAction(action);
+				this.actions.add(node, service, serviceAction);
+				service.addAction(serviceAction);
 			});
 		}
 
 		/**
 		 * Create a local Endpoint for private actions
 		 *
-		 * @param {Action} action
+		 * @param {ActionSchema} action
 		 * @returns {ActionEndpoint}
 		 * @memberof Registry
 		 */
@@ -7459,13 +11764,12 @@
 		 *
 		 * @param {String} actionName
 		 * @param {String} nodeID
-		 * @returns {Endpoint}
+		 * @returns {ActionEndpoint}
 		 * @memberof Registry
 		 */
 		getActionEndpointByNodeId(actionName, nodeID) {
 			const list = this.actions.get(actionName);
-			if (list)
-				return list.getEndpointByNodeID(nodeID);
+			if (list) return list.getEndpointByNodeID(nodeID);
 		}
 
 		/**
@@ -7476,10 +11780,18 @@
 		 * @memberof Registry
 		 */
 		unregisterService(fullName, nodeID) {
-			this.services.remove(fullName, nodeID || this.broker.nodeID);
+			nodeID = nodeID || this.broker.nodeID;
+			this.services.remove(fullName, nodeID);
 
-			if (!nodeID || nodeID == this.broker.nodeID) {
-				this.regenerateLocalRawInfo(true);
+			if (nodeID == this.broker.nodeID) {
+				// Clean the local node services
+				const idx = this.nodes.localNode.services.findIndex(svc => svc.fullName === fullName);
+				if (idx !== -1) this.nodes.localNode.services.splice(idx, 1);
+			}
+
+			if (nodeID == this.broker.nodeID) {
+				this.localNodeInfoInvalidated = "seq";
+				//this.regenerateLocalRawInfo(true);
 			}
 		}
 
@@ -7509,17 +11821,22 @@
 		 *
 		 * @param {Node} node
 		 * @param {ServiceItem} service
-		 * @param {Object} events
+		 * @param {Record<string, EventSchema>} events
 		 * @memberof Registry
 		 */
 		registerEvents(node, service, events) {
 			___default.forIn(events, event => {
+				const serviceEvent = { ...event };
 
 				if (node.local)
-					event.handler = this.broker.middlewares.wrapHandler("localEvent", event.handler, event);
+					serviceEvent.handler = this.broker.middlewares.wrapHandler(
+						"localEvent",
+						serviceEvent.handler,
+						serviceEvent
+					);
 
-				this.events.add(node, service, event);
-				service.addEvent(event);
+				this.events.add(node, service, serviceEvent);
+				service.addEvent(serviceEvent);
 			});
 		}
 
@@ -7537,18 +11854,32 @@
 		/**
 		 * Generate local raw info for INFO packet
 		 *
+		 * @param {boolean} incSeq
+		 * @param {boolean=} isStopping
+		 *
+		 * @returns {NodeRawInfo}
 		 * @memberof Registry
 		 */
-		regenerateLocalRawInfo(incSeq) {
+		regenerateLocalRawInfo(incSeq, isStopping) {
 			let node = this.nodes.localNode;
-			if (incSeq)
-				node.seq++;
+			if (incSeq) node.seq++;
 
-			const rawInfo = ___default.pick(node, ["ipList", "hostname", "instanceID", "client", "config", "port", "seq", "metadata"]);
-			if (this.broker.started)
+			const rawInfo = ___default.pick(node, [
+				"ipList",
+				"hostname",
+				"instanceID",
+				"client",
+				"config",
+				"port",
+				"seq",
+				"metadata"
+			]);
+
+			if (!isStopping && (this.broker.started || incSeq)) {
 				rawInfo.services = this.services.getLocalNodeServices();
-			else
+			} else {
 				rawInfo.services = [];
+			}
 
 			// Make to be safety
 			node.rawInfo = utils_1.safetyObject(rawInfo, this.broker.options);
@@ -7559,12 +11890,17 @@
 		/**
 		 * Generate local node info for INFO packets
 		 *
-		 * @returns
+		 * @param {boolean=} force
+		 * @returns {NodeRawInfo}
 		 * @memberof Registry
 		 */
 		getLocalNodeInfo(force) {
-			if (force || !this.nodes.localNode.rawInfo)
-				return this.regenerateLocalRawInfo();
+			if (force || !this.nodes.localNode.rawInfo || this.localNodeInfoInvalidated) {
+				const res = this.regenerateLocalRawInfo(this.localNodeInfoInvalidated == "seq");
+				this.logger.debug("Local Node info regenerated.");
+				this.localNodeInfoInvalidated = false;
+				return res;
+			}
 
 			return this.nodes.localNode.rawInfo;
 		}
@@ -7572,16 +11908,15 @@
 		/**
 		 * Generate node info for INFO packets
 		 *
-		 * @returns
+		 * @param {String} nodeID
+		 * @returns {NodeRawInfo}
 		 * @memberof Registry
 		 */
 		getNodeInfo(nodeID) {
 			const node = this.nodes.get(nodeID);
-			if (!node)
-				return null;
+			if (!node) return null;
 
-			if (node.local)
-				return this.getLocalNodeInfo();
+			if (node.local) return this.getLocalNodeInfo();
 
 			return node.rawInfo;
 		}
@@ -7600,7 +11935,7 @@
 		/**
 		 * Get list of registered nodes
 		 *
-		 * @param {object} opts
+		 * @param {object?} opts
 		 * @returns
 		 * @memberof Registry
 		 */
@@ -7611,7 +11946,7 @@
 		/**
 		 * Get list of registered services
 		 *
-		 * @param {object} opts
+		 * @param {object?} opts
 		 * @returns
 		 * @memberof Registry
 		 */
@@ -7622,7 +11957,7 @@
 		/**
 		 * Get list of registered actions
 		 *
-		 * @param {object} opts
+		 * @param {object?} opts
 		 * @returns
 		 * @memberof Registry
 		 */
@@ -7633,7 +11968,7 @@
 		/**
 		 * Get list of registered events
 		 *
-		 * @param {object} opts
+		 * @param {object?} opts
 		 * @returns
 		 * @memberof Registry
 		 */
@@ -7644,7 +11979,7 @@
 		/**
 		 * Get a raw info list from nodes
 		 *
-		 * @returns {Array<Object>}
+		 * @returns {Array<NodeRawInfo>}
 		 * @memberof Registry
 		 */
 		getNodeRawList() {
@@ -7656,27 +11991,33 @@
 
 	var registry$2 = registry$1;
 
-	var Endpoint$1 = endpoint;
-	registry$2.Endpoint = Endpoint$1;
-
-	const { match: match$2, isObject: isObject$3, isString: isString$5 }	= utils_1;
+	const { match: match$2, isObject: isObject$3, isString: isString$5 } = utils_1;
 
 	const LEVELS = ["fatal", "error", "warn", "info", "debug", "trace"];
 
 	/**
+	 * Import types
+	 *
+	 * @typedef {import("../logger-factory")} LoggerFactory
+	 * @typedef {import("../logger-factory").LoggerBindings} LoggerBindings
+	 * @typedef {import("./base").LoggerOptions} LoggerOptions
+	 * @typedef {import("./base")} BaseLoggerClass
+	 */
+
+	/**
 	 * Logger base class.
 	 *
-	 * @class BaseLogger
+	 * @implements {BaseLoggerClass}
 	 */
 	class BaseLogger {
-
 		/**
 		 * Creates an instance of BaseLogger.
 		 *
-		 * @param {Object} opts
+		 * @param {LoggerOptions} opts
 		 * @memberof BaseLogger
 		 */
 		constructor(opts) {
+			/** @type {LoggerOptions} */
 			this.opts = ___default.defaultsDeep(opts, {
 				level: "info",
 				createLogger: null
@@ -7689,7 +12030,7 @@
 		 *
 		 * @param {LoggerFactory} loggerFactory
 		 */
-		init(loggerFactory)  {
+		init(loggerFactory) {
 			this.loggerFactory = loggerFactory;
 			this.broker = this.loggerFactory.broker;
 			this.Promise = this.broker.Promise;
@@ -7706,17 +12047,14 @@
 			mod = mod ? mod.toUpperCase() : "";
 
 			const level = this.opts.level;
-			if (isString$5(level))
-				return level;
+			if (isString$5(level)) return level;
 
 			if (isObject$3(level)) {
-				if (level[mod])
-					return level[mod];
+				if (level[mod]) return level[mod];
 
 				// Find with matching
 				const key = Object.keys(level).find(m => match$2(mod, m) && m !== "**");
-				if (key)
-					return level[key];
+				if (key) return level[key];
 				else if (level["**"]) {
 					return level["**"];
 				}
@@ -7726,7 +12064,11 @@
 			return null;
 		}
 
-		getLogHandler(/*bindings*/) {
+		/**
+		 *
+		 * @param {LoggerBindings?} bindings
+		 */
+		getLogHandler(bindings) {
 			return null;
 		}
 	}
@@ -7735,205 +12077,26 @@
 
 	var base$4 = BaseLogger;
 
-	const { isObject: isObject$4, isFunction: isFunction$3 }	= utils_1;
-
-
-	function getColor(type) {
-		switch(type) {
-			case "fatal": return kleur_1.red().inverse;
-			case "error": return kleur_1.red;
-			case "warn": return kleur_1.yellow;
-			case "debug": return kleur_1.magenta;
-			case "trace": return kleur_1.gray;
-			default: return kleur_1.green;
-		}
-	}
-
 	/**
-	 * Formatted abstract logger for Moleculer
+	 * Import types
 	 *
-	 * @class FormattedLogger
-	 * @extends {BaseLogger}
+	 * @typedef {import("../logger-factory")} LoggerFactory
+	 * @typedef {import("../logger-factory").LoggerBindings} LoggerBindings
+	 * @typedef {import("./console").ConsoleLoggerOptions} ConsoleLoggerOptions
+	 * @typedef {import("./console")} ConsoleLoggerClass
 	 */
-	class FormattedLogger extends base$4 {
-
-		/**
-		 * Creates an instance of FormattedLogger.
-		 * @param {Object} opts
-		 * @memberof FormattedLogger
-		 */
-		constructor(opts) {
-			super(opts);
-
-			this.opts = ___default.defaultsDeep(this.opts, {
-				colors: true,
-				moduleColors: false,
-				formatter: "full",
-				objectPrinter: null,
-				autoPadding: false
-			});
-
-			this.maxPrefixLength = 0;
-		}
-
-		init(loggerFactory) {
-			super.init(loggerFactory);
-
-			if (!this.opts.colors)
-				kleur_1.enabled = false;
-
-			this.objectPrinter = this.opts.objectPrinter ? this.opts.objectPrinter : o => util__default.inspect(o, { showHidden: false, depth: 2, colors: kleur_1.enabled, breakLength: Number.POSITIVE_INFINITY });
-
-			// Generate colorful log level names
-			this.levelColorStr = base$4.LEVELS.reduce((a, level) => {
-				a[level] = getColor(level)(___default.padEnd(level.toUpperCase(), 5));
-				return a;
-			}, {});
-
-			if (this.opts.colors && this.opts.moduleColors === true) {
-				this.opts.moduleColors = [
-					"yellow", "bold.yellow",
-					"cyan", "bold.cyan",
-					"green", "bold.green",
-					"magenta", "bold.magenta",
-					"blue", "bold.blue",
-					/*"red",*/
-					/*"grey",*/
-					/*"white,"*/
-				];
-			}
-		}
-
-		/**
-		 * Get a color for the module name.
-		 */
-		getNextColor(mod) {
-			if (this.opts.colors && Array.isArray(this.opts.moduleColors)) {
-				// Credits: "visionmedia/debug" https://github.com/visionmedia/debug/blob/master/src/common.js#L45
-				let hash = 0;
-
-				for (let i = 0; i < mod.length; i++) {
-					hash = ((hash << 5) - hash) + mod.charCodeAt(i);
-					hash |= 0; // Convert to 32bit integer
-				}
-
-				return this.opts.moduleColors[Math.abs(hash) % this.opts.moduleColors.length];
-			}
-
-			return "grey";
-		}
-
-		padLeft(len) {
-			if (this.opts.autoPadding)
-				return " ".repeat(this.maxPrefixLength - len);
-
-			return "";
-		}
-
-		/**
-		 *
-		 * @param {object} bindings
-		 */
-		getFormatter(bindings) {
-			const formatter = this.opts.formatter;
-
-			const mod = (bindings && bindings.mod) ? bindings.mod.toUpperCase() : "";
-			const c = this.getNextColor(mod);
-			const modColorName = c.split(".").reduce((a,b) => a[b] || a()[b], kleur_1)(mod);
-			const moduleColorName = bindings ? kleur_1.grey(bindings.nodeID + "/") + modColorName : "";
-
-			const printArgs = args => {
-				return args.map(p => {
-					if (isObject$4(p) || Array.isArray(p))
-						return this.objectPrinter(p);
-					return p;
-				});
-			};
-
-			if (isFunction$3(formatter)) {
-				return (type, args) => formatter.call(this, type, args, bindings, { printArgs });
-
-			} else if (formatter == "json") {
-				// {"ts":1581243299731,"level":"info","msg":"Moleculer v0.14.0-rc2 is starting...","nodeID":"console","ns":"","mod":"broker"}
-				kleur_1.enabled = false;
-				return (type, args) => [JSON.stringify({ ts: Date.now(), level: type, msg: printArgs(args).join(" "), ...bindings })];
-			} else if (formatter == "jsonext") {
-				// {"time":"2020-02-09T10:44:35.285Z","level":"info","message":"Moleculer v0.14.0-rc2 is starting...","nodeID":"console","ns":"","mod":"broker"}
-				kleur_1.enabled = false;
-				return (type, args) => {
-					const res = {
-						time: new Date().toISOString(),
-						level: type,
-						message: "",
-						...bindings
-					};
-					if (args.length > 0) {
-						if (typeof(args[0]) == "object"/* && !(args[0] instanceof Error)*/) {
-							Object.assign(res, args[0]);
-							res.message = printArgs(args.slice(1)).join(" ");
-						} else {
-							res.message = printArgs(args).join(" ");
-						}
-					}
-					return [JSON.stringify(res)];
-				};
-			} else if (formatter == "simple") {
-				// INFO  - Moleculer v0.14.0-beta3 is starting...
-				return (type, args) => [this.levelColorStr[type], "-", ...printArgs(args)];
-			} else if (formatter == "short") {
-				// [08:42:12.973Z] INFO  BROKER: Moleculer v0.14.0-beta3 is starting...
-				const prefixLen = 23 + bindings.mod.length;
-				this.maxPrefixLength = Math.max(prefixLen, this.maxPrefixLength);
-				return (type, args) => [kleur_1.grey(`[${new Date().toISOString().substr(11)}]`), this.levelColorStr[type], modColorName + this.padLeft(prefixLen) + kleur_1.grey(":"), ...printArgs(args)];
-			} else if (formatter == "full") {
-				// [2019-08-31T08:40:53.481Z] INFO  bobcsi-pc-7100/BROKER: Moleculer v0.14.0-beta3 is starting...
-				const prefixLen = 35 + bindings.nodeID.length + bindings.mod.length;
-				this.maxPrefixLength = Math.max(prefixLen, this.maxPrefixLength);
-				return (type, args) => [kleur_1.grey(`[${new Date().toISOString()}]`), this.levelColorStr[type], moduleColorName + this.padLeft(prefixLen) + kleur_1.grey(":"), ...printArgs(args)];
-			} else {
-				// [{timestamp}] {level} {nodeID}/{mod}: {msg}
-
-				return (type, args) => {
-					const timestamp = new Date().toISOString();
-					return [this.render(formatter, {
-						timestamp: kleur_1.grey(timestamp),
-						time: kleur_1.grey(timestamp.substr(11)),
-
-						level: this.levelColorStr[type],
-						nodeID: kleur_1.grey(bindings.nodeID),
-						mod: modColorName,
-						msg: printArgs(args).join(" ")
-					})];
-				};
-			}
-		}
-
-		/**
-		 * Interpolate a text.
-		 *
-		 * @param {Strimg} str
-		 * @param {Object} obj
-		 * @returns {String}
-		 */
-		render(str, obj) {
-			return str.replace(/\{\s?(\w+)\s?\}/g, (match, v) => obj[v] || "");
-		}
-
-	}
-
-	var formatted = FormattedLogger;
 
 	/**
 	 * Console logger for Moleculer
 	 *
 	 * @class ConsoleLogger
-	 * @extends {FormattedLogger}
+	 * @implements {ConsoleLoggerClass}
+	 * @extends {FormattedLogger<ConsoleLoggerOptions>}
 	 */
-	class ConsoleLogger extends formatted {
-
+	class ConsoleLogger extends require$$19 {
 		/**
 		 * Creates an instance of ConsoleLogger.
-		 * @param {Object} opts
+		 * @param {ConsoleLoggerOptions} opts
 		 * @memberof ConsoleLogger
 		 */
 		constructor(opts) {
@@ -7942,50 +12105,55 @@
 			this.maxPrefixLength = 0;
 		}
 
+		/**
+		 * Initialize logger.
+		 *
+		 * @param {LoggerFactory} loggerFactory
+		 */
 		init(loggerFactory) {
 			super.init(loggerFactory);
 
-			if (!this.opts.colors)
-				kleur_1.enabled = false;
+			if (!this.opts.colors) kleur_1.enabled = false;
 		}
 
 		/**
 		 *
-		 * @param {object} bindings
+		 * @param {LoggerBindings} bindings
 		 */
 		getLogHandler(bindings) {
 			const level = bindings ? this.getLogLevel(bindings.mod) : null;
-			if (!level)
-				return null;
+			if (!level) return null;
 
-			const levelIdx = formatted.LEVELS.indexOf(level);
+			const levelIdx = require$$19.LEVELS.indexOf(level);
 			const formatter = this.getFormatter(bindings);
 
 			return (type, args) => {
-				const typeIdx = formatted.LEVELS.indexOf(type);
+				const typeIdx = require$$19.LEVELS.indexOf(type);
 				if (typeIdx > levelIdx) return;
 
 				const pargs = formatter(type, args);
-				switch(type) {
+				switch (type) {
 					case "fatal":
-					case "error": return console.error(...pargs);
-					case "warn": return console.warn(...pargs);
-					default: return console.log(...pargs);
+					case "error":
+						return console.error(...pargs);
+					case "warn":
+						return console.warn(...pargs);
+					default:
+						return console.log(...pargs);
 				}
 			};
 		}
-
 	}
 
 	var console_1 = ConsoleLogger;
 
-	const { isObject: isObject$5, isString: isString$6 } = utils_1;
+	const { isObject: isObject$4, isString: isString$6, isInheritedClass: isInheritedClass$2 } = utils_1;
 	const { BrokerOptionsError: BrokerOptionsError$4 } = errors;
 
 
 	const Loggers = {
 		Base: base$4,
-		Formatted: formatted,
+		Formatted: require$$19,
 
 		Bunyan: require$$19,
 		Console: console_1,
@@ -8001,35 +12169,31 @@
 
 	function getByName$4(name) {
 		/* istanbul ignore next */
-		if (!name)
-			return null;
+		if (!name) return null;
 
 		let n = Object.keys(Loggers).find(n => n.toLowerCase() == name.toLowerCase());
-		if (n)
-			return Loggers[n];
+		if (n) return Loggers[n];
 	}
 
 	/**
 	 * Resolve reporter by name
 	 *
-	 * @param {object|string} opt
-	 * @returns {Reporter}
-	 * @memberof ServiceBroker
+	 * @param {Record<string, any> | string} opt
+	 * @returns {any}
 	 */
 	function resolve$4(opt) {
-		if (opt instanceof Loggers.Base) {
+		if (isObject$4(opt) && isInheritedClass$2(opt, Loggers.Base)) {
 			return opt;
 		} else if (isString$6(opt)) {
 			let LoggerClass = getByName$4(opt);
-			if (LoggerClass)
-				return new LoggerClass();
-
-		} else if (isObject$5(opt)) {
+			if (LoggerClass) return new LoggerClass();
+		} else if (isObject$4(opt)) {
 			let LoggerClass = getByName$4(opt.type);
-			if (LoggerClass)
-				return new LoggerClass(opt.options);
+			if (LoggerClass) return new LoggerClass(opt.options);
 			else
-				throw new BrokerOptionsError$4(`Invalid logger configuration. Type: '${opt.type}'`, { type: opt.type });
+				throw new BrokerOptionsError$4(`Invalid logger configuration. Type: '${opt.type}'`, {
+					type: opt.type
+				});
 		}
 
 		throw new BrokerOptionsError$4(`Invalid logger configuration: '${opt}'`, { type: opt });
@@ -8048,14 +12212,25 @@
 	const cwd = _process.cwd();
 
 	/**
+	 * Import types
+	 *
+	 * @typedef {import("./service-broker")} ServiceBroker
+	 * @typedef {import("./logger-factory")} LoggerFactoryClass
+	 * @typedef {import("./logger-factory").LoggerBindings} LoggerBindings
+	 * @typedef {import("./logger-factory").Logger} Logger
+	 * @typedef {import("./loggers/base")} BaseLogger
+	 */
+
+	/**
 	 * Log factory class.
 	 *
-	 * @class LoggerFactory
+	 * @implements {LoggerFactoryClass}
 	 */
 	class LoggerFactory {
-
 		/**
 		 * Constructor of LoggerFactory
+		 *
+		 * @param {ServiceBroker} broker
 		 */
 		constructor(broker) {
 			this.broker = broker;
@@ -8074,16 +12249,16 @@
 			if (opts === false || opts == null) {
 				// No logger
 				this.appenders = [];
-
 			} else if (opts === true || opts === console) {
 				// Default console logger
-				this.appenders = [loggers.resolve({
-					type: "Console",
-					options: {
-						level: globalLogLevel
-					}
-				})];
-
+				this.appenders = [
+					loggers.resolve({
+						type: "Console",
+						options: {
+							level: globalLogLevel
+						}
+					})
+				];
 			} else {
 				if (!Array.isArray(opts)) {
 					opts = [opts];
@@ -8096,7 +12271,9 @@
 
 					// Build-in with options
 					if (isPlainObject$2(o))
-						return loggers.resolve(___default.defaultsDeep({}, o, { options: { level: globalLogLevel } }));
+						return loggers.resolve(
+							___default.defaultsDeep({}, o, { options: { level: globalLogLevel } })
+						);
 
 					// Custom logger instance
 					return loggers.resolve(o);
@@ -8124,13 +12301,14 @@
 			Error.prepareStackTrace = _prepareStackTrace;
 
 			if (stack.length > 2) {
+				/** @type {any} */
 				const site = stack[2];
 				return {
 					filename: site.getFileName().substring(cwd.length + 1),
 					lineNumber: site.getLineNumber(),
 					columnNumber: site.getColumnNumber(),
 					methodName: site.getMethodName(),
-					functionName: site.getFunctionName(),
+					functionName: site.getFunctionName()
 				};
 			}
 		}
@@ -8138,8 +12316,8 @@
 		/**
 		 * Get a logger for a module (service, transporter, cacher, context...etc)
 		 *
-		 * @param {Object} bindings
-		 * @returns {ModuleLogger}
+		 * @param {LoggerBindings} bindings
+		 * @returns {Logger}
 		 *
 		 * @memberof ServiceBroker
 		 */
@@ -8152,19 +12330,19 @@
 			const appenders = this.appenders;
 
 			const logHandlers = ___default.compact(appenders.map(app => app.getLogHandler(bindings)));
+			const hasNewLogEntryMiddleware =
+				broker.middlewares && broker.middlewares.registeredHooks.newLogEntry;
 
-			loggers.LEVELS.forEach((type) => {
-				if (logHandlers.length == 0)
-					return logger[type] = noop$1;
+			loggers.LEVELS.forEach(type => {
+				if (logHandlers.length == 0 && !hasNewLogEntryMiddleware) return (logger[type] = noop$1);
 
-				logger[type] = function(...args) {
-					if (broker.middlewares && broker.middlewares.registeredHooks.newLogEntry)
+				logger[type] = function (...args) {
+					if (hasNewLogEntryMiddleware)
 						broker.middlewares.callSyncHandlers("newLogEntry", [type, args, bindings], {});
 
-					if (logHandlers.length == 0) return;
+					if (logHandlers.length === 0) return;
 
-					for(let i = 0; i < logHandlers.length; i++)
-						logHandlers[i](type, args);
+					for (let i = 0; i < logHandlers.length; i++) logHandlers[i](type, args);
 				};
 			});
 
@@ -8172,13 +12350,12 @@
 				if (broker.middlewares)
 					broker.middlewares.callSyncHandlers("newLogEntry", [type, args, bindings], {});
 
-				if (logHandlers.length == 0) return;
+				if (logHandlers.length === 0) return;
 
 				logHandlers.forEach(fn => fn(type, args));
 			};*/
 
 			logger.appenders = appenders;
-
 
 			this.cache.set(this.getBindingsKey(bindings), logger);
 
@@ -8188,17 +12365,14 @@
 		/**
 		 * Create a key from bindings for logger caching.
 		 *
-		 * @param {object} bindings
+		 * @param {LoggerBindings} bindings
 		 * @returns {String}
 		 */
 		getBindingsKey(bindings) {
 			if (!bindings) return "";
 
-			return ["nodeID", "ns", "mod"]
-				.map(key => bindings[key])
-				.join("|");
+			return ["nodeID", "ns", "mod"].map(key => bindings[key]).join("|");
 		}
-
 	}
 
 	var loggerFactory = LoggerFactory;
@@ -8206,34 +12380,65 @@
 	const { ValidationError } = errors;
 
 
-	class BaseValidator {
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 * @typedef {import("../context")} Context
+	 * @typedef {import("./base")} BaseValidatorClass
+	 * @typedef {import("./base").ValidatorOptions} ValidatorOptions
+	 * @typedef {import("./base").CheckerFunction} CheckerFunction
+	 */
 
+	/**
+	 * Abstract validator class
+	 *
+	 * @implements {BaseValidatorClass}
+	 */
+	class BaseValidator {
+		/**
+		 * Creates an instance of Validator.
+		 *
+		 * @param {ValidatorOptions} opts
+		 *
+		 * @memberof Cacher
+		 */
 		constructor(opts) {
+			/** @type {ValidatorOptions} */
 			this.opts = ___default.defaultsDeep(opts, {
 				paramName: "params"
 			});
 		}
 
+		/**
+		 * Initialize cacher
+		 *
+		 * @param {ServiceBroker} broker
+		 *
+		 * @memberof Cacher
+		 */
 		init(broker) {
 			this.broker = broker;
 		}
 
 		/**
 		 * Compile a validation schema to a checker function.
-		 * @param {any} schema
-		 * @returns {Function}
+		 *
+		 * @param {Record<string, any>} schema
+		 * @returns {CheckerFunction}
 		 */
-		compile(/*schema*/) {
+		compile(schema) {
 			throw new Error("Abstract method");
 		}
 
 		/**
 		 * Validate params againt the schema
-		 * @param {any} params
-		 * @param {any} schema
+		 *
+		 * @param {Record<string, any>} params
+		 * @param {Record<string, any>} schema
 		 * @returns {boolean}
 		 */
-		validate(/*params, schema*/) {
+		validate(params, schema) {
 			throw new Error("Abstract method");
 		}
 
@@ -8241,21 +12446,33 @@
 		 * Convert the specific validation schema to
 		 * the Moleculer (fastest-validator) validation schema format.
 		 *
-		 * @param {any} schema
+		 * @param {Record<string, any>} schema
 		 * @returns {Object}
 		 */
-		convertSchemaToMoleculer(/*schema*/) {
+		convertSchemaToMoleculer(schema) {
 			throw new Error("Abstract method");
 		}
 
 		/**
 		 * Register validator as a middleware
 		 *
+		 * @param {ServiceBroker} broker
+		 *
 		 * @memberof BaseValidator
 		 */
 		middleware(broker) {
 			const self = this;
 			const paramName = this.opts.paramName;
+
+			const processCheckResponse = function (ctx, handler, res, additionalInfo) {
+				if (res === true) return handler(ctx);
+				else {
+					res = res.map(data => Object.assign(data, additionalInfo));
+					return broker.Promise.reject(
+						new ValidationError("Parameters validation error!", null, res)
+					);
+				}
+			};
 
 			return {
 				name: "Validator",
@@ -8264,13 +12481,19 @@
 					if (action[paramName] && typeof action[paramName] === "object") {
 						const check = self.compile(action[paramName]);
 						return function validateContextParams(ctx) {
-							let res = check(ctx.params != null ? ctx.params : {});
-							if (res === true)
-								return handler(ctx);
-							else {
-								res = res.map(data => Object.assign(data, { nodeID: ctx.nodeID, action: ctx.action.name }));
-								return broker.Promise.reject(new ValidationError("Parameters validation error!", null, res));
-							}
+							const res = check(ctx.params != null ? ctx.params : {}, { meta: ctx });
+							if (check.async)
+								return res.then(res =>
+									processCheckResponse(ctx, handler, res, {
+										nodeID: ctx.nodeID,
+										action: ctx.action.name
+									})
+								);
+							else
+								return processCheckResponse(ctx, handler, res, {
+									nodeID: ctx.nodeID,
+									action: ctx.action.name
+								});
 						};
 					}
 					return handler;
@@ -8281,13 +12504,20 @@
 					if (event[paramName] && typeof event[paramName] === "object") {
 						const check = self.compile(event[paramName]);
 						return function validateContextParams(ctx) {
-							let res = check(ctx.params != null ? ctx.params : {});
-							if (res === true)
-								return handler(ctx);
-							else {
-								res = res.map(data => Object.assign(data, { nodeID: ctx.nodeID, event: ctx.event.name }));
-								return broker.Promise.reject(new ValidationError("Parameters validation error!", null, res));
-							}
+							const res = check(ctx.params != null ? ctx.params : {}, { meta: ctx });
+
+							if (check.async)
+								return res.then(res =>
+									processCheckResponse(ctx, handler, res, {
+										nodeID: ctx.nodeID,
+										event: ctx.event.name
+									})
+								);
+							else
+								return processCheckResponse(ctx, handler, res, {
+									nodeID: ctx.nodeID,
+									event: ctx.event.name
+								});
 						};
 					}
 					return handler;
@@ -8296,38 +12526,2184 @@
 		}
 	}
 
-
 	var base$5 = BaseValidator;
+
+	function isObjectHasKeys(v) {
+		if (typeof v !== "object" || Array.isArray(v) || v == null) return false;
+		return Object.keys(v).length > 0;
+	}
+
+	function deepExtend(destination, source, options = {}) {
+		for (let property in source) {
+			if (isObjectHasKeys(source[property])) {
+				destination[property] = destination[property] || {};
+				deepExtend(destination[property], source[property], options);
+			} else {
+				if (options.skipIfExist === true && destination[property] !== undefined) continue;
+				destination[property] = source[property];
+			}
+		}
+		return destination;
+	}
+
+	var deepExtend_1 = deepExtend;
+
+	function convertible(value) {
+		if (value === undefined) return "";
+		if (value === null) return "";
+		if (typeof value.toString === "function") return value;
+		return typeof value;
+	}
+
+	var replace = (string, searchValue, newValue) => string.replace(searchValue, convertible(newValue));
+
+	var messages = {
+		required: "The '{field}' field is required.",
+
+		string: "The '{field}' field must be a string.",
+		stringEmpty: "The '{field}' field must not be empty.",
+		stringMin: "The '{field}' field length must be greater than or equal to {expected} characters long.",
+		stringMax: "The '{field}' field length must be less than or equal to {expected} characters long.",
+		stringLength: "The '{field}' field length must be {expected} characters long.",
+		stringPattern: "The '{field}' field fails to match the required pattern.",
+		stringContains: "The '{field}' field must contain the '{expected}' text.",
+		stringEnum: "The '{field}' field does not match any of the allowed values.",
+		stringNumeric: "The '{field}' field must be a numeric string.",
+		stringAlpha: "The '{field}' field must be an alphabetic string.",
+		stringAlphanum: "The '{field}' field must be an alphanumeric string.",
+		stringAlphadash: "The '{field}' field must be an alphadash string.",
+		stringHex: "The '{field}' field must be a hex string.",
+		stringSingleLine: "The '{field}' field must be a single line string.",
+		stringBase64: "The '{field}' field must be a base64 string.",
+
+		number: "The '{field}' field must be a number.",
+		numberMin: "The '{field}' field must be greater than or equal to {expected}.",
+		numberMax: "The '{field}' field must be less than or equal to {expected}.",
+		numberEqual: "The '{field}' field must be equal to {expected}.",
+		numberNotEqual: "The '{field}' field can't be equal to {expected}.",
+		numberInteger: "The '{field}' field must be an integer.",
+		numberPositive: "The '{field}' field must be a positive number.",
+		numberNegative: "The '{field}' field must be a negative number.",
+
+		array: "The '{field}' field must be an array.",
+		arrayEmpty: "The '{field}' field must not be an empty array.",
+		arrayMin: "The '{field}' field must contain at least {expected} items.",
+		arrayMax: "The '{field}' field must contain less than or equal to {expected} items.",
+		arrayLength: "The '{field}' field must contain {expected} items.",
+		arrayContains: "The '{field}' field must contain the '{expected}' item.",
+		arrayUnique: "The '{actual}' value in '{field}' field does not unique the '{expected}' values.",
+		arrayEnum: "The '{actual}' value in '{field}' field does not match any of the '{expected}' values.",
+
+		tuple: "The '{field}' field must be an array.",
+		tupleEmpty: "The '{field}' field must not be an empty array.",
+		tupleLength: "The '{field}' field must contain {expected} items.",
+
+		boolean: "The '{field}' field must be a boolean.",
+
+		currency: "The '{field}' must be a valid currency format",
+
+		date: "The '{field}' field must be a Date.",
+		dateMin: "The '{field}' field must be greater than or equal to {expected}.",
+		dateMax: "The '{field}' field must be less than or equal to {expected}.",
+
+		enumValue: "The '{field}' field value '{expected}' does not match any of the allowed values.",
+
+		equalValue: "The '{field}' field value must be equal to '{expected}'.",
+		equalField: "The '{field}' field value must be equal to '{expected}' field value.",
+
+		forbidden: "The '{field}' field is forbidden.",
+
+		function: "The '{field}' field must be a function.",
+
+		email: "The '{field}' field must be a valid e-mail.",
+		emailEmpty: "The '{field}' field must not be empty.",
+		emailMin: "The '{field}' field length must be greater than or equal to {expected} characters long.",
+		emailMax: "The '{field}' field length must be less than or equal to {expected} characters long.",
+
+		luhn: "The '{field}' field must be a valid checksum luhn.",
+
+		mac: "The '{field}' field must be a valid MAC address.",
+
+		object: "The '{field}' must be an Object.",
+		objectStrict: "The object '{field}' contains forbidden keys: '{actual}'.",
+		objectMinProps: "The object '{field}' must contain at least {expected} properties.",
+		objectMaxProps: "The object '{field}' must contain {expected} properties at most.",
+
+		url: "The '{field}' field must be a valid URL.",
+		urlEmpty: "The '{field}' field must not be empty.",
+
+		uuid: "The '{field}' field must be a valid UUID.",
+		uuidVersion: "The '{field}' field must be a valid UUID version provided.",
+
+		classInstanceOf: "The '{field}' field must be an instance of the '{expected}' class.",
+
+		objectID: "The '{field}' field must be an valid ObjectID",
+
+		record: "The '{field}' must be an Object."
+	};
+
+	/**	Signature: function(value, field, parent, errors, context)
+	 */
+	var any = function(/*{ schema, messages }, path, context*/) {
+		const src = [];
+		src.push(`
+		return value;
+	`);
+
+		return {
+			source: src.join("\n")
+		};
+	};
+
+	/**	Signature: function(value, field, parent, errors, context)
+	 */
+	var array = function ({ schema, messages }, path, context) {
+		const src = [];
+
+		let sanitized = false;
+		if (schema.convert === true) {
+			sanitized = true;
+			// Convert to array if not and the value is not null or undefined
+			src.push(`
+			if (!Array.isArray(value) && value != null) {
+				value = [value];
+			}
+		`);
+		}
+
+		src.push(`
+		if (!Array.isArray(value)) {
+			${this.makeError({ type: "array", actual: "value", messages })}
+			return value;
+		}
+
+		var len = value.length;
+	`);
+
+		if (schema.empty === false) {
+			src.push(`
+			if (len === 0) {
+				${this.makeError({ type: "arrayEmpty", actual: "value", messages })}
+			}
+		`);
+		}
+
+		if (schema.min != null) {
+			src.push(`
+			if (len < ${schema.min}) {
+				${this.makeError({ type: "arrayMin", expected: schema.min, actual: "len", messages })}
+			}
+		`);
+		}
+
+		if (schema.max != null) {
+			src.push(`
+			if (len > ${schema.max}) {
+				${this.makeError({ type: "arrayMax", expected: schema.max, actual: "len", messages })}
+			}
+		`);
+		}
+
+		if (schema.length != null) {
+			src.push(`
+			if (len !== ${schema.length}) {
+				${this.makeError({ type: "arrayLength", expected: schema.length, actual: "len", messages })}
+			}
+		`);
+		}
+
+		if (schema.contains != null) {
+			src.push(`
+			if (value.indexOf(${JSON.stringify(schema.contains)}) === -1) {
+				${this.makeError({ type: "arrayContains", expected: JSON.stringify(schema.contains), actual: "value", messages })}
+			}
+		`);
+		}
+
+		if (schema.unique === true) {
+			src.push(`
+			if(len > (new Set(value)).size) {
+				${this.makeError({ type: "arrayUnique", expected: "Array.from(new Set(value.filter((item, index) => value.indexOf(item) !== index)))", actual: "value", messages })}
+			}
+		`);
+		}
+
+		if (schema.enum != null) {
+			const enumStr = JSON.stringify(schema.enum);
+			src.push(`
+			for (var i = 0; i < value.length; i++) {
+				if (${enumStr}.indexOf(value[i]) === -1) {
+					${this.makeError({ type: "arrayEnum", expected: "\"" + schema.enum.join(", ") + "\"", actual: "value[i]", messages })}
+				}
+			}
+		`);
+		}
+
+		if (schema.items != null) {
+			src.push(`
+			var arr = value;
+			var parentField = field;
+			for (var i = 0; i < arr.length; i++) {
+				value = arr[i];
+		`);
+
+			const itemPath = path + "[]";
+			const rule = this.getRuleFromSchema(schema.items);
+			// eslint-disable-next-line quotes
+			const innerSource = `arr[i] = ${context.async ? "await " : ""}context.fn[%%INDEX%%](arr[i], (parentField ? parentField : "") + "[" + i + "]", parent, errors, context)`;
+			src.push(this.compileRule(rule, context, itemPath, innerSource, "arr[i]"));
+			src.push(`
+			}
+		`);
+			src.push(`
+		return arr;
+	`);
+		} else {
+			src.push(`
+		return value;
+	`);
+		}
+
+		return {
+			sanitized,
+			source: src.join("\n")
+		};
+	};
+
+	/**	Signature: function(value, field, parent, errors, context)
+	 */
+	var boolean_1 = function({ schema, messages }, path, context) {
+		const src = [];
+		let sanitized = false;
+
+		src.push(`
+		var origValue = value;
+	`);
+
+		if (schema.convert === true) {
+			sanitized = true;
+			src.push(`
+			if (typeof value !== "boolean") {
+				if (
+				value === 1
+				|| value === "true"
+				|| value === "1"
+				|| value === "on"
+				) {
+					value = true;
+				} else if (
+				value === 0
+				|| value === "false"
+				|| value === "0"
+				|| value === "off"
+				) {
+					value = false;
+				}
+			}
+		`);
+		}
+
+		src.push(`
+		if (typeof value !== "boolean") {
+			${this.makeError({ type: "boolean",  actual: "origValue", messages })}
+		}
+		
+		return value;
+	`);
+
+		return {
+			sanitized,
+			source: src.join("\n")
+		};
+	};
+
+	/**	Signature: function(value, field, parent, errors, context)
+	 */
+	var _class = function({ schema, messages, index }, path, context) {
+		const src = [];
+
+		const className = schema.instanceOf.name ? schema.instanceOf.name : "<UnknowClass>";
+		if (!context.customs[index]) context.customs[index] = { schema };
+		else context.customs[index].schema = schema;
+
+		src.push(`
+		if (!(value instanceof context.customs[${index}].schema.instanceOf))
+			${this.makeError({ type: "classInstanceOf",  actual: "value", expected: "'" + className + "'", messages })}
+	`);
+
+		src.push(`
+		return value;
+	`);
+
+		return {
+			source: src.join("\n")
+		};
+	};
+
+	var custom = function ({ schema, messages, index }, path, context) {
+		const src = [];
+
+		src.push(`
+		${this.makeCustomValidator({ fnName: "check", path, schema, messages, context, ruleIndex: index })}
+		return value;
+	`);
+
+		return {
+			source: src.join("\n")
+		};
+	};
+
+	const CURRENCY_REGEX = "(?=.*\\d)^(-?~1|~1-?)(([0-9]\\d{0,2}(~2\\d{3})*)|0)?(\\~3\\d{1,2})?$";
+	/**	Signature: function(value, field, parent, errors, context)
+	 */
+
+	var currency = function ({schema, messages}, path, context) {
+		const currencySymbol = schema.currencySymbol || null;
+		const thousandSeparator = schema.thousandSeparator || ",";
+		const decimalSeparator = schema.decimalSeparator || ".";
+		const customRegex = schema.customRegex;
+		let isCurrencySymbolMandatory = !schema.symbolOptional;
+		let finalRegex = CURRENCY_REGEX.replace(/~1/g, currencySymbol ? (`\\${currencySymbol}${(isCurrencySymbolMandatory ? "" : "?")}`) : "")
+			.replace("~2", thousandSeparator)
+			.replace("~3", decimalSeparator);
+
+
+		const src = [];
+
+		src.push(`
+		if (!value.match(${customRegex || new RegExp(finalRegex)})) {
+			${this.makeError({ type: "currency", actual: "value", messages })}
+			return value;
+		}
+
+		return value;
+	`);
+
+		return {
+			source: src.join("\n")
+		};
+	};
+
+	/**	Signature: function(value, field, parent, errors, context)
+	 */
+	var date = function({ schema, messages }, path, context) {
+		const src = [];
+		let sanitized = false;
+
+		src.push(`
+		var origValue = value;
+	`);
+
+		if (schema.convert === true) {
+			sanitized = true;
+			src.push(`
+			if (!(value instanceof Date)) {
+				value = new Date(value.length && !isNaN(+value) ? +value : value);
+			}
+		`);
+		}
+
+		src.push(`
+		if (!(value instanceof Date) || isNaN(value.getTime()))
+			${this.makeError({ type: "date",  actual: "origValue", messages })}
+
+		return value;
+	`);
+
+		return {
+			sanitized,
+			source: src.join("\n")
+		};
+	};
+
+	const PRECISE_PATTERN = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+	const BASIC_PATTERN = /^\S+@\S+\.\S+$/;
+
+	/**	Signature: function(value, field, parent, errors, context)
+	 */
+	var email = function({ schema, messages }, path, context) {
+		const src = [];
+
+		const pattern = schema.mode == "precise" ? PRECISE_PATTERN : BASIC_PATTERN;
+		let sanitized = false;
+
+		src.push(`
+		if (typeof value !== "string") {
+			${this.makeError({ type: "string",  actual: "value", messages })}
+			return value;
+		}
+	`);
+
+		if (!schema.empty) {
+			src.push(`
+			if (value.length === 0) {
+				${this.makeError({ type: "emailEmpty", actual: "value", messages })}
+				return value;
+			}
+		`);
+		} else {
+			src.push(`
+			if (value.length === 0) return value;
+		`);
+		}
+
+		if (schema.normalize) {
+			sanitized = true;
+			src.push(`
+			value = value.trim().toLowerCase();
+		`);
+		}
+
+		if (schema.min != null) {
+			src.push(`
+			if (value.length < ${schema.min}) {
+				${this.makeError({ type: "emailMin", expected: schema.min, actual: "value.length", messages })}
+			}
+		`);
+		}
+
+		if (schema.max != null) {
+			src.push(`
+			if (value.length > ${schema.max}) {
+				${this.makeError({ type: "emailMax", expected: schema.max, actual: "value.length", messages })}
+			}
+		`);
+		}
+
+		src.push(`
+		if (!${pattern.toString()}.test(value)) {
+			${this.makeError({ type: "email",  actual: "value", messages })}
+		}
+
+		return value;
+	`);
+
+		return {
+			sanitized,
+			source: src.join("\n")
+		};
+	};
+
+	/**	Signature: function(value, field, parent, errors, context)
+	 */
+	var _enum = function({ schema, messages }, path, context) {
+		const enumStr = JSON.stringify(schema.values || []);
+		return {
+			source: `
+			if (${enumStr}.indexOf(value) === -1)
+				${this.makeError({ type: "enumValue", expected: "\"" + schema.values.join(", ") + "\"", actual: "value", messages })}
+			
+			return value;
+		`
+		};
+	};
+
+	/**	Signature: function(value, field, parent, errors, context)
+	 */
+	var equal = function({ schema, messages }, path, context) {
+		const src = [];
+
+		if (schema.field) {
+			if (schema.strict) {
+				src.push(`
+				if (value !== parent["${schema.field}"])
+			`);
+			} else {
+				src.push(`
+				if (value != parent["${schema.field}"])
+			`);
+			}
+			src.push(`
+				${this.makeError({ type: "equalField",  actual: "value", expected: JSON.stringify(schema.field), messages })}
+		`);
+		} else {
+			if (schema.strict) {
+				src.push(`
+				if (value !== ${JSON.stringify(schema.value)})
+			`);
+			} else {
+				src.push(`
+				if (value != ${JSON.stringify(schema.value)})
+			`);
+			}
+			src.push(`
+				${this.makeError({ type: "equalValue",  actual: "value", expected: JSON.stringify(schema.value), messages })}
+		`);
+		}
+
+		src.push(`
+		return value;
+	`);
+
+		return {
+			source: src.join("\n")
+		};
+	};
+
+	/**	Signature: function(value, field, parent, errors, context)
+	 */
+	var forbidden = function checkForbidden({ schema, messages }, path, context) {
+		const src = [];
+
+		src.push(`
+		if (value !== null && value !== undefined) {
+	`);
+
+		if (schema.remove) {
+			src.push(`
+			return undefined;
+		`);
+
+		} else {
+			src.push(`
+			${this.makeError({ type: "forbidden",  actual: "value", messages })}
+		`);
+		}
+
+		src.push(`
+		}
+
+		return value;
+	`);
+
+		return {
+			source: src.join("\n")
+		};
+	};
+
+	/**	Signature: function(value, field, parent, errors, context)
+	 */
+	var _function = function({ schema, messages }, path, context) {
+		return {
+			source: `
+			if (typeof value !== "function")
+				${this.makeError({ type: "function",  actual: "value", messages })}
+
+			return value;
+		`
+		};
+	};
+
+	/**	Signature: function(value, field, parent, errors, context)
+	 */
+	var multi = function({ schema, messages }, path, context) {
+		const src = [];
+
+		src.push(`
+		var hasValid = false;
+		var newVal = value;
+		var checkErrors = [];
+		var errorsSize = errors.length;
+	`);
+
+		for (let i = 0; i < schema.rules.length; i++) {
+			src.push(`
+			if (!hasValid) {
+				var _errors = [];
+		`);
+
+			const rule = this.getRuleFromSchema(schema.rules[i]);
+			src.push(this.compileRule(rule, context, path, `var tmpVal = ${context.async ? "await " : ""}context.fn[%%INDEX%%](value, field, parent, _errors, context);`, "tmpVal"));
+			src.push(`
+				if (errors.length == errorsSize && _errors.length == 0) {
+					hasValid = true;
+					newVal = tmpVal;
+				} else {
+					Array.prototype.push.apply(checkErrors, [].concat(_errors, errors.splice(errorsSize)));
+				}
+			}
+		`);
+		}
+
+		src.push(`
+		if (!hasValid) {
+			Array.prototype.push.apply(errors, checkErrors);
+		}
+
+		return newVal;
+	`);
+
+		return {
+			source: src.join("\n")
+		};
+	};
+
+	/**	Signature: function(value, field, parent, errors, context)
+	 */
+	var number = function({ schema, messages }, path, context) {
+		const src = [];
+
+		src.push(`
+		var origValue = value;
+	`);
+
+		let sanitized = false;
+		if (schema.convert === true) {
+			sanitized = true;
+			src.push(`
+			if (typeof value !== "number") {
+				value = Number(value);
+			}
+		`);
+		}
+
+		src.push(`
+		if (typeof value !== "number" || isNaN(value) || !isFinite(value)) {
+			${this.makeError({ type: "number",  actual: "origValue", messages })}
+			return value;
+		}
+	`);
+
+		if (schema.min != null) {
+			src.push(`
+			if (value < ${schema.min}) {
+				${this.makeError({ type: "numberMin", expected: schema.min, actual: "origValue", messages })}
+			}
+		`);
+		}
+
+		if (schema.max != null) {
+			src.push(`
+			if (value > ${schema.max}) {
+				${this.makeError({ type: "numberMax", expected: schema.max, actual: "origValue", messages })}
+			}
+		`);
+		}
+
+		// Check fix value
+		if (schema.equal != null) {
+			src.push(`
+			if (value !== ${schema.equal}) {
+				${this.makeError({ type: "numberEqual", expected: schema.equal, actual: "origValue", messages })}
+			}
+		`);
+		}
+
+		// Check not fix value
+		if (schema.notEqual != null) {
+			src.push(`
+			if (value === ${schema.notEqual}) {
+				${this.makeError({ type: "numberNotEqual", expected: schema.notEqual, actual: "origValue", messages })}
+			}
+		`);
+		}
+
+		// Check integer
+		if (schema.integer === true) {
+			src.push(`
+			if (value % 1 !== 0) {
+				${this.makeError({ type: "numberInteger",  actual: "origValue", messages })}
+			}
+		`);
+		}
+
+		// Check positive
+		if (schema.positive === true) {
+			src.push(`
+			if (value <= 0) {
+				${this.makeError({ type: "numberPositive",  actual: "origValue", messages })}
+			}
+		`);
+		}
+
+		// Check negative
+		if (schema.negative === true) {
+			src.push(`
+			if (value >= 0) {
+				${this.makeError({ type: "numberNegative",  actual: "origValue", messages })}
+			}
+		`);
+		}
+
+		src.push(`
+		return value;
+	`);
+
+		return {
+			sanitized,
+			source: src.join("\n")
+		};
+	};
+
+	// Quick regex to match most common unquoted JavaScript property names. Note the spec allows Unicode letters.
+	// Unmatched property names will be quoted and validate slighly slower. https://www.ecma-international.org/ecma-262/5.1/#sec-7.6
+	const identifierRegex = /^[_$a-zA-Z][_$a-zA-Z0-9]*$/;
+
+	// Regex to escape quoted property names for eval/new Function
+	const escapeEvalRegex = /["'\\\n\r\u2028\u2029]/g;
+
+	/* istanbul ignore next */
+	function escapeEvalString(str) {
+		// Based on https://github.com/joliss/js-string-escape
+		return str.replace(escapeEvalRegex, function (character) {
+			switch (character) {
+			case "\"":
+			case "'":
+			case "\\":
+				return "\\" + character;
+				// Four possible LineTerminator characters need to be escaped:
+			case "\n":
+				return "\\n";
+			case "\r":
+				return "\\r";
+			case "\u2028":
+				return "\\u2028";
+			case "\u2029":
+				return "\\u2029";
+			}
+		});
+	}
+
+	/**	Signature: function(value, field, parent, errors, context)
+	 */
+	var object = function ({ schema, messages }, path, context) {
+		const sourceCode = [];
+
+		sourceCode.push(`
+		if (typeof value !== "object" || value === null || Array.isArray(value)) {
+			${this.makeError({ type: "object", actual: "value", messages })}
+			return value;
+		}
+	`);
+
+		const subSchema = schema.properties || schema.props;
+		if (subSchema) {
+			sourceCode.push("var parentObj = value;");
+			sourceCode.push("var parentField = field;");
+
+			const keys = Object.keys(subSchema).filter(key => !this.isMetaKey(key));
+
+			for (let i = 0; i < keys.length; i++) {
+				const property = keys[i];
+				const rule = this.getRuleFromSchema(subSchema[property]);
+				
+				const name = escapeEvalString(property);
+				const safeSubName = identifierRegex.test(name) ? `.${name}` : `['${name}']`;
+				const safePropName = `parentObj${safeSubName}`;
+				const newPath = (path ? path + "." : "") + property;
+
+				const labelName = rule.schema.label;
+				const label = labelName ? `'${escapeEvalString(labelName)}'` : undefined;
+
+				sourceCode.push(`\n// Field: ${escapeEvalString(newPath)}`);
+				sourceCode.push(`field = parentField ? parentField + "${safeSubName}" : "${name}";`);
+				sourceCode.push(`value = ${safePropName};`);
+				sourceCode.push(`label = ${label}`);
+				const innerSource = `
+				${safePropName} = ${context.async ? "await " : ""}context.fn[%%INDEX%%](value, field, parentObj, errors, context, label);
+			`;
+				sourceCode.push(this.compileRule(rule, context, newPath, innerSource, safePropName));
+				if (this.opts.haltOnFirstError === true) {
+					sourceCode.push("if (errors.length) return parentObj;");
+				}
+			}
+
+			// Strict handler
+			if (schema.strict) {
+				const allowedProps = Object.keys(subSchema);
+
+				sourceCode.push(`
+				field = parentField;
+				var invalidProps = [];
+				var props = Object.keys(parentObj);
+
+				for (let i = 0; i < props.length; i++) {
+					if (${JSON.stringify(allowedProps)}.indexOf(props[i]) === -1) {
+						invalidProps.push(props[i]);
+					}
+				}
+				if (invalidProps.length) {
+			`);
+				if (schema.strict === "remove") {
+					sourceCode.push(`
+					if (errors.length === 0) {
+				`);
+					sourceCode.push(`
+						invalidProps.forEach(function(field) {
+							delete parentObj[field];
+						});
+				`);
+					sourceCode.push(`
+					}
+				`);
+				} else {
+					sourceCode.push(`
+					${this.makeError({ type: "objectStrict", expected: "\"" + allowedProps.join(", ") + "\"", actual: "invalidProps.join(', ')", messages })}
+				`);
+				}
+				sourceCode.push(`
+				}
+			`);
+			}
+		}
+
+		if (schema.minProps != null || schema.maxProps != null) {
+			// We recalculate props, because:
+			//	- if strict equals 'remove', we want to work on
+			//	the payload with the extra keys removed,
+			//	- if no strict is set, we need them anyway.
+			if (schema.strict) {
+				sourceCode.push(`
+				props = Object.keys(${subSchema ? "parentObj" : "value"});
+			`);
+			} else {
+				sourceCode.push(`
+				var props = Object.keys(${subSchema ? "parentObj" : "value"});
+				${subSchema ? "field = parentField;" : ""}
+			`);
+			}
+		}
+
+		if (schema.minProps != null) {
+			sourceCode.push(`
+			if (props.length < ${schema.minProps}) {
+				${this.makeError({ type: "objectMinProps", expected: schema.minProps, actual: "props.length", messages })}
+			}
+		`);
+		}
+
+		if (schema.maxProps != null) {
+			sourceCode.push(`
+			if (props.length > ${schema.maxProps}) {
+				${this.makeError({ type: "objectMaxProps", expected: schema.maxProps, actual: "props.length", messages })}
+			}
+		`);
+		}
+
+		if (subSchema) {
+			sourceCode.push(`
+			return parentObj;
+		`);
+		} else {
+			sourceCode.push(`
+			return value;
+		`);
+		}
+
+		return {
+			source: sourceCode.join("\n")
+		};
+	};
+
+	/**	Signature: function(value, field, parent, errors, context)
+	 */
+	var objectID = function({ schema, messages, index }, path, context) {
+		const src = [];
+
+		if (!context.customs[index]) context.customs[index] = { schema };
+		else context.customs[index].schema = schema;
+
+		src.push(`
+		const ObjectID = context.customs[${index}].schema.ObjectID;
+		if (!ObjectID.isValid(value)) {
+			${this.makeError({ type: "objectID", actual: "value", messages })}
+			return;
+		}
+	`);
+
+		if (schema.convert === true) src.push("return new ObjectID(value)");
+		else if (schema.convert === "hexString") src.push("return value.toString()");
+		else src.push("return value");
+
+		return {
+			source: src.join("\n")
+		};
+	};
+
+	function patchKeyRuleMessages(rule) {
+		for (const type in rule.messages) {
+			if (type.startsWith("string")) {
+				rule.messages[type] = rule.messages[type].replace(" field ", " key ");
+			}
+		}
+	}
+
+	var record = function compileRecordRule({ schema, messages }, path, context) {
+		const sourceCode = [];
+		sourceCode.push(`
+		if (typeof value !== "object" || value === null || Array.isArray(value)) {
+			${this.makeError({ type: "record", actual: "value", messages })}
+			return value;
+		}
+	`);
+
+		const keyRuleName = schema.key || "string";
+		const valueRuleName = schema.value || "any";
+
+		sourceCode.push(`
+		const record = value;
+		let sanitizedKey, sanitizedValue;
+		const result = {};
+		for (let key in value) {
+	`);
+
+		sourceCode.push("sanitizedKey = value = key;");
+
+		const keyRule = this.getRuleFromSchema(keyRuleName);
+		patchKeyRuleMessages(keyRule);
+		const keyInnerSource = `
+		sanitizedKey = ${context.async ? "await " : ""}context.fn[%%INDEX%%](key, field ? field + "." + key : key, record, errors, context);
+	`;
+		sourceCode.push(this.compileRule(keyRule, context, null, keyInnerSource, "sanitizedKey"));
+		sourceCode.push("sanitizedValue = value = record[key];");
+
+		const valueRule = this.getRuleFromSchema(valueRuleName);
+		const valueInnerSource = `
+		sanitizedValue = ${context.async ? "await " : ""}context.fn[%%INDEX%%](value, field ? field + "." + key : key, record, errors, context);
+	`;
+		sourceCode.push(this.compileRule(valueRule, context, `${path}[key]`, valueInnerSource, "sanitizedValue"));
+		sourceCode.push("result[sanitizedKey] = sanitizedValue;");
+		sourceCode.push(`
+		}
+	`);
+		sourceCode.push("return result;");
+
+		return {
+			source: sourceCode.join("\n")
+		};
+	};
+
+	const NUMERIC_PATTERN = /^-?[0-9]\d*(\.\d+)?$/;
+	const ALPHA_PATTERN = /^[a-zA-Z]+$/;
+	const ALPHANUM_PATTERN = /^[a-zA-Z0-9]+$/;
+	const ALPHADASH_PATTERN = /^[a-zA-Z0-9_-]+$/;
+	const HEX_PATTERN = /^[0-9a-fA-F]+$/;
+	const BASE64_PATTERN = /^(?:[A-Za-z0-9+\\/]{4})*(?:[A-Za-z0-9+\\/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
+
+	/**	Signature: function(value, field, parent, errors, context)
+	 */
+	var string = function checkString({ schema, messages }, path, context) {
+		const src = [];
+		let sanitized = false;
+
+		if (schema.convert === true) {
+			sanitized = true;
+			src.push(`
+			if (typeof value !== "string") {
+				value = String(value);
+			}
+		`);
+		}
+
+		src.push(`
+		if (typeof value !== "string") {
+			${this.makeError({ type: "string", actual: "value", messages })}
+			return value;
+		}
+
+		var origValue = value;
+	`);
+
+		if (schema.trim) {
+			sanitized = true;
+			src.push(`
+			value = value.trim();
+		`);
+		}
+
+		if (schema.trimLeft) {
+			sanitized = true;
+			src.push(`
+			value = value.trimLeft();
+		`);
+		}
+
+		if (schema.trimRight) {
+			sanitized = true;
+			src.push(`
+			value = value.trimRight();
+		`);
+		}
+
+		if (schema.padStart) {
+			sanitized = true;
+			const padChar = schema.padChar != null ? schema.padChar : " ";
+			src.push(`
+			value = value.padStart(${schema.padStart}, ${JSON.stringify(padChar)});
+		`);
+		}
+
+		if (schema.padEnd) {
+			sanitized = true;
+			const padChar = schema.padChar != null ? schema.padChar : " ";
+			src.push(`
+			value = value.padEnd(${schema.padEnd}, ${JSON.stringify(padChar)});
+		`);
+		}
+
+		if (schema.lowercase) {
+			sanitized = true;
+			src.push(`
+			value = value.toLowerCase();
+		`);
+		}
+
+		if (schema.uppercase) {
+			sanitized = true;
+			src.push(`
+			value = value.toUpperCase();
+		`);
+		}
+
+		if (schema.localeLowercase) {
+			sanitized = true;
+			src.push(`
+			value = value.toLocaleLowerCase();
+		`);
+		}
+
+		if (schema.localeUppercase) {
+			sanitized = true;
+			src.push(`
+			value = value.toLocaleUpperCase();
+		`);
+		}
+
+		src.push(`
+			var len = value.length;
+	`);
+
+		if (schema.empty === false) {
+			src.push(`
+			if (len === 0) {
+				${this.makeError({ type: "stringEmpty",  actual: "value", messages })}
+			}
+		`);
+		} else if (schema.empty === true) {
+			src.push(`
+			if (len === 0) {
+				return value;
+			}
+		`);
+		}
+
+		if (schema.min != null) {
+			src.push(`
+			if (len < ${schema.min}) {
+				${this.makeError({ type: "stringMin", expected: schema.min, actual: "len", messages })}
+			}
+		`);
+		}
+
+		if (schema.max != null) {
+			src.push(`
+			if (len > ${schema.max}) {
+				${this.makeError({ type: "stringMax", expected: schema.max, actual: "len", messages })}
+			}
+		`);
+		}
+
+		if (schema.length != null) {
+			src.push(`
+			if (len !== ${schema.length}) {
+				${this.makeError({ type: "stringLength", expected: schema.length, actual: "len", messages })}
+			}
+		`);
+		}
+
+		if (schema.pattern != null) {
+			let pattern = schema.pattern;
+			if (typeof schema.pattern == "string")
+				pattern = new RegExp(schema.pattern, schema.patternFlags);
+
+			src.push(`
+			if (!${pattern.toString()}.test(value)) {
+				${this.makeError({ type: "stringPattern", expected: `"${pattern.toString().replace(/"/g, "\\$&")}"`, actual: "origValue", messages })}
+			}
+		`);
+		}
+
+		if (schema.contains != null) {
+			src.push(`
+			if (value.indexOf("${schema.contains}") === -1) {
+				${this.makeError({ type: "stringContains", expected: "\"" + schema.contains + "\"", actual: "origValue", messages })}
+			}
+		`);
+		}
+
+		if (schema.enum != null) {
+			const enumStr = JSON.stringify(schema.enum);
+			src.push(`
+			if (${enumStr}.indexOf(value) === -1) {
+				${this.makeError({ type: "stringEnum", expected: "\"" + schema.enum.join(", ") + "\"", actual: "origValue", messages })}
+			}
+		`);
+		}
+
+		if (schema.numeric === true) {
+			src.push(`
+			if (!${NUMERIC_PATTERN.toString()}.test(value) ) {
+				${this.makeError({ type: "stringNumeric",  actual: "origValue", messages })}
+			}
+		`);
+		}
+
+		if(schema.alpha === true) {
+			src.push(`
+			if(!${ALPHA_PATTERN.toString()}.test(value)) {
+				${this.makeError({ type: "stringAlpha",  actual: "origValue", messages })}
+			}
+		`);
+		}
+
+		if(schema.alphanum === true) {
+			src.push(`
+			if(!${ALPHANUM_PATTERN.toString()}.test(value)) {
+				${this.makeError({ type: "stringAlphanum",  actual: "origValue", messages })}
+			}
+		`);
+		}
+
+		if(schema.alphadash === true) {
+			src.push(`
+			if(!${ALPHADASH_PATTERN.toString()}.test(value)) {
+				${this.makeError({ type: "stringAlphadash",  actual: "origValue", messages })}
+			}
+		`);
+		}
+
+		if(schema.hex === true) {
+			src.push(`
+			if(value.length % 2 !== 0 || !${HEX_PATTERN.toString()}.test(value)) {
+				${this.makeError({ type: "stringHex",  actual: "origValue", messages })}
+			}
+		`);
+		}
+
+		if(schema.singleLine === true) {
+			src.push(`
+			if(value.includes("\\n")) {
+				${this.makeError({ type: "stringSingleLine", messages })}
+			}
+		`);
+		}
+
+
+		if(schema.base64 === true) {
+			src.push(`
+			if(!${BASE64_PATTERN.toString()}.test(value)) {
+				${this.makeError({ type: "stringBase64",  actual: "origValue", messages })}
+			}
+		`);
+		}
+
+		src.push(`
+		return value;
+	`);
+
+		return {
+			sanitized,
+			source: src.join("\n")
+		};
+	};
+
+	/**	Signature: function(value, field, parent, errors, context)
+	 */
+	var tuple = function ({ schema, messages }, path, context) {
+		const src = [];
+
+		if (schema.items != null) {
+			if (!Array.isArray(schema.items)) {
+				throw new Error(`Invalid '${schema.type}' schema. The 'items' field must be an array.`);
+			}
+
+			if (schema.items.length === 0) {
+				throw new Error(`Invalid '${schema.type}' schema. The 'items' field must not be an empty array.`);
+			}
+		}
+
+		src.push(`
+		if (!Array.isArray(value)) {
+			${this.makeError({ type: "tuple", actual: "value", messages })}
+			return value;
+		}
+
+		var len = value.length;
+	`);
+
+
+		if (schema.empty === false) {
+			src.push(`
+			if (len === 0) {
+				${this.makeError({ type: "tupleEmpty", actual: "value", messages })}
+				return value;
+			}
+		`);
+		}
+
+		if (schema.items != null) {
+			src.push(`
+			if (${schema.empty} !== false && len === 0) {
+				return value;
+			}
+
+			if (len !== ${schema.items.length}) {
+				${this.makeError({type: "tupleLength", expected: schema.items.length, actual: "len", messages})}
+				return value;
+			}
+		`);
+
+			src.push(`
+			var arr = value;
+			var parentField = field;
+		`);
+
+			for (let i = 0; i < schema.items.length; i++) {
+				src.push(`
+			value = arr[${i}];
+		`);
+
+				const itemPath = `${path}[${i}]`;
+				const rule = this.getRuleFromSchema(schema.items[i]);
+				const innerSource = `
+			arr[${i}] = ${context.async ? "await " : ""}context.fn[%%INDEX%%](arr[${i}], (parentField ? parentField : "") + "[" + ${i} + "]", parent, errors, context);
+		`;
+				src.push(this.compileRule(rule, context, itemPath, innerSource, `arr[${i}]`));
+			}
+			src.push(`
+		return arr;
+	`);
+		} else {
+			src.push(`
+		return value;
+	`);
+		}
+
+		return {
+			source: src.join("\n")
+		};
+	};
+
+	const PATTERN = /^https?:\/\/\S+/;
+	//const PATTERN = /^(?:(?:https?|ftp):\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,}))\.?)(?::\d{2,5})?(?:[/?#]\S*)?$/i;
+	//const PATTERN = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g;
+
+	/**	Signature: function(value, field, parent, errors, context)
+	 */
+	var url = function ({ schema, messages }, path, context) {
+		const src = [];
+
+		src.push(`
+		if (typeof value !== "string") {
+			${this.makeError({ type: "string", actual: "value", messages })}
+			return value;
+		}
+	`);
+
+		if (!schema.empty) {
+			src.push(`
+			if (value.length === 0) {
+				${this.makeError({ type: "urlEmpty", actual: "value", messages })}
+				return value;
+			}
+		`);
+		} else {
+			src.push(`
+			if (value.length === 0) return value;
+		`);
+		}
+
+		src.push(`
+		if (!${PATTERN.toString()}.test(value)) {
+			${this.makeError({ type: "url", actual: "value", messages })}
+		}
+
+		return value;
+	`);
+
+		return {
+			source: src.join("\n"),
+		};
+	};
+
+	const PATTERN$1 = /^([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}|[0]{8}-[0]{4}-[0]{4}-[0]{4}-[0]{12})$/i;
+
+	/**	Signature: function(value, field, parent, errors, context)
+	 */
+	var uuid = function({ schema, messages }, path) {
+		const src = [];
+		src.push(`
+		if (typeof value !== "string") {
+			${this.makeError({ type: "string",  actual: "value", messages })}
+			return value;
+		}
+
+		var val = value.toLowerCase();
+		if (!${PATTERN$1.toString()}.test(val)) {
+			${this.makeError({ type: "uuid",  actual: "value", messages })}
+			return value;
+		}
+
+		const version = val.charAt(14) | 0;
+	`);
+
+		if(parseInt(schema.version) < 9) {
+			src.push(`
+			if (${schema.version} !== version) {
+				${this.makeError({ type: "uuidVersion", expected: schema.version, actual: "version", messages })}
+				return value;
+			}
+		`);
+		}
+
+		src.push(`
+		switch (version) {
+		case 0:
+		case 1:
+		case 2:
+		case 6:
+			break;
+		case 3:
+		case 4:
+		case 5:
+  		case 7:
+		case 8:
+			if (["8", "9", "a", "b"].indexOf(val.charAt(19)) === -1) {
+				${this.makeError({ type: "uuid",  actual: "value", messages })}
+			}
+		}
+
+		return value;
+	`);
+
+		return {
+			source: src.join("\n")
+		};
+	};
+
+	const PATTERN$2 = /^((([a-f0-9][a-f0-9]+[-]){5}|([a-f0-9][a-f0-9]+[:]){5})([a-f0-9][a-f0-9])$)|(^([a-f0-9][a-f0-9][a-f0-9][a-f0-9]+[.]){2}([a-f0-9][a-f0-9][a-f0-9][a-f0-9]))$/i;
+
+	/**	Signature: function(value, field, parent, errors, context)
+	 */
+	var mac = function({ schema, messages }, path, context) {
+		return {
+			source: `
+			if (typeof value !== "string") {
+				${this.makeError({ type: "string",  actual: "value", messages })}
+				return value;
+			}
+
+			var v = value.toLowerCase();
+			if (!${PATTERN$2.toString()}.test(v)) {
+				${this.makeError({ type: "mac",  actual: "value", messages })}
+			}
+			
+			return value;
+		`
+		};
+	};
+
+	/**
+	 * Luhn algorithm checksum https://en.wikipedia.org/wiki/Luhn_algorithm
+	 * Credit Card numbers, IMEI numbers, National Provider Identifier numbers and others
+	 * @param value
+	 * @param schema
+	 * @return {boolean|{actual, expected, type}|ValidationError}
+	 *
+	 *	Signature: function(value, field, parent, errors, context)
+	 */
+	var luhn = function({ schema, messages }, path, context) {
+		return {
+			source: `
+			if (typeof value !== "string") {
+				${this.makeError({ type: "string",  actual: "value", messages })}
+				return value;
+			}
+
+			if (typeof value !== "string")
+				value = String(value);
+
+			val = value.replace(/\\D+/g, "");
+
+			var array = [0, 2, 4, 6, 8, 1, 3, 5, 7, 9];
+			var len = val ? val.length : 0,
+				bit = 1,
+				sum = 0;
+			while (len--) {
+				sum += !(bit ^= 1) ? parseInt(val[len], 10) : array[val[len]];
+			}
+
+			if (!(sum % 10 === 0 && sum > 0)) {
+				${this.makeError({ type: "luhn",  actual: "value", messages })}
+			}
+
+			return value;
+		`
+		};
+	};
+
+	// globals window
+	let prettier, prettierOpts;
+	let hljs, hljsOpts;
+
+	var prettier_1 = function(source) {
+		if (!prettier) {
+			prettier = commonjsRequire();
+			prettierOpts = {
+				parser: "babel",
+				useTabs: false,
+				printWidth: 120,
+				trailingComma: "none",
+				tabWidth: 4,
+				singleQuote: false,
+				semi: true,
+				bracketSpacing: true
+			};
+
+			hljs = commonjsRequire();
+			hljsOpts = {
+				language: "js",
+				theme: hljs.fromJson({
+					keyword: ["white", "bold"],
+					built_in: "magenta",
+					literal: "cyan",
+					number: "magenta",
+					regexp: "red",
+					string: ["yellow", "bold"],
+					symbol: "plain",
+					class: "blue",
+					attr: "plain",
+					function: ["white", "bold"],
+					title: "plain",
+					params: "green",
+					comment: "grey"
+				})
+			};
+		}
+
+		const res = prettier.format(source, prettierOpts);
+		return hljs.highlight(res, hljsOpts);
+	};
+
+	let AsyncFunction;
+	try {
+		AsyncFunction = (new Function("return Object.getPrototypeOf(async function(){}).constructor"))();
+	} catch(err) { /* async is not supported */}
+
+
+
+
+	function loadMessages() {
+		return Object.assign({} , messages);
+	}
+
+	function loadRules() {
+		return {
+			any: any,
+			array: array,
+			boolean: boolean_1,
+			class: _class,
+			custom: custom,
+			currency: currency,
+			date: date,
+			email: email,
+			enum: _enum,
+			equal: equal,
+			forbidden: forbidden,
+			function: _function,
+			multi: multi,
+			number: number,
+			object: object,
+			objectID: objectID,
+			record: record,
+			string: string,
+			tuple: tuple,
+			url: url,
+			uuid: uuid,
+			mac: mac,
+			luhn: luhn
+		};
+	}
+
+	/**
+	 * Fastest Validator
+	 */
+	class Validator {
+
+		/**
+		 * Validator class constructor
+		 *
+		 * @param {Object} opts
+		 */
+		constructor(opts) {
+			this.opts = {};
+			this.defaults = {};
+			this.messages = loadMessages();
+			this.rules = loadRules();
+			this.aliases = {};
+			this.cache = new Map();
+			this.customFunctions = {};
+
+			if (opts) {
+				deepExtend_1(this.opts, opts);
+				if (opts.defaults) deepExtend_1(this.defaults, opts.defaults);
+
+				if (opts.messages) {
+					for (const messageName in opts.messages) this.addMessage(messageName, opts.messages[messageName]);
+				}
+
+				if (opts.aliases) {
+					for (const aliasName in opts.aliases) this.alias(aliasName, opts.aliases[aliasName]);
+				}
+
+				if (opts.customRules) {
+					for (const ruleName in opts.customRules) this.add(ruleName, opts.customRules[ruleName]);
+				}
+
+				if (opts.customFunctions) {
+					for (const customName in opts.customFunctions) this.addCustomFunction(customName, opts.customFunctions[customName]);
+				}
+
+				if (opts.plugins) {
+					const plugins = opts.plugins;
+					if (!Array.isArray(plugins)) throw new Error("Plugins type must be array");
+					plugins.forEach(this.plugin.bind(this));
+				}
+
+				/* istanbul ignore next */
+				if (this.opts.debug) {
+					let formatter = function (code) { return code; };
+					if (typeof window === "undefined") {
+						formatter = prettier_1;
+					}
+
+					this._formatter = formatter;
+				}
+			}
+		}
+
+		/**
+		 * Validate an object by schema
+		 *
+		 * @param {Object} obj
+		 * @param {Object} schema
+		 * @returns {Array<Object>|boolean}
+		 */
+		validate(obj, schema) {
+			const check = this.compile(schema);
+			return check(obj);
+		}
+
+		/**
+		 * Wrap a source code with `required` & `optional` checker codes.
+		 * @param {Object} rule
+		 * @param {String} innerSrc
+		 * @param {String?} resVar
+		 * @returns {String}
+		 */
+		wrapRequiredCheckSourceCode(rule, innerSrc, context, resVar) {
+			const src = [];
+			const {considerNullAsAValue = false} = this.opts;
+			let handleNoValue;
+
+			let skipUndefinedValue = rule.schema.optional === true || rule.schema.type === "forbidden";
+			let skipNullValue = considerNullAsAValue ?
+				rule.schema.nullable !== false || rule.schema.type === "forbidden" :
+				rule.schema.optional === true || rule.schema.nullable === true || rule.schema.type === "forbidden";
+
+			const ruleHasDefault = considerNullAsAValue ?
+				rule.schema.default != undefined && rule.schema.default != null :
+				rule.schema.default != undefined;
+
+			if (ruleHasDefault) {
+				// We should set default-value when value is undefined or null, not skip! (Except when null is allowed)
+				skipUndefinedValue = false;
+				if (considerNullAsAValue) {
+					if (rule.schema.nullable === false) skipNullValue = false;
+				} else {
+					if (rule.schema.nullable !== true) skipNullValue = false;
+				}
+
+				let defaultValue;
+				if (typeof rule.schema.default === "function") {
+					if (!context.customs[rule.index]) context.customs[rule.index] = {};
+					context.customs[rule.index].defaultFn = rule.schema.default;
+					defaultValue = `context.customs[${rule.index}].defaultFn.call(this, context.rules[${rule.index}].schema, field, parent, context)`;
+				} else {
+					defaultValue = JSON.stringify(rule.schema.default);
+				}
+
+				handleNoValue = `
+				value = ${defaultValue};
+				${resVar} = value;
+			`;
+
+			} else {
+				handleNoValue = this.makeError({ type: "required", actual: "value", messages: rule.messages });
+			}
+
+
+			src.push(`
+			${`if (value === undefined) { ${skipUndefinedValue ? "\n// allow undefined\n" : handleNoValue} }`}
+			${`else if (value === null) { ${skipNullValue ? "\n// allow null\n" : handleNoValue} }`}
+			${innerSrc ? `else { ${innerSrc} }` : ""}
+		`);
+			return src.join("\n");
+		}
+
+		/**
+		 * check if the key is a meta key
+		 *
+		 * @param key
+		 * @return {boolean}
+		 */
+		isMetaKey(key) {
+			return key.startsWith("$$");
+		}
+		/**
+		 * will remove all "metas" keys (keys starting with $$)
+		 *
+		 * @param obj
+		 */
+		removeMetasKeys(obj) {
+			Object.keys(obj).forEach(key => {
+				if(!this.isMetaKey(key)) {
+					return;
+				}
+
+				delete obj[key];
+			});
+		}
+
+		/**
+		 * Compile a schema
+		 *
+		 * @param {Object} schema
+		 * @throws {Error} Invalid schema
+		 * @returns {Function}
+		 */
+		compile(schema) {
+			if (schema === null || typeof schema !== "object") {
+				throw new Error("Invalid schema.");
+			}
+
+			const self = this;
+			const context = {
+				index: 0,
+				async: schema.$$async === true,
+				rules: [],
+				fn: [],
+				customs: {},
+				customFunctions : this.customFunctions,
+				utils: {
+					replace,
+				},
+			};
+			this.cache.clear();
+			delete schema.$$async;
+
+			/* istanbul ignore next */
+			if (context.async && !AsyncFunction) {
+				throw new Error("Asynchronous mode is not supported.");
+			}
+
+			if (schema.$$root !== true) {
+				if (Array.isArray(schema)) {
+					const rule = this.getRuleFromSchema(schema);
+					schema = rule.schema;
+				} else {
+					const prevSchema = Object.assign({}, schema);
+					schema = {
+						type: "object",
+						strict: prevSchema.$$strict,
+						properties: prevSchema
+					};
+
+					this.removeMetasKeys(prevSchema);
+				}
+			}
+
+			const sourceCode = [
+				"var errors = [];",
+				"var field;",
+				"var parent = null;",
+				`var label = ${schema.label ? "\"" + schema.label + "\"" : "null"};`
+			];
+
+			const rule = this.getRuleFromSchema(schema);
+			sourceCode.push(this.compileRule(rule, context, null, `${context.async ? "await " : ""}context.fn[%%INDEX%%](value, field, null, errors, context, label);`, "value"));
+
+			sourceCode.push("if (errors.length) {");
+			sourceCode.push(`
+			return errors.map(err => {
+				if (err.message) {
+					err.message = context.utils.replace(err.message, /\\{field\\}/g, err.label || err.field);
+					err.message = context.utils.replace(err.message, /\\{expected\\}/g, err.expected);
+					err.message = context.utils.replace(err.message, /\\{actual\\}/g, err.actual);
+				}
+				if(!err.label) delete err.label
+				return err;
+			});
+		`);
+
+			sourceCode.push("}");
+			sourceCode.push("return true;");
+
+			const src = sourceCode.join("\n");
+
+			const FnClass = context.async ? AsyncFunction : Function;
+			const checkFn = new FnClass("value", "context", src);
+
+			/* istanbul ignore next */
+			if (this.opts.debug) {
+				console.log(this._formatter("// Main check function\n" + checkFn.toString())); // eslint-disable-line no-console
+			}
+
+			this.cache.clear();
+
+			const resFn = function (data, opts) {
+				context.data = data;
+				if (opts && opts.meta)
+					context.meta = opts.meta;
+				return checkFn.call(self, data, context);
+			};
+			resFn.async = context.async;
+			return resFn;
+		}
+
+		/**
+		 * Compile a rule to source code.
+		 * @param {Object} rule
+		 * @param {Object} context
+		 * @param {String} path
+		 * @param {String} innerSrc
+		 * @param {String} resVar
+		 * @returns {String}
+		 */
+		compileRule(rule, context, path, innerSrc, resVar) {
+			const sourceCode = [];
+
+			const item = this.cache.get(rule.schema);
+			if (item) {
+				// Handle cyclic schema
+				rule = item;
+				rule.cycle = true;
+				rule.cycleStack = [];
+				sourceCode.push(this.wrapRequiredCheckSourceCode(rule, `
+				var rule = context.rules[${rule.index}];
+				if (rule.cycleStack.indexOf(value) === -1) {
+					rule.cycleStack.push(value);
+					${innerSrc.replace(/%%INDEX%%/g, rule.index)}
+					rule.cycleStack.pop(value);
+				}
+			`, context, resVar));
+
+			} else {
+				this.cache.set(rule.schema, rule);
+				rule.index = context.index;
+				context.rules[context.index] = rule;
+
+				const customPath = path != null ? path : "$$root";
+
+				context.index++;
+				const res = rule.ruleFunction.call(this, rule, path, context);
+				res.source = res.source.replace(/%%INDEX%%/g, rule.index);
+				const FnClass = context.async ? AsyncFunction : Function;
+				const fn = new FnClass("value", "field", "parent", "errors", "context", "label", res.source);
+				context.fn[rule.index] = fn.bind(this);
+				sourceCode.push(this.wrapRequiredCheckSourceCode(rule, innerSrc.replace(/%%INDEX%%/g, rule.index), context, resVar));
+				sourceCode.push(this.makeCustomValidator({vName: resVar, path: customPath, schema: rule.schema, context, messages: rule.messages, ruleIndex: rule.index}));
+
+				/* istanbul ignore next */
+				if (this.opts.debug) {
+					console.log(this._formatter(`// Context.fn[${rule.index}]\n` + fn.toString())); // eslint-disable-line no-console
+				}
+			}
+
+			return sourceCode.join("\n");
+		}
+
+		/**
+		 * Create a rule instance from schema definition.
+		 * @param {Object} schema
+		 * @returns {Object} rule
+		 */
+		getRuleFromSchema(schema) {
+			schema = this.resolveType(schema);
+
+			const alias = this.aliases[schema.type];
+			if (alias) {
+				delete schema.type;
+				schema = deepExtend_1(schema, alias, { skipIfExist: true });
+			}
+
+			const ruleFunction = this.rules[schema.type];
+			if (!ruleFunction)
+				throw new Error("Invalid '" + schema.type + "' type in validator schema.");
+
+			const rule = {
+				messages: Object.assign({}, this.messages, schema.messages),
+				schema: deepExtend_1(schema, this.defaults[schema.type], { skipIfExist: true }),
+				ruleFunction: ruleFunction,
+			};
+
+			return rule;
+		}
+
+		/**
+		 * Parse rule from shorthand string
+		 * @param {String} str shorthand string
+		 * @param {Object} schema schema reference
+		 */
+
+		parseShortHand(str) {
+			const p = str.split("|").map((s) => s.trim());
+			let type = p[0];
+			let schema;
+			if (type.endsWith("[]")) {
+				schema = this.getRuleFromSchema({ type: "array", items: type.slice(0, -2) }).schema;
+			} else {
+				schema = {
+					type: p[0],
+				};
+			}
+
+			p.slice(1).forEach((s) => {
+				const idx = s.indexOf(":");
+				if (idx !== -1) {
+					const key = s.substring(0, idx).trim();
+					let value = s.substring(idx + 1).trim();
+					if (value === "true" || value === "false")
+						value = value === "true";
+					else if (!Number.isNaN(Number(value))) {
+						value = Number(value);
+					}
+					schema[key] = value;
+				} else {
+					// boolean value
+					if (s.startsWith("no-")) schema[s.slice(3)] = false;
+					else schema[s] = true;
+				}
+			});
+
+			return schema;
+		}
+
+		/**
+		 * Generate error source code.
+		 * @param {Object} opts
+		 * @param {String} opts.type
+		 * @param {String} opts.field
+		 * @param {any} opts.expected
+		 * @param {any} opts.actual
+		 * @param {Object} opts.messages
+		 */
+		makeError({ type, field, expected, actual, messages }) {
+			const o = {
+				type: `"${type}"`,
+				message: `"${messages[type]}"`,
+			};
+			if (field) o.field = `"${field}"`;
+			else o.field = "field";
+			if (expected != null) o.expected = expected;
+			if (actual != null) o.actual = actual;
+			o.label = "label";
+
+			const s = Object.keys(o)
+				.map(key => `${key}: ${o[key]}`)
+				.join(", ");
+
+			return `errors.push({ ${s} });`;
+		}
+
+		/**
+		 * Generate custom validator function source code.
+		 * @param {Object} opts
+		 * @param {String} opts.vName
+		 * @param {String} opts.fnName
+		 * @param {String} opts.ruleIndex
+		 * @param {String} opts.path
+		 * @param {Object} opts.schema
+		 * @param {Object} opts.context
+	 	 * @param {Object} opts.messages
+		 */
+		makeCustomValidator({ vName = "value", fnName = "custom", ruleIndex, path, schema, context, messages }) {
+			const ruleVName = "rule" + ruleIndex;
+			const fnCustomErrorsVName = "fnCustomErrors" + ruleIndex;
+
+			if (typeof schema[fnName] == "function" || (Array.isArray(schema[fnName]))) {
+				if (context.customs[ruleIndex]) {
+					context.customs[ruleIndex].messages = messages;
+					context.customs[ruleIndex].schema = schema;
+				} else {
+					context.customs[ruleIndex] = { messages, schema };
+				}
+				const ret = [];
+				if (this.opts.useNewCustomCheckerFunction) {
+					ret.push( `
+               		const ${ruleVName} = context.customs[${ruleIndex}];
+					const ${fnCustomErrorsVName} = [];
+				`);
+
+					if(Array.isArray(schema[fnName])){
+						for (let i = 0; i < schema[fnName].length; i++) {
+
+							let custom = schema[fnName][i];
+
+							if (typeof custom === "string") {
+								custom = this.parseShortHand(custom);
+								schema[fnName][i] = custom;
+							}
+
+							const customIndex = ruleIndex*1000+i;
+							context.customs[customIndex] = { messages, schema: Object.assign({}, schema, { custom, index: i }) };
+
+							ret.push( `
+							const ${ruleVName}_${i} = context.customs[${customIndex}];
+
+					 	`);
+
+							if(custom.type){
+								ret.push( `
+							 ${vName} = ${context.async ? "await " : ""}context.customFunctions[${ruleVName}.schema.${fnName}[${i}].type].call(this, ${vName}, ${fnCustomErrorsVName} , ${ruleVName}_${i}.schema, "${path}", parent, context);
+							`);
+							}
+							if(typeof custom==="function"){
+								ret.push( `
+							${vName} = ${context.async ? "await " : ""}${ruleVName}.schema.${fnName}[${i}].call(this, ${vName}, ${fnCustomErrorsVName} , ${ruleVName}.schema, "${path}", parent, context);
+							`);
+							}
+						}
+					}else {
+						ret.push( `
+					${vName} = ${context.async ? "await " : ""}${ruleVName}.schema.${fnName}.call(this, ${vName}, ${fnCustomErrorsVName} , ${ruleVName}.schema, "${path}", parent, context);
+					`);
+					}
+
+					ret.push( `
+					if (Array.isArray(${fnCustomErrorsVName} )) {
+                  		${fnCustomErrorsVName} .forEach(err => errors.push(Object.assign({ message: ${ruleVName}.messages[err.type], field }, err)));
+					}
+				`);
+				}else {
+					const result = "res_" + ruleVName;
+					ret.push( `
+					const ${ruleVName} = context.customs[${ruleIndex}];
+					const ${result} = ${context.async ? "await " : ""}${ruleVName}.schema.${fnName}.call(this, ${vName}, ${ruleVName}.schema, "${path}", parent, context);
+					if (Array.isArray(${result})) {
+						${result}.forEach(err => errors.push(Object.assign({ message: ${ruleVName}.messages[err.type], field }, err)));
+					}
+			`);
+				}
+				return ret.join("\n");
+
+			}
+			return "";
+		}
+
+		/**
+		 * Add a custom rule
+		 *
+		 * @param {String} type
+		 * @param {Function} fn
+		 */
+		add(type, fn) {
+			this.rules[type] = fn;
+		}
+
+		/**
+		 * Add a custom function
+		 *
+		 * @param {String} type
+		 * @param {Function} fn
+		 */
+		addCustomFunction(name, fn) {
+			this.customFunctions[name] = fn;
+		}
+
+		/**
+		 * Add a message
+		 *
+		 * @param {String} name
+		 * @param {String} message
+		 */
+		addMessage(name, message) {
+			this.messages[name] = message;
+		}
+
+		/**
+		 * create alias name for a rule
+		 *
+		 * @param {String} name
+		 * @param validationRule
+		 */
+		alias(name, validationRule) {
+			if (this.rules[name]) throw new Error("Alias name must not be a rule name");
+			this.aliases[name] = validationRule;
+		}
+
+		/**
+		 * Add a plugin
+		 *
+		 * @param {Function} fn
+		 */
+		plugin(fn) {
+			if (typeof fn !== "function") throw new Error("Plugin fn type must be function");
+			return fn(this);
+		}
+
+		/**
+		 * Resolve the schema 'type' by:
+		 * - parsing short hands into full type definitions
+		 * - expanding arrays into 'multi' types with a rules property
+		 * - objects which have a root $$type property into a schema which
+		 *   explicitly has a 'type' property and a 'props' property.
+		 *
+		 * @param schema The schema to resolve the type of
+		 */
+		resolveType(schema) {
+			if (typeof schema === "string") {
+				schema = this.parseShortHand(schema);
+			} else if (Array.isArray(schema)) {
+				if (schema.length === 0)
+					throw new Error("Invalid schema.");
+
+				schema = {
+					type: "multi",
+					rules: schema
+				};
+
+				// Check 'optional' flag
+				const isOptional = schema.rules
+					.map(s => this.getRuleFromSchema(s))
+					.every(rule => rule.schema.optional === true);
+				if (isOptional)
+					schema.optional = true;
+
+				// Check 'nullable' flag
+				const nullCheck = this.opts.considerNullAsAValue ? false : true;
+				const setNullable = schema.rules
+					.map(s => this.getRuleFromSchema(s))
+					.every(rule => rule.schema.nullable === nullCheck);
+				if (setNullable)
+					schema.nullable = nullCheck;
+			}
+
+			if (schema.$$type) {
+				const type = schema.$$type;
+				const otherShorthandProps = this.getRuleFromSchema(type).schema;
+				delete schema.$$type;
+				const props = Object.assign({}, schema);
+
+				for (const key in schema) {  // clear object without changing reference
+					delete schema[key];
+				}
+
+				deepExtend_1(schema, otherShorthandProps, { skipIfExist: true });
+				schema.props = props;
+			}
+
+			return schema;
+		}
+
+		/**
+		 * Normalize a schema, type or short hand definition by expanding it to a full form. The 'normalized'
+		 * form is the equivalent schema with any short hands undone. This ensure that each rule; always includes
+		 * a 'type' key, arrays always have an 'items' key, 'multi' always have a 'rules' key and objects always
+		 * have their properties defined in a 'props' key
+		 *
+		 * @param {Object|String} value The value to normalize
+		 * @returns {Object} The normalized form of the given rule or schema
+		 */
+		normalize(value) {
+			let result = this.resolveType(value);
+			if(this.aliases[result.type])
+				result = deepExtend_1(result, this.normalize(this.aliases[result.type]), { skipIfExists: true});
+
+			result = deepExtend_1(result, this.defaults[result.type], { skipIfExist: true });
+
+			if(result.type === "multi") {
+				result.rules = result.rules.map(r => this.normalize(r));
+				result.optional = result.rules.every(r => r.optional === true);
+				return result;
+			}
+			if(result.type === "array") {
+				result.items = this.normalize(result.items);
+				return result;
+			}
+			if(result.type === "object") {
+				if(result.props) {
+					Object.entries(result.props).forEach(([k,v]) => result.props[k] = this.normalize(v));
+				}
+			}
+			if(typeof value === "object") {
+				if(value.type) {
+					const config = this.normalize(value.type);
+					deepExtend_1(result, config, { skipIfExists: true });
+				}
+				else {
+					Object.entries(value).forEach(([k,v]) => result[k] = this.normalize(v));
+				}
+			}
+
+			return result;
+		}
+	}
+
+	var validator = Validator;
+
+	var fastestValidator = validator;
 
 	const { ValidationError: ValidationError$1 } = errors;
 
 
-	class FastestValidator  extends base$5{
 
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 * @typedef {import("../context")} Context
+	 * @typedef {import("./fastest")} FastestValidatorClass
+	 * @typedef {import("./fastest").FastestValidatorOptions} FastestValidatorOptions
+	 * @typedef {import("./base").CheckerFunction} CheckerFunction
+	 * @typedef {import("fastest-validator").default} Validator
+	 */
+
+	/**
+	 * Fastest validator class
+	 *
+	 * @implements {FastestValidatorClass}
+	 */
+	class FastestValidator extends base$5 {
+		/**
+		 * Creates an instance of FastestValidator.
+		 *
+		 * @param {FastestValidatorOptions} opts
+		 *
+		 */
 		constructor(opts) {
 			super(opts);
-			this.validator = new Validator__default(this.opts);
+			/** @type {FastestValidatorOptions} */
+			this.opts = ___default.defaultsDeep(this.opts, {
+				useNewCustomCheckerFunction: true
+			});
+
+			/** @type {Validator} */
+			// @ts-ignore
+			this.validator = new fastestValidator(this.opts);
 		}
 
 		/**
 		 * Compile a validation schema to a checker function.
-		 * @param {any} schema
-		 * @returns {Function}
+		 * Need a clone because FV manipulate the schema (removing $$... props)
+		 *
+		 * @param {Record<string, any>} schema
+		 * @returns {CheckerFunction}
 		 */
 		compile(schema) {
-			return this.validator.compile(schema);
+			return this.validator.compile(___default.cloneDeep(schema));
 		}
 
 		/**
-		 * Validate params againt the schema
-		 * @param {any} params
-		 * @param {any} schema
+		 * Validate params against the schema
+		 *
+		 * @param {Record<string, any>} params
+		 * @param {Record<string, any>} schema
 		 * @returns {boolean}
 		 */
 		validate(params, schema) {
-			const res = this.validator.validate(params, schema);
-			if (res !== true)
-				throw new ValidationError$1("Parameters validation error!", null, res);
+			const res = this.validator.validate(params, ___default.cloneDeep(schema));
+			if (res !== true) throw new ValidationError$1("Parameters validation error!", null, res);
 
 			return true;
 		}
@@ -8336,7 +14712,7 @@
 		 * Convert the specific validation schema to
 		 * the Moleculer (fastest-validator) validation schema format.
 		 *
-		 * @param {any} schema
+		 * @param {Record<string, any>} schema
 		 * @returns {Object}
 		 */
 		convertSchemaToMoleculer(schema) {
@@ -8347,7 +14723,7 @@
 	var fastest = FastestValidator;
 
 	const { BrokerOptionsError: BrokerOptionsError$5 } = errors;
-	const { isObject: isObject$6, isString: isString$8 } = utils_1;
+	const { isObject: isObject$5, isString: isString$8, isInheritedClass: isInheritedClass$3 } = utils_1;
 
 	const Validators = {
 		Base: base$5,
@@ -8356,77 +14732,93 @@
 
 	function getByName$5(name) {
 		/* istanbul ignore next */
-		if (!name)
-			return null;
+		if (!name) return null;
 
 		let n = Object.keys(Validators).find(n => n.toLowerCase() == name.toLowerCase());
-		if (n)
-			return Validators[n];
+		if (n) return Validators[n];
 	}
 
 	/**
 	 * Resolve validator by name
 	 *
-	 * @param {object|string} opt
-	 * @returns {Validator}
+	 * @param {Record<string,any>|string} opt
+	 * @returns {any}
 	 * @memberof ServiceBroker
 	 */
 	function resolve$5(opt) {
-		if (opt instanceof Validators.Base) {
+		if (isObject$5(opt) && isInheritedClass$3(opt, Validators.Base)) {
 			return opt;
 		} else if (isString$8(opt)) {
 			let ValidatorClass = getByName$5(opt);
-			if (ValidatorClass)
-				return new ValidatorClass();
+			if (ValidatorClass) return new ValidatorClass();
 
 			throw new BrokerOptionsError$5(`Invalid Validator type '${opt}'.`, { type: opt });
-
-		} else if (isObject$6(opt)) {
+		} else if (isObject$5(opt)) {
 			let ValidatorClass = getByName$5(opt.type || "Fastest");
-			if (ValidatorClass)
-				return new ValidatorClass(opt.options);
+			if (ValidatorClass) return new ValidatorClass(opt.options);
 			else
-				throw new BrokerOptionsError$5(`Invalid Validator type '${opt.type}'.`, { type: opt.type });
+				throw new BrokerOptionsError$5(`Invalid Validator type '${opt.type}'.`, {
+					type: opt.type
+				});
 		}
 
 		return new Validators.Fastest();
 	}
 
+	/**
+	 * Register a custom validator
+	 *
+	 * @param {string} name
+	 * @param {any} value
+	 */
 	function register$5(name, value) {
 		Validators[name] = value;
 	}
 
 	var validators = Object.assign(Validators, { resolve: resolve$5, register: register$5 });
 
-	const { METRIC: METRIC$2 }	= metrics;
-	const { isObject: isObject$7, isFunction: isFunction$4 }	= utils_1;
+	const { METRIC: METRIC$2 } = metrics;
+	const { isObject: isObject$6, isFunction: isFunction$3, isDate } = utils_1;
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 * @typedef {import("../context")} Context
+	 * @typedef {import("./base").CacherOptions} CacherOptions
+	 * @typedef {import("./base")} CacherBaseClass
+	 */
 
 	/**
 	 * Abstract cacher class
 	 *
-	 * @class Cacher
+	 * @implements {CacherBaseClass}
 	 */
 	class Cacher {
-
 		/**
 		 * Creates an instance of Cacher.
 		 *
-		 * @param {object} opts
+		 * @param {CacherOptions} opts
 		 *
 		 * @memberof Cacher
 		 */
 		constructor(opts) {
+			/** @type {CacherOptions} */
 			this.opts = ___default.defaultsDeep(opts, {
 				ttl: null,
 				keygen: null,
-				maxParamsLength: null
+				maxParamsLength: null,
+				missingResponse: undefined
 			});
+
+			/** @type {boolean} Flag indicating the connection status */
+			this.connected = null; // Init as null for backward compatibility
 		}
 
 		/**
 		 * Initialize cacher
 		 *
-		 * @param {any} broker
+		 * @param {ServiceBroker} broker
 		 *
 		 * @memberof Cacher
 		 */
@@ -8441,8 +14833,7 @@
 					this.prefix = this.opts.prefix + "-";
 				} else {
 					this.prefix = "MOL-";
-					if (this.broker.namespace)
-						this.prefix += this.broker.namespace + "-";
+					if (this.broker.namespace) this.prefix += this.broker.namespace + "-";
 				}
 
 				this.registerMoleculerMetrics();
@@ -8453,21 +14844,65 @@
 		 * Register Moleculer Transit Core metrics.
 		 */
 		registerMoleculerMetrics() {
-			this.metrics.register({ name: METRIC$2.MOLECULER_CACHER_GET_TOTAL, type: METRIC$2.TYPE_COUNTER, rate: true });
-			this.metrics.register({ name: METRIC$2.MOLECULER_CACHER_GET_TIME, type: METRIC$2.TYPE_HISTOGRAM, quantiles: true, unit: METRIC$2.UNIT_MILLISECONDS });
+			this.metrics.register({
+				name: METRIC$2.MOLECULER_CACHER_GET_TOTAL,
+				type: METRIC$2.TYPE_COUNTER,
+				rate: true
+			});
+			this.metrics.register({
+				name: METRIC$2.MOLECULER_CACHER_GET_TIME,
+				type: METRIC$2.TYPE_HISTOGRAM,
+				quantiles: true,
+				unit: METRIC$2.UNIT_MILLISECONDS
+			});
 
-			this.metrics.register({ name: METRIC$2.MOLECULER_CACHER_FOUND_TOTAL, type: METRIC$2.TYPE_COUNTER, rate: true });
+			this.metrics.register({
+				name: METRIC$2.MOLECULER_CACHER_FOUND_TOTAL,
+				type: METRIC$2.TYPE_COUNTER,
+				rate: true
+			});
 
-			this.metrics.register({ name: METRIC$2.MOLECULER_CACHER_SET_TOTAL, type: METRIC$2.TYPE_COUNTER, rate: true });
-			this.metrics.register({ name: METRIC$2.MOLECULER_CACHER_SET_TIME, type: METRIC$2.TYPE_HISTOGRAM, quantiles: true, unit: METRIC$2.UNIT_MILLISECONDS });
+			this.metrics.register({
+				name: METRIC$2.MOLECULER_CACHER_SET_TOTAL,
+				type: METRIC$2.TYPE_COUNTER,
+				rate: true
+			});
+			this.metrics.register({
+				name: METRIC$2.MOLECULER_CACHER_SET_TIME,
+				type: METRIC$2.TYPE_HISTOGRAM,
+				quantiles: true,
+				unit: METRIC$2.UNIT_MILLISECONDS
+			});
 
-			this.metrics.register({ name: METRIC$2.MOLECULER_CACHER_DEL_TOTAL, type: METRIC$2.TYPE_COUNTER, rate: true });
-			this.metrics.register({ name: METRIC$2.MOLECULER_CACHER_DEL_TIME, type: METRIC$2.TYPE_HISTOGRAM, quantiles: true, unit: METRIC$2.UNIT_MILLISECONDS });
+			this.metrics.register({
+				name: METRIC$2.MOLECULER_CACHER_DEL_TOTAL,
+				type: METRIC$2.TYPE_COUNTER,
+				rate: true
+			});
+			this.metrics.register({
+				name: METRIC$2.MOLECULER_CACHER_DEL_TIME,
+				type: METRIC$2.TYPE_HISTOGRAM,
+				quantiles: true,
+				unit: METRIC$2.UNIT_MILLISECONDS
+			});
 
-			this.metrics.register({ name: METRIC$2.MOLECULER_CACHER_CLEAN_TOTAL, type: METRIC$2.TYPE_COUNTER, rate: true });
-			this.metrics.register({ name: METRIC$2.MOLECULER_CACHER_CLEAN_TIME, type: METRIC$2.TYPE_HISTOGRAM, quantiles: true, unit: METRIC$2.UNIT_MILLISECONDS });
+			this.metrics.register({
+				name: METRIC$2.MOLECULER_CACHER_CLEAN_TOTAL,
+				type: METRIC$2.TYPE_COUNTER,
+				rate: true
+			});
+			this.metrics.register({
+				name: METRIC$2.MOLECULER_CACHER_CLEAN_TIME,
+				type: METRIC$2.TYPE_HISTOGRAM,
+				quantiles: true,
+				unit: METRIC$2.UNIT_MILLISECONDS
+			});
 
-			this.metrics.register({ name: METRIC$2.MOLECULER_CACHER_EXPIRED_TOTAL, type: METRIC$2.TYPE_COUNTER, rate: true });
+			this.metrics.register({
+				name: METRIC$2.MOLECULER_CACHER_EXPIRED_TOTAL,
+				type: METRIC$2.TYPE_COUNTER,
+				rate: true
+			});
 		}
 
 		/**
@@ -8485,9 +14920,10 @@
 		 *
 		 * @param {any} key
 		 *
+		 * @returns {Promise<any>}
 		 * @memberof Cacher
 		 */
-		get(/*key*/) {
+		get(key) {
 			/* istanbul ignore next */
 			throw new Error("Not implemented method!");
 		}
@@ -8496,10 +14932,10 @@
 		 * Get a cached content and ttl by key
 		 *
 		 * @param {any} key
-		 *
+		 * @returns {Promise<any>}
 		 * @memberof Cacher
 		 */
-		getWithTTL(/*key*/) {
+		getWithTTL(key) {
 			/* istanbul ignore next */
 			throw new Error("Not implemented method!");
 		}
@@ -8511,9 +14947,10 @@
 		 * @param {any} data
 		 * @param {Number?} ttl
 		 *
+		 * @returns {Promise<any>}
 		 * @memberof Cacher
 		 */
-		set(/*key, data, ttl*/) {
+		set(key, data, ttl) {
 			/* istanbul ignore next */
 			throw new Error("Not implemented method!");
 		}
@@ -8523,19 +14960,18 @@
 		 *
 		 * @param {string|Array<string>} key
 		 *
+		 * @returns {Promise<any>}
 		 * @memberof Cacher
 		 */
-		del(/*key*/) {
+		del(key) {
 			/* istanbul ignore next */
 			throw new Error("Not implemented method!");
 		}
 
-
 		/**
 		 * Clean cache. Remove every key by match
-		 * @param {string|Array<string>} match string. Default is "**"
-		 * @returns {Promise}
-		 *
+		 * /@param {string|Array<string>} match string. Default is "**"
+		 * @returns {Promise<any>}
 		 * @memberof Cacher
 		 */
 		clean(/*match = "**"*/) {
@@ -8544,81 +14980,136 @@
 		}
 
 		/**
+		 * Try to acquire a lock
+		 *
+		 * @param {string|Array<string>} key
+		 * @param {number?} ttl
+		 *
+		 * @returns {Promise<any>}
+		 * @memberof Cacher
+		 */
+		tryLock(key, ttl) {
+			/* istanbul ignore next */
+			throw new Error("Not implemented method!");
+		}
+
+		/**
+		 * Acquire a lock
+		 *
+		 * @param {string|Array<string>} key
+		 * @param {number?} ttl
+		 *
+		 * @returns {Promise<any>}
+		 * @memberof Cacher
+		 */
+		lock(key, ttl) {
+			/* istanbul ignore next */
+			throw new Error("Not implemented method!");
+		}
+
+		/**
 		 * Get a value from params or meta by `key`.
-		 * If the key starts with `#` it reads from `meta`, otherwise from `params`.
+		 * If the key starts with `#` it reads from `meta`.
+		 * If the key starts with `@` it reads from `headers`.
 		 *
 		 * @param {String} key
 		 * @param {Object} params
 		 * @param {Object} meta
+		 * @param {Object} headers
 		 * @returns {any}
 		 * @memberof Cacher
 		 */
-		getParamMetaValue(key, params, meta) {
-			if (key.startsWith("#") && meta != null)
-				return ___default.get(meta, key.slice(1));
-			else if (params != null)
-				return ___default.get(params, key);
+		_getParamMetaValue(key, params, meta, headers) {
+			if (key.startsWith("#") && meta != null) return ___default.get(meta, key.slice(1));
+			if (key.startsWith("@") && headers != null) return ___default.get(headers, key.slice(1));
+			else if (params != null) return ___default.get(params, key);
 		}
 
 		/**
 		 * Default cache key generator
 		 *
-		 * @param {String} actionName
-		 * @param {Object|null} params
-		 * @param {Object} meta
-		 * @param {Array|null} keys
+		 * @param {Object} action
+		 * @param {Object} opts
+		 * @param {Context} ctx
 		 * @returns {String}
 		 * @memberof Cacher
 		 */
-		defaultKeygen(actionName, params, meta, keys) {
-			if (params || meta) {
-				const keyPrefix = actionName + ":";
-				if (keys) {
-					if (keys.length == 1) {
+		defaultKeygen(action, opts, ctx) {
+			if (!action) return undefined;
+
+			const { params, meta, headers } = ctx ?? {};
+
+			if (params || meta || headers) {
+				const keyPrefix = action.name + ":";
+				if (opts?.keys) {
+					if (opts.keys.length == 1) {
 						// Fast solution for ['id'] key
-						const val = this.getParamMetaValue(keys[0], params, meta);
-						return keyPrefix + this._hashedKey(isObject$7(val) ? this._hashedKey(this._generateKeyFromObject(val)) : val);
+						const val = this._getParamMetaValue(opts.keys[0], params, meta, headers);
+						return keyPrefix + this._hashedKey(this._generateKeyFromObject(val));
 					}
 
-					if (keys.length > 0) {
-						return keyPrefix + this._hashedKey(keys.reduce((a, key, i) => {
-							const val = this.getParamMetaValue(key, params, meta);
-							return a + (i ? "|" : "") + (isObject$7(val) || Array.isArray(val) ? this._hashedKey(this._generateKeyFromObject(val)) : val);
-						}, ""));
+					if (opts.keys.length > 0) {
+						return (
+							keyPrefix +
+							this._hashedKey(
+								opts.keys.reduce((a, key, i) => {
+									const val = this._getParamMetaValue(key, params, meta, headers);
+									const valKey = this._generateKeyFromObject(val);
+									return (
+										a +
+										(i ? "|" : "") +
+										(isObject$6(val) || Array.isArray(val)
+											? this._hashedKey(valKey)
+											: valKey)
+									);
+								}, "")
+							)
+						);
 					}
-				}
-				else {
+				} else {
 					return keyPrefix + this._hashedKey(this._generateKeyFromObject(params));
 				}
 			}
-			return actionName;
+			return action.name;
 		}
 
+		/**
+		 *  Hash key if it's too long.
+		 *
+		 * @param {String} key
+		 * @returns {String}
+		 */
 		_hashedKey(key) {
+			if (typeof key !== "string") key = String(key);
+
 			const maxParamsLength = this.opts.maxParamsLength;
-			if (!maxParamsLength || maxParamsLength < 44 || key.length <= maxParamsLength)
-				return key;
+			if (!maxParamsLength || maxParamsLength < 44 || key.length <= maxParamsLength) return key;
 
 			const prefixLength = maxParamsLength - 44;
 
 			const base64Hash = crypto__default.createHash("sha256").update(key).digest("base64");
-			if (prefixLength < 1)
-				return base64Hash;
+			if (prefixLength < 1) return base64Hash;
 
 			return key.substring(0, prefixLength) + base64Hash;
 		}
 
 		_generateKeyFromObject(obj) {
 			if (Array.isArray(obj)) {
-				return obj.map(o => this._generateKeyFromObject(o)).join("|");
-			}
-			else if (isObject$7(obj)) {
-				return Object.keys(obj).map(key => [key, this._generateKeyFromObject(obj[key])].join("|")).join("|");
-			}
-			else if (obj != null) {
+				return "[" + obj.map(o => this._generateKeyFromObject(o)).join("|") + "]";
+			} else if (isDate(obj)) {
+				return obj.valueOf();
+			} else if (isObject$6(obj)) {
+				return Object.keys(obj)
+					.map(key => [key, this._generateKeyFromObject(obj[key])].join("|"))
+					.join("|");
+			} else if (typeof obj === "string") {
+				return '"' + obj + '"';
+			} else if (obj != null) {
 				return obj.toString();
-			} else {
+			} else if (obj === null) {
 				return "null";
+			} else {
+				return "undefined";
 			}
 		}
 
@@ -8626,17 +15117,16 @@
 		 * Get a cache key by name and params.
 		 * Concatenate the name and the hashed params object
 		 *
-		 * @param {String} name
-		 * @param {Object} params
-		 * @param {Object} meta
-		 * @param {Array|null} keys
+		 * @param {Object} action
+		 * @param {Object} opts
+		 * @param {Context} ctx
 		 * @returns {String}
 		 */
-		getCacheKey(actionName, params, meta, keys) {
-			if (isFunction$4(this.opts.keygen))
-				return this.opts.keygen.call(this, actionName, params, meta, keys);
-			else
-				return this.defaultKeygen(actionName, params, meta, keys);
+		getCacheKey(action, opts, ctx) {
+			if (opts && isFunction$3(opts.keygen)) return opts.keygen.call(this, action, opts, ctx);
+			else if (isFunction$3(this.opts.keygen))
+				return this.opts.keygen.call(this, action, opts, ctx);
+			else return this.defaultKeygen(action, opts, ctx);
 		}
 
 		/**
@@ -8645,121 +15135,194 @@
 		 * @memberof Cacher
 		 */
 		middleware() {
-			return (handler, action) => {
-				const opts = ___default.defaultsDeep({}, isObject$7(action.cache) ? action.cache : { enabled: !!action.cache });
-				opts.lock = ___default.defaultsDeep({}, isObject$7(opts.lock) ? opts.lock : { enabled: !!opts.lock });
-				if (opts.enabled !== false) {
-					const isEnabledFunction = isFunction$4(opts.enabled);
+			return {
+				name: "Cacher",
+				localAction: (handler, action) => {
+					const opts = ___default.defaultsDeep(
+						{},
+						isObject$6(action.cache) ? action.cache : { enabled: !!action.cache }
+					);
+					opts.lock = ___default.defaultsDeep(
+						{},
+						isObject$6(opts.lock) ? opts.lock : { enabled: !!opts.lock }
+					);
 
-					return function cacherMiddleware(ctx) {
-						if (isEnabledFunction) {
-							if (!opts.enabled.call(ctx.service, ctx)) {
-								// Cache is disabled. Call the handler only.
+					if (opts.enabled !== false) {
+						const isEnabledFunction = isFunction$3(opts.enabled);
+
+						return function cacherMiddleware(ctx) {
+							if (isEnabledFunction) {
+								if (!opts.enabled.call(ctx.service, ctx)) {
+									// Cache is disabled. Call the handler only.
+									return handler(ctx);
+								}
+							}
+
+							// Disable caching with `ctx.meta.$cache = false`
+							if (ctx.meta["$cache"] === false) return handler(ctx);
+
+							// Cache is enabled but not in healthy state
+							// More info: https://github.com/moleculerjs/moleculer/issues/978
+							if (this.connected === false) {
+								this.logger.debug(
+									"Cacher is enabled but it is not connected at the moment... Calling the handler"
+								);
 								return handler(ctx);
 							}
-						}
 
-						// Disable caching with `ctx.meta.$cache = false`
-						if (ctx.meta["$cache"] === false)
-							return handler(ctx);
+							const cacheKey = this.getCacheKey(action, opts, ctx);
 
-						const cacheKey = this.getCacheKey(action.name, ctx.params, ctx.meta, opts.keys);
-						// Using lock
-						if(opts.lock.enabled !== false){
-							let cachePromise;
-							if(opts.lock.staleTime && this.getWithTTL){ // If enable cache refresh
-								cachePromise = this.getWithTTL(cacheKey).then(({ data, ttl }) => {
-									if (data != null) {
-										if(opts.lock.staleTime && ttl && ttl < opts.lock.staleTime){
-											// Cache is stale, try to refresh it.
-											this.tryLock(cacheKey, opts.lock.ttl).then(unlock=>{
-												return handler(ctx).then(result => {
-													// Save the result to the cache and realse the lock.
-													return this.set(cacheKey, result, opts.ttl).then(()=>unlock());
-												}).catch((/*err*/) => {
-													return this.del(cacheKey).then(()=>unlock());
-												});
-											}).catch((/*err*/)=>{
-												// The cache is refreshing on somewhere else.
-											});
-										}
-									}
-									return data;
-								});
+							// Using lock
+							if (opts.lock.enabled !== false) {
+								return this.middlewareWithLock(ctx, cacheKey, handler, opts);
 							} else {
-								cachePromise = this.get(cacheKey);
+								// Not using lock
+								return this.middlewareWithoutLock(ctx, cacheKey, handler, opts);
 							}
-							return cachePromise.then(data=>{
-								if (data != null) {
-									// Found in the cache! Don't call handler, return with the content
-									ctx.cachedResult = true;
-									return data;
-								}
-								// Not found in the cache! Acquire a lock
-								return this.lock(cacheKey, opts.lock.ttl).then(unlock => {
-									return this.get(cacheKey).then(content => {
-										if (content != null) {
-											// Cache found. Realse the lock and return the value.
-											ctx.cachedResult = true;
-											return unlock().then(() => {
-												return content;
-											});
-										}
-										// Call the handler
-										return handler(ctx).then(result => {
-											// Save the result to the cache and realse the lock.
-											this.set(cacheKey, result, opts.ttl).then(()=>unlock());
-											return result;
-										}).catch(e => {
-											return unlock().then(() => {
-												return Promise.reject(e);
-											});
-										});
-									});
-								});
-							});
-						}
-						// Not using lock
-						return this.get(cacheKey).then(content => {
-							if (content != null) {
-								// Found in the cache! Don't call handler, return with the content
-								ctx.cachedResult = true;
-								return content;
-							}
+						}.bind(this);
+					}
 
-							// Call the handler
-							return handler(ctx).then(result => {
-								// Save the result to the cache
-								this.set(cacheKey, result, opts.ttl);
-
-								return result;
-							});
-						});
-					}.bind(this);
+					return handler;
 				}
-
-				return handler;
 			};
 		}
 
+		/**
+		 * Middleware functionality with lock support.
+		 *
+		 * @param {Context} ctx
+		 * @param {string} cacheKey
+		 * @param {Function} handler
+		 * @param {Object} opts
+		 * @returns {Promise<any>}
+		 */
+		middlewareWithLock(ctx, cacheKey, handler, opts) {
+			let cachePromise;
+			if (opts.lock.staleTime && this.getWithTTL) {
+				// If enable cache refresh
+				cachePromise = this.getWithTTL(cacheKey).then(({ data, ttl }) => {
+					if (data != null) {
+						if (opts.lock.staleTime && ttl && ttl < opts.lock.staleTime) {
+							// Cache is stale, try to refresh it.
+							this.tryLock(cacheKey, opts.lock.ttl)
+								.then(unlock => {
+									return handler(ctx)
+										.then(result => {
+											// Save the result to the cache and release the lock.
+											return this.set(cacheKey, result, opts.ttl).then(() =>
+												unlock()
+											);
+										})
+										.catch((/*err*/) => {
+											return this.del(cacheKey).then(() => unlock());
+										});
+								})
+								.catch((/*err*/) => {
+									// The cache is refreshing on somewhere else.
+								});
+						}
+					}
+					return data;
+				});
+			} else {
+				cachePromise = this.get(cacheKey);
+			}
+
+			return cachePromise.then(data => {
+				if (data !== this.opts.missingResponse) {
+					// Found in the cache! Don't call handler, return with the content
+					ctx.cachedResult = true;
+					return data;
+				}
+				// Not found in the cache! Acquire a lock
+				return this.lock(cacheKey, opts.lock.ttl).then(unlock => {
+					return this.get(cacheKey).then(content => {
+						if (content != null) {
+							// Cache found. Realse the lock and return the value.
+							ctx.cachedResult = true;
+							return unlock().then(() => {
+								return content;
+							});
+						}
+						// Call the handler
+						return handler(ctx)
+							.then(result => {
+								// Save the result to the cache and realse the lock.
+								this.set(cacheKey, result, opts.ttl).then(() => unlock());
+								return result;
+							})
+							.catch(e => {
+								return unlock().then(() => {
+									return Promise.reject(e);
+								});
+							});
+					});
+				});
+			});
+		}
+
+		/**
+		 * Middleware functionality without lock support.
+		 *
+		 * @param {Context} ctx
+		 * @param {string} cacheKey
+		 * @param {Function} handler
+		 * @param {Object} opts
+		 * @returns {Promise<any>}
+		 */
+		middlewareWithoutLock(ctx, cacheKey, handler, opts) {
+			return this.get(cacheKey).then(content => {
+				if (content !== this.opts.missingResponse) {
+					// Found in the cache! Don't call handler, return with the content
+					ctx.cachedResult = true;
+					return content;
+				}
+
+				// Call the handler
+				return handler(ctx).then(result => {
+					// Save the result to the cache
+					this.set(cacheKey, result, opts.ttl);
+
+					return result;
+				});
+			});
+		}
+
+		/**
+		 * Return all cache keys with available properties (ttl, lastUsed, ...etc).
+		 *
+		 * @returns {Promise<Array<Object>>}
+		 */
+		getCacheKeys() {
+			// Not available
+			return Promise.resolve(null);
+		}
 	}
 
 	var base$6 = Cacher;
 
 	/*
 	 * moleculer
-	 * Copyright (c) 2019 MoleculerJS (https://github.com/moleculerjs/moleculer)
+	 * Copyright (c) 2023 MoleculerJS (https://github.com/moleculerjs/moleculer)
 	 * MIT Licensed
 	 */
 
+	/**
+	 * @typedef {import("./lock")} LockClass
+	 */
+
+	/**
+	 * @implements {LockClass}
+	 */
 	class Lock {
-		constructor(){
+		constructor() {
 			this.locked = new Map();
 		}
 
 		acquire(key /*, ttl*/) {
 			let locked = this.locked.get(key);
-			if (!locked) { // not locked
+			if (!locked) {
+				// not locked
 				locked = [];
 				this.locked.set(key, locked);
 				return Promise.resolve();
@@ -8772,10 +15335,10 @@
 			return !!this.locked.get(key);
 		}
 
-		release(key){
+		release(key) {
 			let locked = this.locked.get(key);
-			if(locked) {
-				if(locked.length > 0) {
+			if (locked) {
+				if (locked.length > 0) {
 					locked.shift()(); // Release the lock
 				} else {
 					this.locked.delete(key);
@@ -8787,20 +15350,29 @@
 
 	var lock = Lock;
 
-	const { METRIC: METRIC$3 }	= metrics;
+	const { METRIC: METRIC$3 } = metrics;
 
+
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 * @typedef {import("./memory")} MemoryCacherClass
+	 * @typedef {import("./memory").MemoryCacherOptions} MemoryCacherOptions
+	 */
 
 	/**
 	 * Cacher factory for memory cache
 	 *
-	 * @class MemoryCacher
+	 * @implements {MemoryCacherClass}
+	 * @extends {BaseCacher<MemoryCacherOptions>}
 	 */
 	class MemoryCacher extends base$6 {
-
 		/**
 		 * Creates an instance of MemoryCacher.
 		 *
-		 * @param {object} opts
+		 * @param {MemoryCacherOptions?} opts
 		 *
 		 * @memberof MemoryCacher
 		 */
@@ -8825,12 +15397,14 @@
 		/**
 		 * Initialize cacher
 		 *
-		 * @param {any} broker
+		 * @param {ServiceBroker} broker
 		 *
 		 * @memberof MemoryCacher
 		 */
 		init(broker) {
 			super.init(broker);
+
+			this.connected = true;
 
 			broker.localBus.on("$transporter.connected", () => {
 				// Clear all entries after transporter connected. Maybe we missed some "cache.clear" events.
@@ -8851,7 +15425,7 @@
 		/**
 		 * Get data from cache by key
 		 *
-		 * @param {any} key
+		 * @param {string} key
 		 * @returns {Promise}
 		 *
 		 * @memberof MemoryCacher
@@ -8871,7 +15445,7 @@
 					this.metrics.increment(METRIC$3.MOLECULER_CACHER_EXPIRED_TOTAL);
 					this.cache.delete(key);
 					timeEnd();
-					return this.broker.Promise.resolve(null);
+					return this.broker.Promise.resolve(this.opts.missingResponse);
 				}
 				const res = this.clone ? this.clone(item.data) : item.data;
 				timeEnd();
@@ -8880,7 +15454,7 @@
 			} else {
 				timeEnd();
 			}
-			return this.broker.Promise.resolve(null);
+			return this.broker.Promise.resolve(this.opts.missingResponse);
 		}
 
 		/**
@@ -8897,8 +15471,9 @@
 			this.metrics.increment(METRIC$3.MOLECULER_CACHER_SET_TOTAL);
 			const timeEnd = this.metrics.timer(METRIC$3.MOLECULER_CACHER_SET_TIME);
 
-			if (ttl == null)
-				ttl = this.opts.ttl;
+			if (ttl == null) ttl = this.opts.ttl;
+
+			data = this.clone ? this.clone(data) : data;
 
 			this.cache.set(key, {
 				data,
@@ -8919,11 +15494,11 @@
 		 *
 		 * @memberof MemoryCacher
 		 */
-		del(keys) {
+		del(key) {
 			this.metrics.increment(METRIC$3.MOLECULER_CACHER_DEL_TOTAL);
 			const timeEnd = this.metrics.timer(METRIC$3.MOLECULER_CACHER_DEL_TIME);
 
-			keys = Array.isArray(keys) ? keys : [keys];
+			const keys = Array.isArray(key) ? key : [key];
 			keys.forEach(key => {
 				this.cache.delete(key);
 				this.logger.debug(`REMOVE ${key}`);
@@ -8935,6 +15510,7 @@
 
 		/**
 		 * Clean cache. Remove every key by match
+		 *
 		 * @param {string|Array<string>} match string. Default is "**"
 		 * @returns {Promise}
 		 *
@@ -8966,16 +15542,16 @@
 		 *
 		 * @memberof MemoryCacher
 		 */
-		getWithTTL(key){
+		getWithTTL(key) {
 			this.logger.debug(`GET ${key}`);
-			let data = null;
+			let data = this.opts.missingResponse;
 			let ttl = null;
 			if (this.cache.has(key)) {
 				this.logger.debug(`FOUND ${key}`);
 
 				let item = this.cache.get(key);
 				let now = Date.now();
-				ttl = (item.expire - now)/1000;
+				ttl = (item.expire - now) / 1000;
 				ttl = ttl > 0 ? ttl : null;
 				if (this.opts.ttl) {
 					// Update expire time (hold in the cache if we are using it)
@@ -8996,8 +15572,8 @@
 		 * @memberof MemoryCacher
 		 */
 		lock(key, ttl) {
-			return this._lock.acquire(key, ttl).then(()=> {
-				return ()=>this._lock.release(key);
+			return this._lock.acquire(key, ttl).then(() => {
+				return () => this._lock.release(key);
 			});
 		}
 
@@ -9011,11 +15587,11 @@
 		 * @memberof MemoryCacher
 		 */
 		tryLock(key, ttl) {
-			if(this._lock.isLocked(key)){
+			if (this._lock.isLocked(key)) {
 				return this.broker.Promise.reject(new Error("Locked."));
 			}
-			return this._lock.acquire(key, ttl).then(()=> {
-				return ()=>this._lock.release(key);
+			return this._lock.acquire(key, ttl).then(() => {
+				return () => this._lock.release(key);
 			});
 		}
 
@@ -9036,24 +15612,53 @@
 				}
 			});
 		}
+
+		/**
+		 * Return all cache keys with available properties (ttl, lastUsed, ...etc).
+		 *
+		 * @returns Promise<Array<Object>>
+		 */
+		getCacheKeys() {
+			return Promise.resolve(
+				Array.from(this.cache.entries()).map(([key, item]) => {
+					return {
+						key,
+						expiresAt: item.expire
+					};
+				})
+			);
+		}
 	}
 
 	var memory = MemoryCacher;
 
-	const { METRIC: METRIC$4 }	= metrics;
+	const { isObject: isObject$7 } = utils_1;
+	const utilsMatch = utils_1.match;
 
+	const { LRUCache: LRUCache$2 } = lruCache;
+	const { METRIC: METRIC$4 } = metrics;
+
+
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 * @typedef {import("./memory-lru")} MemoryLRUCacherClass
+	 * @typedef {import("./memory-lru").MemoryLRUCacherOptions} MemoryLRUCacherOptions
+	 */
 
 	/**
 	 * Cacher factory for memory cache
 	 *
-	 * @class MemoryLRUCacher
+	 * @implements {MemoryLRUCacherClass}
+	 * @extends {BaseCacher<MemoryLRUCacherOptions>}
 	 */
 	class MemoryLRUCacher extends base$6 {
-
 		/**
 		 * Creates an instance of MemoryLRUCacher.
 		 *
-		 * @param {object} opts
+		 * @param {MemoryLRUCacherOptions?} opts
 		 *
 		 * @memberof MemoryLRUCacher
 		 */
@@ -9061,11 +15666,12 @@
 			super(opts);
 
 			// Cache container
-			this.cache = new LRU__default({
-				max: this.opts.max,
-				maxAge: this.opts.ttl ? this.opts.ttl * 1000 : null,
+			this.cache = new LRUCache$2({
+				max: this.opts.max ? this.opts.max : 1000,
+				ttl: this.opts.ttl ? this.opts.ttl * 1000 : undefined,
 				updateAgeOnGet: !!this.opts.ttl
 			});
+
 			// Async lock
 			this._lock = new lock();
 			// Start TTL timer
@@ -9082,18 +15688,25 @@
 		/**
 		 * Initialize cacher
 		 *
-		 * @param {any} broker
+		 * @param {ServiceBroker} broker
 		 *
 		 * @memberof MemoryLRUCacher
 		 */
 		init(broker) {
 			super.init(broker);
 
+			this.connected = true;
+
 			broker.localBus.on("$transporter.connected", () => {
 				// Clear all entries after transporter connected. Maybe we missed some "cache.clear" events.
 				return this.clean();
 			});
-			if(this.opts.lock && this.opts.lock.enabled !== false && this.opts.lock.staleTime){
+
+			if (
+				isObject$7(this.opts.lock) &&
+				this.opts.lock?.enabled !== false &&
+				this.opts.lock.staleTime
+			) {
 				/* istanbul ignore next */
 				this.logger.warn("setting lock.staleTime with MemoryLRUCacher is not supported.");
 			}
@@ -9134,7 +15747,7 @@
 			} else {
 				timeEnd();
 			}
-			return this.broker.Promise.resolve(null);
+			return this.broker.Promise.resolve(this.opts.missingResponse);
 		}
 
 		/**
@@ -9151,10 +15764,11 @@
 			this.metrics.increment(METRIC$4.MOLECULER_CACHER_SET_TOTAL);
 			const timeEnd = this.metrics.timer(METRIC$4.MOLECULER_CACHER_SET_TIME);
 
-			if (ttl == null)
-				ttl = this.opts.ttl;
+			if (ttl == null) ttl = this.opts.ttl;
 
-			this.cache.set(key, data, ttl ? ttl * 1000 : null);
+			data = this.clone ? this.clone(data) : data;
+
+			this.cache.set(key, data, { ttl: ttl ? ttl * 1000 : 0 });
 
 			timeEnd();
 			this.logger.debug(`SET ${key}`);
@@ -9170,13 +15784,13 @@
 		 *
 		 * @memberof MemoryLRUCacher
 		 */
-		del(keys) {
+		del(key) {
 			this.metrics.increment(METRIC$4.MOLECULER_CACHER_DEL_TOTAL);
 			const timeEnd = this.metrics.timer(METRIC$4.MOLECULER_CACHER_DEL_TIME);
 
-			keys = Array.isArray(keys) ? keys : [keys];
+			const keys = Array.isArray(key) ? key : [key];
 			keys.forEach(key => {
-				this.cache.del(key);
+				this.cache.delete(key);
 				this.logger.debug(`REMOVE ${key}`);
 			});
 			timeEnd();
@@ -9198,12 +15812,16 @@
 			const matches = Array.isArray(match) ? match : [match];
 			this.logger.debug(`CLEAN ${matches.join(", ")}`);
 
-			this.cache.keys().forEach(key => {
-				if (matches.some(match => utils_1.match(key, match))) {
-					this.logger.debug(`REMOVE ${key}`);
-					this.cache.del(key);
+			const keys = this.cache.keys();
+			/** @type {any} */
+			let key = keys.next();
+			while (!key.done) {
+				if (matches.some(m => utilsMatch(key.value, m))) {
+					this.logger.debug(`REMOVE ${key.value}`);
+					this.cache.delete(key.value);
 				}
-			});
+				key = keys.next();
+			}
 			timeEnd();
 
 			return this.broker.Promise.resolve();
@@ -9216,9 +15834,9 @@
 		 *
 		 * @memberof MemoryLRUCacher
 		 */
-		getWithTTL(key){
+		getWithTTL(key) {
 			// There are no way to get the ttl of LRU cache :(
-			return this.get(key).then(data=>{
+			return this.get(key).then(data => {
 				return { data, ttl: null };
 			});
 		}
@@ -9234,8 +15852,8 @@
 		 */
 
 		lock(key, ttl) {
-			return this._lock.acquire(key, ttl).then(()=> {
-				return ()=>this._lock.release(key);
+			return this._lock.acquire(key, ttl).then(() => {
+				return () => this._lock.release(key);
 			});
 		}
 
@@ -9249,14 +15867,13 @@
 		 * @memberof MemoryLRUCacher
 		 */
 		tryLock(key, ttl) {
-			if(this._lock.isLocked(key)){
+			if (this._lock.isLocked(key)) {
 				return this.broker.Promise.reject(new Error("Locked."));
 			}
-			return this._lock.acquire(key, ttl).then(()=> {
-				return ()=>this._lock.release(key);
+			return this._lock.acquire(key, ttl).then(() => {
+				return () => this._lock.release(key);
 			});
 		}
-
 
 		/**
 		 * Check & remove the expired cache items
@@ -9264,13 +15881,31 @@
 		 * @memberof MemoryLRUCacher
 		 */
 		checkTTL() {
-			this.cache.prune();
+			this.cache.purgeStale();
+		}
+
+		/**
+		 * Return all cache keys with available properties (ttl, lastUsed, ...etc).
+		 *
+		 * @returns Promise<Array<Object>>
+		 */
+		getCacheKeys() {
+			const res = [];
+
+			const keys = this.cache.keys();
+			let key = keys.next();
+			while (!key.done) {
+				res.push({ key: key.value });
+				key = keys.next();
+			}
+
+			return Promise.resolve(res);
 		}
 	}
 
 	var memoryLru = MemoryLRUCacher;
 
-	const { isObject: isObject$8, isString: isString$9 } = utils_1;
+	const { isObject: isObject$8, isString: isString$9, isInheritedClass: isInheritedClass$4 } = utils_1;
 	const { BrokerOptionsError: BrokerOptionsError$6 } = errors;
 
 	const Cachers = {
@@ -9282,44 +15917,35 @@
 
 	function getByName$6(name) {
 		/* istanbul ignore next */
-		if (!name)
-			return null;
+		if (!name) return null;
 
 		let n = Object.keys(Cachers).find(n => n.toLowerCase() == name.toLowerCase());
-		if (n)
-			return Cachers[n];
+		if (n) return Cachers[n];
 	}
 
 	/**
 	 * Resolve cacher by name
 	 *
-	 * @param {object|string} opt
-	 * @returns {Cacher}
+	 * @param {Record<string,any>|string|boolean} opt
+	 * @returns {any}
 	 */
 	function resolve$6(opt) {
-		if (opt instanceof Cachers.Base) {
+		if (isObject$8(opt) && isInheritedClass$4(opt, Cachers.Base)) {
 			return opt;
 		} else if (opt === true) {
 			return new Cachers.Memory();
 		} else if (isString$9(opt)) {
 			let CacherClass = getByName$6(opt);
-			if (CacherClass)
-				return new CacherClass();
+			if (CacherClass) return new CacherClass();
 
-			if (opt.startsWith("redis://"))
-				CacherClass = Cachers.Redis;
+			if (opt.startsWith("redis://") || opt.startsWith("rediss://")) CacherClass = Cachers.Redis;
 
-			if (CacherClass)
-				return new CacherClass(opt);
-			else
-				throw new BrokerOptionsError$6(`Invalid cacher type '${opt}'.`, { type: opt });
-
+			if (CacherClass) return new CacherClass(opt);
+			else throw new BrokerOptionsError$6(`Invalid cacher type '${opt}'.`, { type: opt });
 		} else if (isObject$8(opt)) {
 			let CacherClass = getByName$6(opt.type || "Memory");
-			if (CacherClass)
-				return new CacherClass(opt.options);
-			else
-				throw new BrokerOptionsError$6(`Invalid cacher type '${opt.type}'.`, { type: opt.type });
+			if (CacherClass) return new CacherClass(opt.options);
+			else throw new BrokerOptionsError$6(`Invalid cacher type '${opt.type}'.`, { type: opt.type });
 		}
 
 		return null;
@@ -9335,16 +15961,26 @@
 	const { BrokerDisconnectedError } = errors;
 
 	/**
+	 * Import types
+	 *
+	 * @typedef {import("./base")} BaseTransporterClass
+	 * @typedef {import("../transit")} Transit
+	 * @typedef {import("../packets").Packet} Packet
+	 * @typedef {import("../packets").PacketRequestPayload} PacketRequestPayload
+	 * @typedef {import("../packets").PacketEventPayload} PacketEventPayload
+	 */
+
+	/**
 	 * Base Transporter class
 	 *
 	 * @class BaseTransporter
+	 * @implements {BaseTransporterClass}
 	 */
 	class BaseTransporter {
-
 		/**
 		 * Creates an instance of BaseTransporter.
 		 *
-		 * @param {any} opts
+		 * @param {Record<string,any>?} opts
 		 *
 		 * @memberof BaseTransporter
 		 */
@@ -9371,9 +16007,7 @@
 				this.logger = this.broker.getLogger("transporter");
 
 				this.prefix = "MOL";
-				if (this.broker.namespace)
-					this.prefix += "-" + this.broker.namespace;
-
+				if (this.broker.namespace) this.prefix += "-" + this.broker.namespace;
 			}
 			this.messageHandler = messageHandler;
 			this.afterConnect = afterConnect;
@@ -9382,9 +16016,11 @@
 		/**
 		 * Connect to the transporter server
 		 *
+		 * @param {Function} errorHandler
+		 * @returns {Promise}
 		 * @memberof BaseTransporter
 		 */
-		connect() {
+		connect(errorHandler) {
 			/* istanbul ignore next */
 			throw new Error("Not implemented!");
 		}
@@ -9392,7 +16028,7 @@
 		/**
 		 * Event handler for connected.
 		 *
-		 * @param {any} wasReconnect
+		 * @param {boolean?} wasReconnect
 		 * @returns {Promise}
 		 *
 		 * @memberof BaseTransporter
@@ -9409,6 +16045,7 @@
 		/**
 		 * Disconnect from the transporter server
 		 *
+		 * @returns {Promise}
 		 * @memberof BaseTransporter
 		 */
 		disconnect() {
@@ -9420,19 +16057,22 @@
 		 * Subscribe to all topics
 		 *
 		 * @param {Array<Object>} topics
+		 * @returns {Promise}
 		 *
 		 * @memberof BaseTransporter
 		 */
 		makeSubscriptions(topics) {
-			return this.broker.Promise.all(topics.map(({ cmd, nodeID }) => this.subscribe(cmd, nodeID)));
+			return this.broker.Promise.all(
+				topics.map(({ cmd, nodeID }) => this.subscribe(cmd, nodeID))
+			);
 		}
 
 		/**
 		 * Process incoming messages
 		 *
 		 * @param {String} cmd
-		 * @param {Buffer} msg
-		 * @returns
+		 * @param {Buffer=} msg
+		 * @returns {Promise}
 		 * @memberof BaseTransporter
 		 */
 		incomingMessage(cmd, msg) {
@@ -9440,7 +16080,7 @@
 			try {
 				const packet = this.deserialize(cmd, msg);
 				return this.messageHandler(cmd, packet);
-			} catch(err) {
+			} catch (err) {
 				this.logger.warn("Invalid incoming packet. Type:", cmd, err);
 				this.logger.debug("Content:", msg.toString ? msg.toString() : msg);
 			}
@@ -9448,8 +16088,10 @@
 
 		/**
 		 * Received data. It's a wrapper for middlewares.
+		 *
 		 * @param {String} cmd
 		 * @param {Buffer} data
+		 * @returns {Promise}
 		 */
 		receive(cmd, data) {
 			return this.incomingMessage(cmd, data);
@@ -9460,10 +16102,11 @@
 		 *
 		 * @param {String} cmd
 		 * @param {String} nodeID
+		 * @returns {Promise}
 		 *
 		 * @memberof BaseTransporter
 		 */
-		subscribe(/*cmd, nodeID*/) {
+		subscribe(cmd, nodeID) {
 			/* istanbul ignore next */
 			throw new Error("Not implemented!");
 		}
@@ -9472,9 +16115,11 @@
 		 * Subscribe to balanced action commands
 		 *
 		 * @param {String} action
+		 * @returns {Promise}
+		 *
 		 * @memberof AmqpTransporter
 		 */
-		subscribeBalancedRequest(/*action*/) {
+		subscribeBalancedRequest(action) {
 			/* istanbul ignore next */
 			throw new Error("Not implemented!");
 		}
@@ -9484,9 +16129,11 @@
 		 *
 		 * @param {String} event
 		 * @param {String} group
+		 * @returns {Promise}
+		 *
 		 * @memberof AmqpTransporter
 		 */
-		subscribeBalancedEvent(/*event, group*/) {
+		subscribeBalancedEvent(event, group) {
 			/* istanbul ignore next */
 			throw new Error("Not implemented!");
 		}
@@ -9494,6 +16141,7 @@
 		/**
 		 * Unsubscribe all balanced request and event commands
 		 *
+		 * @returns {Promise}
 		 * @memberof BaseTransporter
 		 */
 		unsubscribeFromBalancedCommands() {
@@ -9556,15 +16204,15 @@
 		 *
 		 * @returns {Promise}
 		 */
-		send(/*topic, data, meta*/) {
+		send(topic, data, meta) {
 			throw new Error("Not implemented!");
 		}
 
 		/**
 		 * Get topic name from command & target nodeID
 		 *
-		 * @param {any} cmd
-		 * @param {any} nodeID
+		 * @param {string} cmd
+		 * @param {string=} nodeID
 		 *
 		 * @memberof BaseTransporter
 		 */
@@ -9575,31 +16223,40 @@
 		/**
 		 * Initialize queues for REQUEST & EVENT packets.
 		 *
-		 * @memberof AmqpTransporter
+		 * @returns {Promise}
+		 * @memberof BaseTransporter
 		 */
 		makeBalancedSubscriptions() {
 			if (!this.hasBuiltInBalancer) return this.broker.Promise.resolve();
 
 			return this.unsubscribeFromBalancedCommands().then(() => {
 				const services = this.broker.getLocalNodeInfo().services;
-				return this.broker.Promise.all(services.map(service => {
-					const p = [];
+				return this.broker.Promise.all(
+					services.map(service => {
+						const p = [];
 
-					// Service actions queues
-					if (service.actions && typeof(service.actions) == "object") {
-						p.push(Object.keys(service.actions).map(action => this.subscribeBalancedRequest(action)));
-					}
+						// Service actions queues
+						if (service.actions && typeof service.actions == "object") {
+							p.push(
+								Object.keys(service.actions).map(action =>
+									this.subscribeBalancedRequest(action)
+								)
+							);
+						}
 
-					// Load-balanced/grouped events queues
-					if (service.events && typeof(service.events) == "object") {
-						p.push(Object.keys(service.events).map(event => {
-							const group = service.events[event].group || service.name;
-							this.subscribeBalancedEvent(event, group);
-						}));
-					}
+						// Load-balanced/grouped events queues
+						if (service.events && typeof service.events == "object") {
+							p.push(
+								Object.keys(service.events).map(event => {
+									const group = service.events[event].group || service.name;
+									this.subscribeBalancedEvent(event, group);
+								})
+							);
+						}
 
-					return this.broker.Promise.all(___default.compact(flatten(p, true)));
-				}));
+						return this.broker.Promise.all(___default.compact(flatten(p)));
+					})
+				);
 			});
 		}
 
@@ -9615,7 +16272,9 @@
 			if (!this.connected) {
 				// For packets that are triggered intentionally by users, throw a retryable error.
 				if ([packets.PACKET_REQUEST, packets.PACKET_EVENT, packets.PACKET_PING].includes(packet.type)) {
-					return this.broker.Promise.reject(new BrokerDisconnectedError());
+					return this.broker.Promise.reject(
+						new BrokerDisconnectedError("Broker is disconnected!")
+					);
 				}
 
 				// For internal packets like INFO and HEARTBEATS, skip sending and don't throw
@@ -9625,21 +16284,22 @@
 			}
 
 			if (packet.type === packets.PACKET_EVENT && packet.target == null && packet.payload.groups) {
-				const groups = packet.payload.groups;
+				const groups = /** @type {PacketEventPayload} */ (packet.payload).groups;
 				// If the packet contains groups, we don't send the packet to
 				// the targetted node, but we push them to the event group queues
 				// and AMQP will load-balanced it.
 				if (groups.length > 0) {
 					groups.forEach(group => {
+						// Create a copy of the packet because the `publishBalancedEvent` will modify the payload.
+						const copy = ___default.cloneDeep(packet);
 						// Change the groups to this group to avoid multi handling in consumers.
-						packet.payload.groups = [group];
-						this.publishBalancedEvent(packet, group);
+						copy.payload.groups = [group];
+						this.publishBalancedEvent(copy, group);
 					});
 					return this.broker.Promise.resolve();
 				}
 				// If it's not contain, then it is a broadcasted event,
 				// we sent it in the normal way (exchange)
-
 			} else if (packet.type === packets.PACKET_REQUEST && packet.target == null) {
 				return this.publishBalancedRequest(packet);
 			}
@@ -9654,7 +16314,7 @@
 		 * @param {Packet} packet
 		 * @returns {Buffer}
 		 *
-		 * @memberof Transit
+		 * @memberof BaseTransporter
 		 */
 		serialize(packet) {
 			packet.payload.ver = this.broker.PROTOCOL_VERSION;
@@ -9669,20 +16329,25 @@
 		 * @param {Buffer} buf
 		 * @returns {Packet}
 		 *
-		 * @memberof Transit
+		 * @memberof BaseTransporter
 		 */
 		deserialize(type, buf) {
 			if (buf == null) return null;
 
 			const msg = this.broker.serializer.deserialize(buf, type);
 			return new packets.Packet(type, null, msg);
-
 		}
 	}
 
 	var base$7 = BaseTransporter;
 
-	const EventEmitter2 = require$$0__default$2.EventEmitter2;
+	const EventEmitter2 = eventemitter2.EventEmitter2;
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("./fake")} FakeTransporterClass
+	 */
 
 	// Put to global to transfer messages between brokers in the same process
 	commonjsGlobal.bus = new EventEmitter2({
@@ -9695,13 +16360,13 @@
 	 *
 	 * @class FakeTransporter
 	 * @extends {Transporter}
+	 * @implements {FakeTransporterClass}
 	 */
 	class FakeTransporter extends base$7 {
-
 		/**
 		 * Creates an instance of FakeTransporter.
 		 *
-		 * @param {any} opts
+		 * @param {Record<string, any>} opts
 		 *
 		 * @memberof FakeTransporter
 		 */
@@ -9757,21 +16422,18 @@
 		/**
 		 * Subscribe to balanced action commands
 		 *
-		 * @param {String} action
 		 * @memberof AmqpTransporter
 		 */
-		subscribeBalancedRequest(/*action*/) {
+		subscribeBalancedRequest() {
 			return this.broker.Promise.resolve();
 		}
 
 		/**
 		 * Subscribe to balanced event command
 		 *
-		 * @param {String} event
-		 * @param {String} group
 		 * @memberof AmqpTransporter
 		 */
-		subscribeBalancedEvent(/*event, group*/) {
+		subscribeBalancedEvent() {
 			return this.broker.Promise.resolve();
 		}
 
@@ -9780,7 +16442,6 @@
 		 *
 		 * @param {String} topic
 		 * @param {Buffer} data
-		 * @param {Object} meta
 		 *
 		 * @returns {Promise}
 		 */
@@ -9792,7 +16453,7 @@
 
 	var fake = FakeTransporter;
 
-	const { isObject: isObject$9, isString: isString$a } = utils_1;
+	const { isObject: isObject$9, isString: isString$a, isInheritedClass: isInheritedClass$5 } = utils_1;
 	const { BrokerOptionsError: BrokerOptionsError$7 } = errors;
 
 	const Transporters = {
@@ -9804,63 +16465,51 @@
 		AMQP: require$$19,
 		AMQP10: require$$19,
 		Kafka: require$$19,
-		STAN: require$$19,
 		TCP: require$$19
 	};
 
 	function getByName$7(name) {
 		/* istanbul ignore next */
-		if (!name)
-			return null;
+		if (!name) return null;
 
 		let n = Object.keys(Transporters).find(n => n.toLowerCase() == name.toLowerCase());
-		if (n)
-			return Transporters[n];
+		if (n) return Transporters[n];
 	}
 
 	/**
 	 * Resolve transporter by name
 	 *
-	 * @param {object|string} opt
-	 * @returns {Transporter}
+	 * @param {Record<string,any>|string} opt
+	 * @returns {any}
 	 */
 	function resolve$7(opt) {
-		if (opt instanceof Transporters.Base) {
+		if (isObject$9(opt) && isInheritedClass$5(opt, Transporters.Base)) {
 			return opt;
 		} else if (isString$a(opt)) {
 			let TransporterClass = getByName$7(opt);
-			if (TransporterClass)
-				return new TransporterClass();
+			if (TransporterClass) return new TransporterClass();
 
-			if (opt.startsWith("nats://"))
-				TransporterClass = Transporters.NATS;
+			if (opt.startsWith("nats://")) TransporterClass = Transporters.NATS;
 			else if (opt.startsWith("mqtt://") || opt.startsWith("mqtts://"))
 				TransporterClass = Transporters.MQTT;
 			else if (opt.startsWith("redis://") || opt.startsWith("rediss://"))
 				TransporterClass = Transporters.Redis;
 			else if (opt.startsWith("amqp://") || opt.startsWith("amqps://"))
 				TransporterClass = Transporters.AMQP;
-			else if (opt.startsWith("amqp10://"))
-				TransporterClass = Transporters.AMQP10;
-			else if (opt.startsWith("kafka://"))
-				TransporterClass = Transporters.Kafka;
-			else if (opt.startsWith("stan://"))
-				TransporterClass = Transporters.STAN;
-			else if (opt.startsWith("tcp://"))
-				TransporterClass = Transporters.TCP;
+			else if (opt.startsWith("amqp10://")) TransporterClass = Transporters.AMQP10;
+			else if (opt.startsWith("kafka://")) TransporterClass = Transporters.Kafka;
+			else if (opt.startsWith("tcp://")) TransporterClass = Transporters.TCP;
 
-			if (TransporterClass)
-				return new TransporterClass(opt);
-			else
-				throw new BrokerOptionsError$7(`Invalid transporter type '${opt}'.`, { type: opt });
-
+			if (TransporterClass) return new TransporterClass(opt);
+			else throw new BrokerOptionsError$7(`Invalid transporter type '${opt}'.`, { type: opt });
 		} else if (isObject$9(opt)) {
 			let TransporterClass = getByName$7(opt.type || "NATS");
 
-			if (TransporterClass)
-				return new TransporterClass(opt.options);
+			if (TransporterClass) return new TransporterClass(opt.options);
 			else
-				throw new BrokerOptionsError$7(`Invalid transporter type '${opt.type}'.`, { type: opt.type });
+				throw new BrokerOptionsError$7(`Invalid transporter type '${opt.type}'.`, {
+					type: opt.type
+				});
 		}
 
 		return null;
@@ -9870,28 +16519,32 @@
 		Transporters[name] = value;
 	}
 
-
 	var transporters = Object.assign(Transporters, { resolve: resolve$7, register: register$7 });
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 * @typedef {import("./base")} SerializerBaseClass
+	 */
 
 	/**
 	 * Abstract serializer class
 	 *
-	 * @class Serializer
+	 * @implements {SerializerBaseClass}
 	 */
 	class Serializer {
-
 		/**
 		 * Creates an instance of Serializer.
 		 *
 		 * @memberof Serializer
 		 */
-		constructor() {
-		}
+		constructor(/*opts*/) {}
 
 		/**
 		 * Initialize Serializer
 		 *
-		 * @param {any} broker
+		 * @param {ServiceBroker} broker
 		 *
 		 * @memberof Serializer
 		 */
@@ -9906,12 +16559,12 @@
 		 * Serializer a JS object to Buffer
 		 *
 		 * @param {Object} obj
-		 * @param {String} type of packet
+		 * @param {String?} type
 		 * @returns {Buffer}
 		 *
 		 * @memberof Serializer
 		 */
-		serialize(/*obj, type*/) {
+		serialize(obj, type) {
 			/* istanbul ignore next */
 			throw new Error("Not implemented method!");
 		}
@@ -9920,12 +16573,12 @@
 		 * Deserialize Buffer to JS object
 		 *
 		 * @param {Buffer} buf
-		 * @param {String} type of packet
-		 * @returns {Object}
+		 * @param {String?} type
+		 * @returns {any}
 		 *
 		 * @memberof Serializer
 		 */
-		deserialize(/*buf, type*/) {
+		deserialize(buf, type) {
 			/* istanbul ignore next */
 			throw new Error("Not implemented method!");
 		}
@@ -9934,18 +16587,16 @@
 		 * Serialize custom fields (stringify)
 		 *
 		 * @param {String} type
-		 * @param {Packet} obj
-		 * @returns {Packet}
+		 * @param {Object} obj
+		 * @returns {Object}
 		 * @memberof Serializer
 		 */
 		serializeCustomFields(type, obj) {
 			switch (type) {
 				case packets.PACKET_INFO: {
 					obj.services = JSON.stringify(obj.services);
-					if (obj.config)
-						obj.config = JSON.stringify(obj.config);
-					if (obj.metadata)
-						obj.metadata = JSON.stringify(obj.metadata);
+					if (obj.config) obj.config = JSON.stringify(obj.config);
+					if (obj.metadata) obj.metadata = JSON.stringify(obj.metadata);
 					break;
 				}
 				case packets.PACKET_EVENT: {
@@ -9961,22 +16612,17 @@
 				case packets.PACKET_RESPONSE: {
 					this.convertDataToTransport(obj, "data", "dataType");
 					obj.meta = JSON.stringify(obj.meta);
-					if (obj.error)
-						obj.error = JSON.stringify(obj.error);
+					if (obj.error) obj.error = JSON.stringify(obj.error);
 					break;
 				}
 				case packets.PACKET_GOSSIP_REQ: {
-					if (obj.online)
-						obj.online = JSON.stringify(obj.online);
-					if (obj.offline)
-						obj.offline = JSON.stringify(obj.offline);
+					if (obj.online) obj.online = JSON.stringify(obj.online);
+					if (obj.offline) obj.offline = JSON.stringify(obj.offline);
 					break;
 				}
 				case packets.PACKET_GOSSIP_RES: {
-					if (obj.online)
-						obj.online = JSON.stringify(obj.online);
-					if (obj.offline)
-						obj.offline = JSON.stringify(obj.offline);
+					if (obj.online) obj.online = JSON.stringify(obj.online);
+					if (obj.offline) obj.offline = JSON.stringify(obj.offline);
 					break;
 				}
 			}
@@ -9988,18 +16634,16 @@
 		 * Deserialize custom fields
 		 *
 		 * @param {String} type
-		 * @param {Packet} obj
-		 * @returns {Packet}
+		 * @param {Object} obj
+		 * @returns {Object}
 		 * @memberof Serializer
 		 */
 		deserializeCustomFields(type, obj) {
 			switch (type) {
 				case packets.PACKET_INFO: {
 					obj.services = JSON.parse(obj.services);
-					if (obj.config)
-						obj.config = JSON.parse(obj.config);
-					if (obj.metadata)
-						obj.metadata = JSON.parse(obj.metadata);
+					if (obj.config) obj.config = JSON.parse(obj.config);
+					if (obj.metadata) obj.metadata = JSON.parse(obj.metadata);
 					break;
 				}
 				case packets.PACKET_EVENT: {
@@ -10015,22 +16659,17 @@
 				case packets.PACKET_RESPONSE: {
 					this.convertDataFromTransport(obj, "data", "dataType");
 					obj.meta = JSON.parse(obj.meta);
-					if (obj.error)
-						obj.error = JSON.parse(obj.error);
+					if (obj.error) obj.error = JSON.parse(obj.error);
 					break;
 				}
 				case packets.PACKET_GOSSIP_REQ: {
-					if (obj.online)
-						obj.online = JSON.parse(obj.online);
-					if (obj.offline)
-						obj.offline = JSON.parse(obj.offline);
+					if (obj.online) obj.online = JSON.parse(obj.online);
+					if (obj.offline) obj.offline = JSON.parse(obj.offline);
 					break;
 				}
 				case packets.PACKET_GOSSIP_RES: {
-					if (obj.online)
-						obj.online = JSON.parse(obj.online);
-					if (obj.offline)
-						obj.offline = JSON.parse(obj.offline);
+					if (obj.online) obj.online = JSON.parse(obj.online);
+					if (obj.offline) obj.offline = JSON.parse(obj.offline);
 					break;
 				}
 			}
@@ -10038,6 +16677,13 @@
 			return obj;
 		}
 
+		/**
+		 * Write the field type and convert to the object field
+		 *
+		 * @param {Object} obj
+		 * @param {string} field
+		 * @param {string} fieldType
+		 */
 		convertDataToTransport(obj, field, fieldType) {
 			if (obj[field] === undefined) {
 				obj[fieldType] = packets.DATATYPE_UNDEFINED;
@@ -10052,9 +16698,16 @@
 			}
 		}
 
+		/**
+		 * Read the field type and convert the object field
+		 *
+		 * @param {Object} obj
+		 * @param {string} field
+		 * @param {string} fieldType
+		 */
 		convertDataFromTransport(obj, field, fieldType) {
 			const type = obj[fieldType];
-			switch(type) {
+			switch (type) {
 				case packets.DATATYPE_UNDEFINED: {
 					obj[field] = undefined;
 					break;
@@ -10064,8 +16717,7 @@
 					break;
 				}
 				case packets.DATATYPE_BUFFER: {
-					if (!Buffer.isBuffer(obj[field]))
-						obj[field] = Buffer.from(obj[field]);
+					if (!Buffer.isBuffer(obj[field])) obj[field] = Buffer.from(obj[field]);
 					break;
 				}
 				default: {
@@ -10082,12 +16734,18 @@
 	var base$8 = Serializer;
 
 	/**
+	 * Import types
+	 *
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 * @typedef {import("./json")} JSONSerializerClass
+	 */
+
+	/**
 	 * JSON serializer for Moleculer
 	 *
-	 * @class JSONSerializer
+	 * @implements {JSONSerializerClass}
 	 */
 	class JSONSerializer extends base$8 {
-
 		/**
 		 * Creates an instance of JSONSerializer.
 		 *
@@ -10101,7 +16759,6 @@
 		 * Serializer a JS object to Buffer
 		 *
 		 * @param {Object} obj
-		 * @param {String} type of packet
 		 * @returns {Buffer}
 		 *
 		 * @memberof Serializer
@@ -10113,8 +16770,7 @@
 		/**
 		 * Deserialize Buffer to JS object
 		 *
-		 * @param {Buffer} buf
-		 * @param {String} type of packet
+		 * @param {any} buf
 		 * @returns {Object}
 		 *
 		 * @memberof Serializer
@@ -10126,56 +16782,213 @@
 
 	var json = JSONSerializer;
 
-	var require$$8 = () => {
+	//const { isDate } = require("../utils");
+	const { isDate: isDate$1, isRegExp, isMap, isSet } = util__default.types;
+
+	const PREFIX_BIGINT = "[[BI]]";
+	const PREFIX_MAP = "[[MP]]";
+	const PREFIX_SET = "[[ST]]";
+	const PREFIX_DATE = "[[DT]]";
+	const PREFIX_BUFFER = "[[BF]]";
+	const PREFIX_REGEXP = "[[RE]]";
+	const PREFIX_ESCAPED_STRING = "[[ES]]";
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 * @typedef {import("./json-extended")} JSONExtSerializerClass
+	 * @typedef {import("./json-extended").JSONExtSerializerOptions} JSONExtSerializerOptions
+	 * @typedef {import("./json-extended").JSONExtSerializerOptionsCustomType} JSONExtSerializerOptionsCustomType
+	 */
+
+	/**
+	 * JSON Extended serializer for Moleculer
+	 *
+	 * @implements {JSONExtSerializerClass}
+	 */
+	class JSONExtSerializer extends base$8 {
+		/**
+		 * Creates an instance of JSONExtSerializer.
+		 *
+		 * @param {JSONExtSerializerOptions} opts
+		 * @memberof JSONExtSerializer
+		 */
+		constructor(opts) {
+			super();
+
+			/** @type {JSONExtSerializerOptions} */
+			this.opts = opts || {};
+
+			/** @type {boolean} */
+			this.hasCustomTypes = this.opts?.customs?.length > 0;
+		}
+
+		/**
+		 * JSON stringify replacer.
+		 *
+		 * @param {object} obj
+		 * @param {String} key
+		 * @param {any} value Already converted value
+		 */
+		replacer(obj, key, value) {
+			if (value == null) return value;
+
+			// Get the original value
+			const v = obj[key];
+
+			if (typeof v == "bigint") {
+				return PREFIX_BIGINT + v;
+			} else if (isDate$1(v)) {
+				return PREFIX_DATE + v.valueOf();
+			} else if (isMap(v)) {
+				return PREFIX_MAP + this.serialize(Object.fromEntries(v));
+			} else if (isSet(v)) {
+				return PREFIX_SET + this.serialize(Array.from(v));
+			} else if (isRegExp(v)) {
+				return PREFIX_REGEXP + v.flags + "|" + v.source;
+			} else if (Buffer.isBuffer(v)) {
+				return PREFIX_BUFFER + v.toString("base64");
+			} else if (this.hasCustomTypes) {
+				for (const custom of this.opts.customs) {
+					if (custom.check(v, key, obj)) {
+						return "[[" + custom.prefix + "]]" + custom.serialize(v, key, obj);
+					}
+				}
+			}
+
+			// Escape plain strings that start with "[[" to avoid false positives during deserialization
+			if (typeof value === "string" && value.charAt(0) === "[" && value.charAt(1) === "[") {
+				return PREFIX_ESCAPED_STRING + value;
+			}
+
+			return value;
+		}
+
+		/**
+		 * JSON.parse reviver.
+		 *
+		 * @param {String} key
+		 * @param {any} value
+		 */
+		reviver(key, value) {
+			if (typeof value === "string" && value.charAt(0) === "[" && value.charAt(1) === "[") {
+				switch (value.slice(0, 6)) {
+					case PREFIX_BIGINT:
+						return BigInt(value.slice(6));
+					case PREFIX_DATE:
+						return new Date(Number(value.slice(6)));
+					case PREFIX_MAP:
+						return new Map(Object.entries(this.deserialize(value.slice(6))));
+					case PREFIX_SET:
+						return new Set(this.deserialize(value.slice(6)));
+					case PREFIX_BUFFER:
+						return Buffer.from(value.slice(6), "base64");
+					case PREFIX_REGEXP: {
+						const p = value.slice(6).split("|");
+						const flags = p.shift();
+						// eslint-disable-next-line security/detect-non-literal-regexp
+						return new RegExp(p.join("|"), flags);
+					}
+					case PREFIX_ESCAPED_STRING:
+						return value.slice(6);
+					default: {
+						if (this.hasCustomTypes) {
+							for (const custom of this.opts.customs) {
+								if (value.startsWith("[[" + custom.prefix + "]]")) {
+									return custom.deserialize(
+										value.slice(custom.prefix.length + 4),
+										key
+									);
+								}
+							}
+						}
+					}
+				}
+			}
+			return value;
+		}
+
+		/**
+		 * Serializer a JS object to Buffer
+		 *
+		 * @param {Object} obj
+		 * @returns {Buffer}
+		 *
+		 * @memberof Serializer
+		 */
+		serialize(obj) {
+			const self = this;
+			return Buffer.from(
+				JSON.stringify(obj, function (key, value) {
+					return self.replacer.call(self, this, key, value);
+				})
+			);
+		}
+
+		/**
+		 * Deserialize Buffer to JS object
+		 *
+		 * @param {any} buf
+		 * @returns {Object}
+		 *
+		 * @memberof Serializer
+		 */
+		deserialize(buf) {
+			const self = this;
+			return JSON.parse(buf, function (key, value) {
+				return self.reviver.call(self, key, value);
+			});
+		}
+	}
+
+	var jsonExtended = JSONExtSerializer;
+
+	var require$$7 = () => {
 	  console.warn('moleculer-browser: You are trying to use an unloaded serializer. You need to import it.');
 	};
 
-	const { isObject: isObject$a, isString: isString$b } = utils_1;
+	const { isObject: isObject$a, isString: isString$b, isInheritedClass: isInheritedClass$6 } = utils_1;
 	const { BrokerOptionsError: BrokerOptionsError$8 } = errors;
 
 	const Serializers = {
 		Base: base$8,
 		JSON: json,
-		Avro: require$$8,
-		MsgPack: require$$8,
-		ProtoBuf: require$$8,
-		Thrift: require$$8,
-		Notepack: require$$8
+		JSONExt: jsonExtended,
+		MsgPack: require$$7,
+		Notepack: require$$7,
+		CBOR: require$$7
 	};
 
 	function getByName$8(name) {
 		/* istanbul ignore next */
-		if (!name)
-			return null;
+		if (!name) return null;
 
 		let n = Object.keys(Serializers).find(n => n.toLowerCase() == name.toLowerCase());
-		if (n)
-			return Serializers[n];
+		if (n) return Serializers[n];
 	}
 
 	/**
 	 * Resolve serializer by name
 	 *
-	 * @param {object|string} opt
-	 * @returns {Serializer}
+	 * @param {Record<string,any>|string} opt
+	 * @returns {any}
 	 * @memberof ServiceBroker
 	 */
 	function resolve$8(opt) {
-		if (opt instanceof Serializers.Base) {
+		if (isObject$a(opt) && isInheritedClass$6(opt, Serializers.Base)) {
 			return opt;
 		} else if (isString$b(opt)) {
 			let SerializerClass = getByName$8(opt);
-			if (SerializerClass)
-				return new SerializerClass();
-			else
-				throw new BrokerOptionsError$8(`Invalid serializer type '${opt}'.`, { type: opt });
-
+			if (SerializerClass) return new SerializerClass();
+			else throw new BrokerOptionsError$8(`Invalid serializer type '${opt}'.`, { type: opt });
 		} else if (isObject$a(opt)) {
 			let SerializerClass = getByName$8(opt.type || "JSON");
-			if (SerializerClass)
-				return new SerializerClass(opt.options);
+			if (SerializerClass) return new SerializerClass(opt.options);
 			else
-				throw new BrokerOptionsError$8(`Invalid serializer type '${opt.type}'.`, { type: opt.type });
+				throw new BrokerOptionsError$8(`Invalid serializer type '${opt.type}'.`, {
+					type: opt.type
+				});
 		}
 
 		return new Serializers.JSON();
@@ -10187,137 +17000,46 @@
 
 	var serializers = Object.assign(Serializers, { resolve: resolve$8, register: register$8 });
 
-	var _args = [
-		[
-			"moleculer@0.14.10",
-			"D:\\Work\\moleculer\\moleculer-browser"
-		]
-	];
-	var _from = "moleculer@0.14.10";
-	var _id = "moleculer@0.14.10";
-	var _inBundle = false;
-	var _integrity = "sha512-3HS8cBAIzhCX8x+R/9yS31NlNRp9u9iyN3lWZbmVv1MrlXqkqPCZXLNNCyaB+iSC6Ncuh97MCsv0dUosA7qpKA==";
-	var _location = "/moleculer";
-	var _phantomChildren = {
-		"fs.realpath": "1.0.0",
-		inflight: "1.0.6",
-		inherits: "2.0.4",
-		minimatch: "3.0.4",
-		once: "1.4.0",
-		"path-is-absolute": "1.0.1"
-	};
-	var _requested = {
-		type: "version",
-		registry: true,
-		raw: "moleculer@0.14.10",
-		name: "moleculer",
-		escapedName: "moleculer",
-		rawSpec: "0.14.10",
-		saveSpec: null,
-		fetchSpec: "0.14.10"
-	};
-	var _requiredBy = [
-		"/"
-	];
-	var _resolved = "https://registry.npmjs.org/moleculer/-/moleculer-0.14.10.tgz";
-	var _spec = "0.14.10";
-	var _where = "D:\\Work\\moleculer\\moleculer-browser";
-	var author = {
-		name: "Icebob"
-	};
-	var bin = {
-		"moleculer-runner": "bin/moleculer-runner.js"
-	};
-	var bugs = {
-		url: "https://github.com/moleculerjs/moleculer/issues"
-	};
-	var dependencies = {
-		args: "^5.0.1",
-		"es6-error": "^4.1.1",
-		eventemitter2: "^6.4.3",
-		"fastest-validator": "^1.6.1",
-		"fn-args": "^5.0.0",
-		glob: "^7.1.6",
-		"ipaddr.js": "^2.0.0",
-		kleur: "^4.1.1",
-		lodash: "^4.17.20",
-		"lru-cache": "^6.0.0",
-		"node-fetch": "^2.6.0"
-	};
+	var name = "moleculer";
+	var version = "0.15.0";
 	var description = "Fast & powerful microservices framework for Node.JS";
-	var devDependencies = {
-		"@sinonjs/fake-timers": "^6.0.1",
-		"@types/bunyan": "^1.8.6",
-		"@types/ioredis": "^4.17.3",
-		"@types/node": "^14.6.0",
-		"@types/pino": "^6.3.0",
-		amqplib: "^0.6.0",
-		avsc: "^5.4.21",
-		benchmarkify: "^2.1.2",
-		bunyan: "^1.8.14",
-		coveralls: "^3.1.0",
-		"dd-trace": "^0.24.2",
-		debug: "^4.1.1",
-		dotenv: "^8.2.0",
-		eslint: "^7.7.0",
-		"eslint-plugin-node": "^11.1.0",
-		"eslint-plugin-promise": "^4.2.1",
-		"eslint-plugin-security": "^1.4.0",
-		etcd3: "^1.0.1",
-		"event-loop-stats": "^1.3.0",
-		fakerator: "^0.3.1",
-		"gc-stats": "^1.4.0",
-		ioredis: "^4.17.3",
-		"jaeger-client": "^3.18.1",
-		jest: "^26.4.2",
-		"jest-cli": "^26.4.2",
-		joi: "^17.2.1",
-		"kafka-node": "^5.0.0",
-		"lockfile-lint": "^4.3.7",
-		log4js: "^6.3.0",
-		"moleculer-repl": "^0.6.4",
-		mqtt: "^4.2.0",
-		msgpack5: "^4.2.1",
-		nats: "^1.4.12",
-		"node-nats-streaming": "^0.0.51",
-		nodemon: "^2.0.4",
-		"notepack.io": "^2.3.0",
-		"npm-check": "^5.9.2",
-		pino: "^6.5.1",
-		protobufjs: "^6.10.1",
-		redlock: "^4.1.0",
-		"rhea-promise": "^1.0.0",
-		supertest: "^4.0.2",
-		thrift: "^0.12.0",
-		"ts-node": "^9.0.0",
-		tsd: "^0.13.1",
-		typescript: "^4.0.2",
-		"v8-natives": "^1.2.0",
-		winston: "^3.3.3",
-		"winston-context": "^0.0.7"
+	var main = "index.js";
+	var type = "commonjs";
+	var exports$1 = {
+		".": {
+			types: "./index.d.ts",
+			require: "./index.js",
+			"import": "./index.mjs"
+		}
 	};
-	var engines = {
-		node: ">= 10.x.x"
-	};
-	var funding = "https://github.com/moleculerjs/moleculer?sponsor=1";
-	var homepage = "https://github.com/moleculerjs/moleculer#readme";
-	var jest = {
-		coverageDirectory: "../coverage",
-		coveragePathIgnorePatterns: [
-			"/node_modules/",
-			"/test/services/",
-			"/test/typescript/",
-			"/test/unit/utils.js",
-			"/src/serializers/proto/",
-			"/src/serializers/thrift/"
-		],
-		transform: {
-		},
-		testEnvironment: "node",
-		rootDir: "./src",
-		roots: [
-			"../test"
-		]
+	var types$1 = "./index.d.ts";
+	var scripts = {
+		bench: "node benchmark/index.js",
+		ci: "jest --watch",
+		"ci:leak": "jest --testMatch \"**/leak-detection/index.spc.js\" --runInBand --watch",
+		coverall: "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+		demo: "node examples/index.js",
+		"demo:ts": "tsx --watch examples/typescript/index.ts",
+		deps: "ncu -i --format group",
+		postdeps: "npm test",
+		dev: "nodemon dev/index.js",
+		lint: "eslint benchmark bin examples src test",
+		"lint:fix": "eslint --fix benchmark bin examples src test",
+		perf: "nodemon --allow-natives-syntax benchmark/perf-runner.js",
+		pperf: "node --inspect --expose-gc benchmark/perf-runner.js",
+		memleak: "node benchmark/memleak-test.js",
+		test: "jest --coverage --forceExit",
+		"test:unit": "jest --testMatch \"**/unit/**/*.spec.js\" --coverage",
+		"test:int": "jest --testMatch \"**/integration/**/*.spec.js\" --coverage",
+		"test:e2e": "cd test/e2e && ./start.sh",
+		"test:leak": "jest --testMatch \"**/leak-detection/**/*.spc.js\" --runInBand",
+		"test:ts": "tsd && tsc -p test/typescript/hello-world && ts-node -P test/typescript/hello-world/tsconfig.json test/typescript/hello-world/index.ts",
+		"test:esm": "node bin/moleculer-runner.mjs -c test/esm/moleculer.config.mjs test/esm/*.service.*js",
+		release: "npm publish --access public && git push --follow-tags",
+		"release:beta": "npm publish --tag next --access public && git push --follow-tags",
+		tsc: "tsc",
+		"tsc:watch": "tsc --watch",
+		tsd: "tsd"
 	};
 	var keywords = [
 		"microservice",
@@ -10332,83 +17054,230 @@
 		"scalable",
 		"distributed"
 	];
-	var license = "MIT";
-	var main = "index.js";
-	var name = "moleculer";
+	var files = [
+		"bin",
+		"src",
+		"types",
+		"index.js",
+		"index.mjs",
+		"index.d.ts",
+		"README.md",
+		"LICENSE"
+	];
 	var repository = {
 		type: "git",
 		url: "git+https://github.com/moleculerjs/moleculer.git"
 	};
-	var scripts = {
-		bench: "node benchmark/index.js",
-		ci: "jest --watch",
-		coverall: "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-		demo: "node examples/index.js",
-		deps: "npm-check -u",
-		dev: "nodemon dev/index.js",
-		lint: "eslint --ext=.js src test/unit test/integration",
-		"lint:fix": "eslint --fix --ext=.js src test/unit test/integration",
-		"lint:lock": "lockfile-lint --path package-lock.json --type npm --validate-https --allowed-hosts npm",
-		memleak: "node benchmark/memleak-test.js",
-		perf: "nodemon --allow-natives-syntax benchmark/perf-runner.js",
-		postdeps: "npm run lint:lock && npm test",
-		pperf: "node --inspect --expose-gc benchmark/perf-runner.js",
-		proto: "pbjs -t static-module -w commonjs -o src/serializers/proto/packets.proto.js src/serializers/proto/packets.proto",
-		release: "npm publish --access public && git push --tags",
-		"release:beta": "npm publish --tag next --access public && git push --tags",
-		test: "node --max-old-space-size=4096 ./node_modules/jest-cli/bin/jest.js --coverage --all --forceExit --logHeapUsage",
-		"test:amqp": "jest --testMatch \"**/transporters/amqp/**spc.js\" --runInBand",
-		"test:amqp10": "jest --testMatch \"**/transporters/amqp10/**spc.js\" --runInBand",
-		"test:int": "jest --testMatch \"**/integration/**/*.spec.js\" --coverage",
-		"test:nats": "jest --testMatch \"**/transporters/nats/**spc.js\" --runInBand",
-		"test:project": "jest --testMatch \"**/project/**/*.spec.js\"",
-		"test:trans": "jest --testMatch \"**/transporters/index.spc.js\"",
-		"test:travis": "npm test && npm run test:trans && npm run test:amqp && npm run test:nats && npm run test:ts",
-		"test:ts": "tsd && tsc -p test/typescript/hello-world && ts-node -P test/typescript/hello-world/tsconfig.json test/typescript/hello-world/index.ts",
-		"test:unit": "jest --testMatch \"**/unit/**/*.spec.js\" --coverage",
-		thrift: "thrift -gen js:node -o src\\serializers\\thrift src\\serializers\\thrift\\packets.thrift"
+	var funding = "https://github.com/moleculerjs/moleculer?sponsor=1";
+	var bin = {
+		"moleculer-runner": "./bin/moleculer-runner.js",
+		"moleculer-runner-esm": "./bin/moleculer-runner.mjs"
+	};
+	var author = "MoleculerJS";
+	var license = "MIT";
+	var devDependencies = {
+		"@eslint/js": "^10.0.1",
+		"@opentelemetry/auto-instrumentations-node": "^0.64.5",
+		"@opentelemetry/exporter-metrics-otlp-proto": "^0.205.0",
+		"@opentelemetry/exporter-trace-otlp-proto": "^0.205.0",
+		"@opentelemetry/instrumentation": "^0.205.0",
+		"@opentelemetry/sdk-node": "^0.205.0",
+		"@opentelemetry/semantic-conventions": "^1.37.0",
+		"@platformatic/kafka": "^1.18.0",
+		"@sinonjs/fake-timers": "^15.0.0",
+		"@types/bunyan": "^1.8.11",
+		"@types/node": "^25.5.0",
+		"@types/pino": "^7.0.5",
+		amqplib: "^0.10.9",
+		avsc: "^5.7.9",
+		benchmarkify: "^4.0.0",
+		bunyan: "^1.8.15",
+		"cbor-x": "^1.6.0",
+		"clock-mock": "^2.0.2",
+		"dd-trace": "^5.67.0",
+		debug: "^4.4.3",
+		dotenv: "^17.2.2",
+		eslint: "^10.1.0",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-node": "^11.1.0",
+		"eslint-plugin-prettier": "^5.5.5",
+		"eslint-plugin-security": "^4.0.0",
+		etcd3: "^1.1.2",
+		fakerator: "^0.3.6",
+		globals: "^17.4.0",
+		ioredis: "^5.8.0",
+		"jaeger-client": "^3.19.0",
+		jest: "^29.7.0",
+		"jest-cli": "^29.7.0",
+		"jest-diff": "^29.7.0",
+		joi: "^18.0.1",
+		"lockfile-lint": "^5.0.0",
+		log4js: "^6.9.1",
+		"moleculer-repl": "^0.7.4",
+		mqtt: "^5.14.1",
+		msgpack5: "^6.0.2",
+		nats: "^2.29.3",
+		nodemon: "^3.1.10",
+		"notepack.io": "^3.0.1",
+		"npm-check-updates": "^19.0.0",
+		pino: "^10.3.1",
+		prettier: "^3.8.1",
+		redlock: "^4.2.0",
+		"rhea-promise": "^3.0.3",
+		supertest: "^7.1.4",
+		"ts-node": "^10.9.2",
+		tsd: "^0.33.0",
+		tsx: "^4.20.6",
+		typescript: "^5.9.2",
+		"v8-natives": "^1.2.5",
+		winston: "^3.17.0",
+		"winston-context": "^0.0.7"
+	};
+	var dependencies = {
+		args: "^5.0.3",
+		eventemitter2: "^6.4.9",
+		"fastest-validator": "^1.19.1",
+		glob: "^13.0.6",
+		"ipaddr.js": "^2.3.0",
+		kleur: "^4.1.5",
+		lodash: "^4.17.21",
+		"lru-cache": "^11.2.2",
+		"recursive-watch": "^1.1.4"
+	};
+	var peerDependencies = {
+		"@platformatic/kafka": "^1.18.0",
+		amqplib: "^0.10.0",
+		bunyan: "^1.0.0",
+		"cbor-x": "^1.2.0",
+		"dd-trace": "^5.67.0",
+		debug: "^4.0.0",
+		etcd3: "^1.0.0",
+		ioredis: "^5.0.0",
+		"jaeger-client": "^3.0.0",
+		log4js: "^6.0.0",
+		mqtt: "^5.0.0",
+		msgpack5: "^6.0.0",
+		nats: "^2.0.0",
+		"notepack.io": "^3.0.0",
+		pino: "^10.0.0",
+		redlock: "^4.0.0",
+		"rhea-promise": "^3.0.0",
+		winston: "^3.0.0"
+	};
+	var peerDependenciesMeta = {
+		amqplib: {
+			optional: true
+		},
+		bunyan: {
+			optional: true
+		},
+		"cbor-x": {
+			optional: true
+		},
+		"dd-trace": {
+			optional: true
+		},
+		debug: {
+			optional: true
+		},
+		etcd3: {
+			optional: true
+		},
+		ioredis: {
+			optional: true
+		},
+		"jaeger-client": {
+			optional: true
+		},
+		"@platformatic/kafka": {
+			optional: true
+		},
+		log4js: {
+			optional: true
+		},
+		mqtt: {
+			optional: true
+		},
+		msgpack5: {
+			optional: true
+		},
+		nats: {
+			optional: true
+		},
+		"notepack.io": {
+			optional: true
+		},
+		pino: {
+			optional: true
+		},
+		redlock: {
+			optional: true
+		},
+		"rhea-promise": {
+			optional: true
+		},
+		winston: {
+			optional: true
+		}
+	};
+	var engines = {
+		node: ">= 22.x.x"
 	};
 	var tsd = {
-		directory: "test/typescript/tsd"
+		directory: "test/typescript/tsd",
+		compilerOptions: {
+			noImplicitThis: true
+		}
 	};
-	var types$1 = "./index.d.ts";
-	var version = "0.14.10";
-	var require$$7 = {
-		_args: _args,
-		_from: _from,
-		_id: _id,
-		_inBundle: _inBundle,
-		_integrity: _integrity,
-		_location: _location,
-		_phantomChildren: _phantomChildren,
-		_requested: _requested,
-		_requiredBy: _requiredBy,
-		_resolved: _resolved,
-		_spec: _spec,
-		_where: _where,
-		author: author,
-		bin: bin,
-		bugs: bugs,
-		dependencies: dependencies,
-		description: description,
-		devDependencies: devDependencies,
-		engines: engines,
-		funding: funding,
-		homepage: homepage,
-		jest: jest,
-		keywords: keywords,
-		license: license,
-		main: main,
+	var jest = {
+		coverageDirectory: "../coverage",
+		coveragePathIgnorePatterns: [
+			"/node_modules/",
+			"/test/services/",
+			"/test/typescript/",
+			"/test/unit/utils.js"
+		],
+		transform: {
+		},
+		testEnvironment: "node",
+		rootDir: "./src",
+		roots: [
+			"../test"
+		]
+	};
+	var require$$8 = {
 		name: name,
-		repository: repository,
-		scripts: scripts,
-		tsd: tsd,
+		version: version,
+		description: description,
+		main: main,
+		type: type,
+		exports: exports$1,
 		types: types$1,
-		version: version
+		scripts: scripts,
+		keywords: keywords,
+		files: files,
+		repository: repository,
+		funding: funding,
+		bin: bin,
+		author: author,
+		license: license,
+		devDependencies: devDependencies,
+		dependencies: dependencies,
+		peerDependencies: peerDependencies,
+		peerDependenciesMeta: peerDependenciesMeta,
+		engines: engines,
+		tsd: tsd,
+		jest: jest
 	};
 
 	const { getIpList: getIpList$1 } = utils_1;
-	const MOLECULER_VERSION = require$$7.version;
+	const MOLECULER_VERSION = require$$8.version;
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("./service-broker").NodeHealthStatus} NodeHealthStatus
+	 */
 
 	const getClientInfo = () => {
 		return {
@@ -10421,13 +17290,14 @@
 	const getCpuInfo = () => {
 		const cpus = require$$0__default();
 		const load = getCpuUsage.loadavg();
+		const cores = Array.isArray(cpus) ? require$$0__default().length : null;
 		const cpu = {
 			load1: load[0],
 			load5: load[1],
 			load15: load[2],
-			cores: Array.isArray(cpus) ? require$$0__default().length : null,
+			cores: cores,
+			utilization: cores > 0 ? Math.min(Math.floor((load[0] * 100) / cores), 100) : null
 		};
-		cpu.utilization = Math.min(Math.floor(load[0] * 100 / cpu.cores), 100);
 
 		return cpu;
 	};
@@ -10435,17 +17305,22 @@
 	const getMemoryInfo = () => {
 		const mem = {
 			free: (() => performance ? performance.memory.totalJSHeapSize - performance.memory.usedJSHeapSize : 0)(),
-			total: (() => performance ? performance.memory.totalJSHeapSize : 0)()
+			total: (() => performance ? performance.memory.totalJSHeapSize : 0)(),
+			percent: null
 		};
-		mem.percent = (mem.free * 100 / mem.total);
+		mem.percent = (mem.free * 100) / mem.total;
 
 		return mem;
 	};
 
+	/**
+	 *
+	 * @returns {os.UserInfo| {}}
+	 */
 	const getUserInfo$1 = () => {
 		try {
 			return os__default.userInfo();
-		} catch (e) {
+		} catch {
 			return {};
 		}
 	};
@@ -10473,7 +17348,7 @@
 
 	const getNetworkInterfacesInfo = () => {
 		return {
-			ip:  getIpList$1()
+			ip: getIpList$1()
 		};
 	};
 
@@ -10485,7 +17360,11 @@
 		};
 	};
 
-	const getHealthStatus = (/*broker*/) => {
+	/**
+	 *
+	 * @returns {NodeHealthStatus}
+	 */
+	const getHealthStatus = () => {
 		return {
 			cpu: getCpuInfo(),
 			mem: getMemoryInfo(),
@@ -10508,23 +17387,33 @@
 		getDateTimeInfo
 	};
 
-	const { isFunction: isFunction$5, isString: isString$c } = utils_1;
+	/**
+	 * @typedef {import("../service")} Service
+	 */
+
+
+	const { isFunction: isFunction$4, isString: isString$c, match: match$3 } = utils_1;
 
 	var actionHook = function actionHookMiddleware(broker) {
-
 		function callHook(hook, service, ctx, res) {
-			if (isFunction$5(hook)) {
+			if (isFunction$4(hook)) {
 				return hook.call(service, ctx, res);
 			} else if (Array.isArray(hook)) {
-				return hook.reduce((p, fn) => p.then(res => fn.call(service, ctx, res)), broker.Promise.resolve(res));
+				return hook.reduce(
+					(p, fn) => p.then(res => fn.call(service, ctx, res)),
+					broker.Promise.resolve(res)
+				);
 			}
 		}
 
 		function callErrorHook(hook, service, ctx, err) {
-			if (isFunction$5(hook)) {
+			if (isFunction$4(hook)) {
 				return hook.call(service, ctx, err);
 			} else if (Array.isArray(hook)) {
-				return hook.reduce((p, fn) => p.catch(err => fn.call(service, ctx, err)), broker.Promise.reject(err));
+				return hook.reduce(
+					(p, fn) => p.catch(err => fn.call(service, ctx, err)),
+					broker.Promise.reject(err)
+				);
 			}
 		}
 
@@ -10536,16 +17425,16 @@
 		 * @returns
 		 */
 		function sanitizeHooks(hooks, service) {
-			if (isString$c(hooks))
-				return service && isFunction$5(service[hooks]) ? service[hooks] : null;
+			if (isString$c(hooks)) return service && isFunction$4(service[hooks]) ? service[hooks] : null;
 
 			if (Array.isArray(hooks)) {
-				return ___default.compact(hooks.map(h => {
-					if (isString$c(h))
-						return service && isFunction$5(service[h]) ? service[h] : null;
+				return ___default.compact(
+					hooks.map(h => {
+						if (isString$c(h)) return service && isFunction$4(service[h]) ? service[h] : null;
 
-					return h;
-				}));
+						return h;
+					})
+				);
 			}
 
 			return hooks;
@@ -10556,33 +17445,106 @@
 			const hooks = action.service && action.service.schema ? action.service.schema.hooks : null;
 			if (hooks || action.hooks) {
 				// Global hooks
-				const beforeAllHook = hooks && hooks.before ? sanitizeHooks(hooks.before["*"], action.service) : null;
-				const afterAllHook = hooks && hooks.after ? sanitizeHooks(hooks.after["*"], action.service) : null;
-				const errorAllHook = hooks && hooks.error ? sanitizeHooks(hooks.error["*"], action.service) : null;
+				const beforeAllHook =
+					hooks && hooks.before ? sanitizeHooks(hooks.before["*"], action.service) : null;
+				const afterAllHook =
+					hooks && hooks.after ? sanitizeHooks(hooks.after["*"], action.service) : null;
+				const errorAllHook =
+					hooks && hooks.error ? sanitizeHooks(hooks.error["*"], action.service) : null;
 
 				// Hooks in service
-				const beforeHook = hooks && hooks.before ? sanitizeHooks(hooks.before[name], action.service) : null;
-				const afterHook = hooks && hooks.after ? sanitizeHooks(hooks.after[name], action.service) : null;
-				const errorHook = hooks && hooks.error ? sanitizeHooks(hooks.error[name], action.service) : null;
+				const matchHook = hookName => {
+					if (hookName === "*") return false;
+					const patterns = hookName.split("|");
+					return patterns.some(pattern => match$3(name, pattern));
+				};
+
+				const beforeHookMatches =
+					hooks && hooks.before ? Object.keys(hooks.before).filter(matchHook) : null;
+
+				/** @type {Array<Function>?} List of hooks that match the action name */
+				const beforeHook =
+					beforeHookMatches && beforeHookMatches.length > 0
+						? beforeHookMatches.map(hookName =>
+								sanitizeHooks(hooks.before[hookName], action.service)
+							)
+						: null;
+
+				/** @type {Array<String>?} List of hooks names that match the action name */
+				const afterHookMatches =
+					hooks && hooks.after ? Object.keys(hooks.after).filter(matchHook) : null;
+
+				/** @type {Array<Function>?} List of hooks that match the action name */
+				const afterHook =
+					afterHookMatches && afterHookMatches.length > 0
+						? afterHookMatches.map(hookName =>
+								sanitizeHooks(hooks.after[hookName], action.service)
+							)
+						: null;
+
+				/** @type {Array<String>?} List of hooks names that match the action name */
+				const errorHookMatches =
+					hooks && hooks.error ? Object.keys(hooks.error).filter(matchHook) : null;
+
+				/** @type {Array<Function>?} List of hooks that match the action name */
+				const errorHook =
+					errorHookMatches && errorHookMatches.length > 0
+						? errorHookMatches.map(hookName =>
+								sanitizeHooks(hooks.error[hookName], action.service)
+							)
+						: null;
 
 				// Hooks in action definition
-				const actionBeforeHook = action.hooks && action.hooks.before ? sanitizeHooks(action.hooks.before, action.service) : null;
-				const actionAfterHook = action.hooks && action.hooks.after ? sanitizeHooks(action.hooks.after, action.service) : null;
-				const actionErrorHook = action.hooks && action.hooks.error ? sanitizeHooks(action.hooks.error, action.service) : null;
+				const actionBeforeHook =
+					action.hooks && action.hooks.before
+						? sanitizeHooks(action.hooks.before, action.service)
+						: null;
+				const actionAfterHook =
+					action.hooks && action.hooks.after
+						? sanitizeHooks(action.hooks.after, action.service)
+						: null;
+				const actionErrorHook =
+					action.hooks && action.hooks.error
+						? sanitizeHooks(action.hooks.error, action.service)
+						: null;
 
-				if (beforeAllHook || beforeHook || actionBeforeHook
-					|| afterAllHook || afterHook || actionAfterHook
-					|| errorAllHook || errorHook || actionErrorHook) {
+				// Show info for debugging purposes
+				broker.logger.debug(`Service Level 'Before' Hooks of '${name}' action:`, [
+					...(beforeAllHook ? ["*"] : []),
+					...(beforeHookMatches ? beforeHookMatches : [])
+				]);
+				broker.logger.debug(`Service Level 'After' Hooks of '${name}' action:`, [
+					...(afterHookMatches ? afterHookMatches : []),
+					...(afterAllHook ? ["*"] : [])
+				]);
+				broker.logger.debug(`Service Level 'Error' Hooks of '${name}' action:`, [
+					...(errorHookMatches ? errorHookMatches : []),
+					...(errorAllHook ? ["*"] : [])
+				]);
+
+				if (
+					beforeAllHook ||
+					beforeHook ||
+					actionBeforeHook ||
+					afterAllHook ||
+					afterHook ||
+					actionAfterHook ||
+					errorAllHook ||
+					errorHook ||
+					actionErrorHook
+				) {
 					return function actionHookMiddleware(ctx) {
 						let p = broker.Promise.resolve();
 
 						// Before hook all
-						if (beforeAllHook)
-							p = p.then(() => callHook(beforeAllHook, ctx.service, ctx));
+						if (beforeAllHook) p = p.then(() => callHook(beforeAllHook, ctx.service, ctx));
 
 						// Before hook
-						if (beforeHook)
-							p = p.then(() => callHook(beforeHook, ctx.service, ctx));
+						if (beforeHook) {
+							beforeHook.forEach(fnHook => {
+								p = p.then(() => callHook(fnHook, ctx.service, ctx));
+							});
+						}
 
 						// Before hook in action definition
 						if (actionBeforeHook)
@@ -10596,8 +17558,11 @@
 							p = p.then(res => callHook(actionAfterHook, ctx.service, ctx, res));
 
 						// After hook
-						if (afterHook)
-							p = p.then(res => callHook(afterHook, ctx.service, ctx, res));
+						if (afterHook) {
+							afterHook.forEach(fnHook => {
+								p = p.then(res => callHook(fnHook, ctx.service, ctx, res));
+							});
+						}
 
 						// After hook all
 						if (afterAllHook)
@@ -10608,8 +17573,11 @@
 							p = p.catch(err => callErrorHook(actionErrorHook, ctx.service, ctx, err));
 
 						// Error hook
-						if (errorHook)
-							p = p.catch(err => callErrorHook(errorHook, ctx.service, ctx, err));
+						if (errorHook) {
+							errorHook.forEach(fnHook => {
+								p = p.catch(err => callErrorHook(fnHook, ctx.service, ctx, err));
+							});
+						}
 
 						// Error hook all
 						if (errorAllHook)
@@ -10629,11 +17597,30 @@
 		};
 	};
 
+	/*
+	 * moleculer
+	 * Copyright (c) 2021 MoleculerJS (https://github.com/moleculerjs/moleculer)
+	 * MIT Licensed
+	 */
+
+	var cacher = function CacherMiddleware(broker) {
+		return broker.cacher ? broker.cacher.middleware() : null;
+	};
+
+	const { isFunction: isFunction$5 } = utils_1;
+
+	var validator$1 = function ValidatorMiddleware(broker) {
+		if (broker.validator && isFunction$5(broker.validator.middleware)) {
+			return broker.validator.middleware(broker);
+		}
+
+		return null;
+	};
+
 	const { QueueIsFullError } = errors;
-	const { METRIC: METRIC$5 }	= metrics;
+	const { METRIC: METRIC$5 } = metrics;
 
 	var bulkhead = function bulkheadMiddleware(broker) {
-
 		function wrapActionBulkheadMiddleware(handler, action) {
 			const service = action.service;
 
@@ -10644,8 +17631,8 @@
 
 				// Call the next request from the queue
 				const callNext = function callNext() {
-				/* istanbul ignore next */
-					if (queue.length == 0) return;
+					/* istanbul ignore next */
+					if (queue.length === 0) return;
 
 					/* istanbul ignore next */
 					if (currentInFlight >= opts.concurrency) return;
@@ -10653,44 +17640,89 @@
 					const item = queue.shift();
 
 					currentInFlight++;
-					broker.metrics.set(METRIC$5.MOLECULER_REQUEST_BULKHEAD_INFLIGHT, currentInFlight, { action: action.name, service: service.fullName });
-					broker.metrics.set(METRIC$5.MOLECULER_REQUEST_BULKHEAD_QUEUE_SIZE, queue.length, { action: action.name, service: service.fullName });
+					broker.metrics.set(METRIC$5.MOLECULER_REQUEST_BULKHEAD_INFLIGHT, currentInFlight, {
+						action: action.name,
+						service: service.fullName
+					});
+					broker.metrics.set(METRIC$5.MOLECULER_REQUEST_BULKHEAD_QUEUE_SIZE, queue.length, {
+						action: action.name,
+						service: service.fullName
+					});
 
 					handler(item.ctx)
 						.then(res => {
 							currentInFlight--;
-							broker.metrics.set(METRIC$5.MOLECULER_REQUEST_BULKHEAD_INFLIGHT, currentInFlight, { action: action.name, service: service.fullName });
-							broker.metrics.set(METRIC$5.MOLECULER_REQUEST_BULKHEAD_QUEUE_SIZE, queue.length, { action: action.name, service: service.fullName });
+							broker.metrics.set(
+								METRIC$5.MOLECULER_REQUEST_BULKHEAD_INFLIGHT,
+								currentInFlight,
+								{ action: action.name, service: service.fullName }
+							);
+							broker.metrics.set(
+								METRIC$5.MOLECULER_REQUEST_BULKHEAD_QUEUE_SIZE,
+								queue.length,
+								{ action: action.name, service: service.fullName }
+							);
 							item.resolve(res);
 							callNext();
 						})
 						.catch(err => {
 							currentInFlight--;
-							broker.metrics.set(METRIC$5.MOLECULER_REQUEST_BULKHEAD_INFLIGHT, currentInFlight, { action: action.name, service: service.fullName });
-							broker.metrics.set(METRIC$5.MOLECULER_REQUEST_BULKHEAD_QUEUE_SIZE, queue.length, { action: action.name, service: service.fullName });
+							broker.metrics.set(
+								METRIC$5.MOLECULER_REQUEST_BULKHEAD_INFLIGHT,
+								currentInFlight,
+								{ action: action.name, service: service.fullName }
+							);
+							broker.metrics.set(
+								METRIC$5.MOLECULER_REQUEST_BULKHEAD_QUEUE_SIZE,
+								queue.length,
+								{ action: action.name, service: service.fullName }
+							);
 							item.reject(err);
 							callNext();
 						});
 				};
 
 				return function bulkheadMiddleware(ctx) {
-				// Call handler without waiting
+					// Call handler without waiting
 					if (currentInFlight < opts.concurrency) {
 						currentInFlight++;
-						broker.metrics.set(METRIC$5.MOLECULER_REQUEST_BULKHEAD_INFLIGHT, currentInFlight, { action: action.name, service: service.fullName });
-						broker.metrics.set(METRIC$5.MOLECULER_REQUEST_BULKHEAD_QUEUE_SIZE, queue.length, { action: action.name, service: service.fullName });
+						broker.metrics.set(
+							METRIC$5.MOLECULER_REQUEST_BULKHEAD_INFLIGHT,
+							currentInFlight,
+							{ action: action.name, service: service.fullName }
+						);
+						broker.metrics.set(METRIC$5.MOLECULER_REQUEST_BULKHEAD_QUEUE_SIZE, queue.length, {
+							action: action.name,
+							service: service.fullName
+						});
 						return handler(ctx)
 							.then(res => {
 								currentInFlight--;
-								broker.metrics.set(METRIC$5.MOLECULER_REQUEST_BULKHEAD_INFLIGHT, currentInFlight, { action: action.name, service: service.fullName });
-								broker.metrics.set(METRIC$5.MOLECULER_REQUEST_BULKHEAD_QUEUE_SIZE, queue.length, { action: action.name, service: service.fullName });
+								broker.metrics.set(
+									METRIC$5.MOLECULER_REQUEST_BULKHEAD_INFLIGHT,
+									currentInFlight,
+									{ action: action.name, service: service.fullName }
+								);
+								broker.metrics.set(
+									METRIC$5.MOLECULER_REQUEST_BULKHEAD_QUEUE_SIZE,
+									queue.length,
+									{ action: action.name, service: service.fullName }
+								);
 								callNext();
 								return res;
 							})
 							.catch(err => {
 								currentInFlight--;
-								broker.metrics.set(METRIC$5.MOLECULER_REQUEST_BULKHEAD_INFLIGHT, currentInFlight, { action: action.name, service: service.fullName });
-								broker.metrics.set(METRIC$5.MOLECULER_REQUEST_BULKHEAD_QUEUE_SIZE, queue.length, { action: action.name, service: service.fullName });
+								broker.metrics.set(
+									METRIC$5.MOLECULER_REQUEST_BULKHEAD_INFLIGHT,
+									currentInFlight,
+									{ action: action.name, service: service.fullName }
+								);
+								broker.metrics.set(
+									METRIC$5.MOLECULER_REQUEST_BULKHEAD_QUEUE_SIZE,
+									queue.length,
+									{ action: action.name, service: service.fullName }
+								);
 								callNext();
 								return broker.Promise.reject(err);
 							});
@@ -10698,15 +17730,19 @@
 
 					// Check whether the queue is full
 					if (opts.maxQueueSize && queue.length >= opts.maxQueueSize) {
-						return broker.Promise.reject(new QueueIsFullError({ action: ctx.action.name, nodeID: ctx.nodeID }));
+						return broker.Promise.reject(
+							new QueueIsFullError({ action: ctx.action.name, nodeID: ctx.nodeID })
+						);
 					}
 
 					// Store the request in the queue
 					const p = new Promise((resolve, reject) => queue.push({ resolve, reject, ctx }));
-					broker.metrics.set(METRIC$5.MOLECULER_REQUEST_BULKHEAD_QUEUE_SIZE, queue.length, { action: action.name, service: service.fullName });
+					broker.metrics.set(METRIC$5.MOLECULER_REQUEST_BULKHEAD_QUEUE_SIZE, queue.length, {
+						action: action.name,
+						service: service.fullName
+					});
 
 					return p;
-
 				}.bind(this);
 			}
 
@@ -10723,8 +17759,8 @@
 
 				// Call the next request from the queue
 				const callNext = function callNext() {
-				/* istanbul ignore next */
-					if (queue.length == 0) return;
+					/* istanbul ignore next */
+					if (queue.length === 0) return;
 
 					/* istanbul ignore next */
 					if (currentInFlight >= opts.concurrency) return;
@@ -10732,21 +17768,43 @@
 					const item = queue.shift();
 
 					currentInFlight++;
-					broker.metrics.set(METRIC$5.MOLECULER_EVENT_BULKHEAD_INFLIGHT, currentInFlight, { event: event.name, service: service.fullName });
-					broker.metrics.set(METRIC$5.MOLECULER_EVENT_BULKHEAD_QUEUE_SIZE, queue.length, { event: event.name, service: service.fullName });
+					broker.metrics.set(METRIC$5.MOLECULER_EVENT_BULKHEAD_INFLIGHT, currentInFlight, {
+						event: event.name,
+						service: service.fullName
+					});
+					broker.metrics.set(METRIC$5.MOLECULER_EVENT_BULKHEAD_QUEUE_SIZE, queue.length, {
+						event: event.name,
+						service: service.fullName
+					});
 
 					handler(item.ctx)
 						.then(res => {
 							currentInFlight--;
-							broker.metrics.set(METRIC$5.MOLECULER_EVENT_BULKHEAD_INFLIGHT, currentInFlight, { event: event.name, service: service.fullName });
-							broker.metrics.set(METRIC$5.MOLECULER_EVENT_BULKHEAD_QUEUE_SIZE, queue.length, { event: event.name, service: service.fullName });
+							broker.metrics.set(
+								METRIC$5.MOLECULER_EVENT_BULKHEAD_INFLIGHT,
+								currentInFlight,
+								{ event: event.name, service: service.fullName }
+							);
+							broker.metrics.set(
+								METRIC$5.MOLECULER_EVENT_BULKHEAD_QUEUE_SIZE,
+								queue.length,
+								{ event: event.name, service: service.fullName }
+							);
 							item.resolve(res);
 							callNext();
 						})
 						.catch(err => {
 							currentInFlight--;
-							broker.metrics.set(METRIC$5.MOLECULER_EVENT_BULKHEAD_INFLIGHT, currentInFlight, { event: event.name, service: service.fullName });
-							broker.metrics.set(METRIC$5.MOLECULER_EVENT_BULKHEAD_QUEUE_SIZE, queue.length, { event: event.name, service: service.fullName });
+							broker.metrics.set(
+								METRIC$5.MOLECULER_EVENT_BULKHEAD_INFLIGHT,
+								currentInFlight,
+								{ event: event.name, service: service.fullName }
+							);
+							broker.metrics.set(
+								METRIC$5.MOLECULER_EVENT_BULKHEAD_QUEUE_SIZE,
+								queue.length,
+								{ event: event.name, service: service.fullName }
+							);
 							item.reject(err);
 							callNext();
 						});
@@ -10756,20 +17814,42 @@
 					// Call handler without waiting
 					if (currentInFlight < opts.concurrency) {
 						currentInFlight++;
-						broker.metrics.set(METRIC$5.MOLECULER_EVENT_BULKHEAD_INFLIGHT, currentInFlight, { event: event.name, service: service.fullName });
-						broker.metrics.set(METRIC$5.MOLECULER_EVENT_BULKHEAD_QUEUE_SIZE, queue.length, { event: event.name, service: service.fullName });
+						broker.metrics.set(METRIC$5.MOLECULER_EVENT_BULKHEAD_INFLIGHT, currentInFlight, {
+							event: event.name,
+							service: service.fullName
+						});
+						broker.metrics.set(METRIC$5.MOLECULER_EVENT_BULKHEAD_QUEUE_SIZE, queue.length, {
+							event: event.name,
+							service: service.fullName
+						});
 						return handler(ctx)
 							.then(res => {
 								currentInFlight--;
-								broker.metrics.set(METRIC$5.MOLECULER_EVENT_BULKHEAD_INFLIGHT, currentInFlight, { event: event.name, service: service.fullName });
-								broker.metrics.set(METRIC$5.MOLECULER_EVENT_BULKHEAD_QUEUE_SIZE, queue.length, { event: event.name, service: service.fullName });
+								broker.metrics.set(
+									METRIC$5.MOLECULER_EVENT_BULKHEAD_INFLIGHT,
+									currentInFlight,
+									{ event: event.name, service: service.fullName }
+								);
+								broker.metrics.set(
+									METRIC$5.MOLECULER_EVENT_BULKHEAD_QUEUE_SIZE,
+									queue.length,
+									{ event: event.name, service: service.fullName }
+								);
 								callNext();
 								return res;
 							})
 							.catch(err => {
 								currentInFlight--;
-								broker.metrics.set(METRIC$5.MOLECULER_EVENT_BULKHEAD_INFLIGHT, currentInFlight, { event: event.name, service: service.fullName });
-								broker.metrics.set(METRIC$5.MOLECULER_EVENT_BULKHEAD_QUEUE_SIZE, queue.length, { event: event.name, service: service.fullName });
+								broker.metrics.set(
+									METRIC$5.MOLECULER_EVENT_BULKHEAD_INFLIGHT,
+									currentInFlight,
+									{ event: event.name, service: service.fullName }
+								);
+								broker.metrics.set(
+									METRIC$5.MOLECULER_EVENT_BULKHEAD_QUEUE_SIZE,
+									queue.length,
+									{ event: event.name, service: service.fullName }
+								);
 								callNext();
 								return broker.Promise.reject(err);
 							});
@@ -10777,32 +17857,55 @@
 
 					// Check whether the queue is full
 					if (opts.maxQueueSize && queue.length >= opts.maxQueueSize) {
-						return broker.Promise.reject(new QueueIsFullError({ event: ctx.eventName, service: service.fullName, nodeID: ctx.nodeID }));
+						return broker.Promise.reject(
+							new QueueIsFullError({
+								event: ctx.eventName,
+								service: service.fullName,
+								nodeID: ctx.nodeID
+							})
+						);
 					}
 
 					// Store the request in the queue
 					const p = new Promise((resolve, reject) => queue.push({ resolve, reject, ctx }));
-					broker.metrics.set(METRIC$5.MOLECULER_EVENT_BULKHEAD_QUEUE_SIZE, queue.length, { event: event.name, service: service.fullName });
+					broker.metrics.set(METRIC$5.MOLECULER_EVENT_BULKHEAD_QUEUE_SIZE, queue.length, {
+						event: event.name,
+						service: service.fullName
+					});
 
 					return p;
-
 				}.bind(this);
 			}
 
 			return handler;
 		}
 
-
 		return {
 			name: "Bulkhead",
 
 			created() {
 				if (broker.isMetricsEnabled()) {
-					broker.metrics.register({ name: METRIC$5.MOLECULER_REQUEST_BULKHEAD_INFLIGHT, type: METRIC$5.TYPE_GAUGE, labelNames: ["action", "service"] });
-					broker.metrics.register({ name: METRIC$5.MOLECULER_REQUEST_BULKHEAD_QUEUE_SIZE, type: METRIC$5.TYPE_GAUGE, labelNames: ["action", "service"] });
+					broker.metrics.register({
+						name: METRIC$5.MOLECULER_REQUEST_BULKHEAD_INFLIGHT,
+						type: METRIC$5.TYPE_GAUGE,
+						labelNames: ["action", "service"]
+					});
+					broker.metrics.register({
+						name: METRIC$5.MOLECULER_REQUEST_BULKHEAD_QUEUE_SIZE,
+						type: METRIC$5.TYPE_GAUGE,
+						labelNames: ["action", "service"]
+					});
 
-					broker.metrics.register({ name: METRIC$5.MOLECULER_EVENT_BULKHEAD_INFLIGHT, type: METRIC$5.TYPE_GAUGE, labelNames: ["event", "service"] });
-					broker.metrics.register({ name: METRIC$5.MOLECULER_EVENT_BULKHEAD_QUEUE_SIZE, type: METRIC$5.TYPE_GAUGE, labelNames: ["event", "service"] });
+					broker.metrics.register({
+						name: METRIC$5.MOLECULER_EVENT_BULKHEAD_INFLIGHT,
+						type: METRIC$5.TYPE_GAUGE,
+						labelNames: ["event", "service"]
+					});
+					broker.metrics.register({
+						name: METRIC$5.MOLECULER_EVENT_BULKHEAD_QUEUE_SIZE,
+						type: METRIC$5.TYPE_GAUGE,
+						labelNames: ["event", "service"]
+					});
 				}
 			},
 
@@ -10814,13 +17917,12 @@
 	const { GracefulStopTimeoutError } = errors;
 
 	var contextTracker = function ContextTrackerMiddleware(broker) {
-
 		function addContext(ctx) {
 			if (ctx.service) {
-			// Local request
+				// Local request
 				ctx.service._trackedContexts.push(ctx);
 			} else {
-			// Remote request
+				// Remote request
 				ctx.broker._trackedContexts.push(ctx);
 			}
 		}
@@ -10828,39 +17930,45 @@
 		function removeContext(ctx) {
 			if (ctx.service) {
 				const idx = ctx.service._trackedContexts.indexOf(ctx);
-				if (idx !== -1)
-					ctx.service._trackedContexts.splice(idx, 1);
+				if (idx !== -1) ctx.service._trackedContexts.splice(idx, 1);
 			} else {
 				const idx = ctx.broker._trackedContexts.indexOf(ctx);
-				if (idx !== -1)
-					ctx.broker._trackedContexts.splice(idx, 1);
+				if (idx !== -1) ctx.broker._trackedContexts.splice(idx, 1);
 			}
 		}
 
 		function wrapTrackerMiddleware(handler) {
 			if (this.options.tracking && this.options.tracking.enabled) {
-
 				return function ContextTrackerMiddleware(ctx) {
-
-					const tracked = ctx.options.tracking != null ? ctx.options.tracking : this.options.tracking.enabled;
+					const tracked =
+						ctx.options.tracking != null
+							? ctx.options.tracking
+							: this.options.tracking.enabled;
 
 					// If no need to track
-					if (!tracked)
-						return handler(ctx);
+					if (!tracked) return handler(ctx);
 
 					// Track the context
 					addContext(ctx);
 
 					// Call the handler
-					let p = handler(ctx);
+					let p;
+					try {
+						p = handler(ctx);
+					} catch (error) {
+						removeContext(ctx);
+						throw error;
+					}
 
-					p = p.then(res => {
-						removeContext(ctx);
-						return res;
-					}).catch(err => {
-						removeContext(ctx);
-						throw err;
-					});
+					p = p
+						.then(res => {
+							removeContext(ctx);
+							return res;
+						})
+						.catch(err => {
+							removeContext(ctx);
+							throw err;
+						});
 
 					return p;
 				}.bind(this);
@@ -10870,10 +17978,9 @@
 		}
 
 		function waitingForActiveContexts(list, logger, time, service) {
-			if (!list || list.length === 0)
-				return broker.Promise.resolve();
+			if (!list || list.length === 0) return broker.Promise.resolve();
 
-			return new broker.Promise((resolve) => {
+			return new broker.Promise(resolve => {
 				let timedOut = false;
 				const timeout = timersBrowserify.setTimeout(() => {
 					timedOut = true;
@@ -10892,8 +17999,7 @@
 							logger.warn(`Waiting for ${list.length} running context(s)...`);
 							first = false;
 						}
-						if (!timedOut)
-							timersBrowserify.setTimeout(checkForContexts, 100);
+						if (!timedOut) timersBrowserify.setTimeout(checkForContexts, 100);
 					}
 				};
 				setImmediate(checkForContexts);
@@ -10920,20 +18026,37 @@
 
 			// Before a local service stopping
 			serviceStopping(service) {
-				return waitingForActiveContexts(service._trackedContexts, service.logger, service.settings.$shutdownTimeout || service.broker.options.tracking.shutdownTimeout, service);
+				return waitingForActiveContexts(
+					service._trackedContexts,
+					service.logger,
+					service.settings.$shutdownTimeout ||
+						service.broker.options.tracking.shutdownTimeout,
+					service
+				);
 			},
 
 			// Before broker stopping
 			stopping(broker) {
-				return waitingForActiveContexts(broker._trackedContexts, broker.logger, broker.options.tracking.shutdownTimeout);
-			},
+				return waitingForActiveContexts(
+					broker._trackedContexts,
+					broker.logger,
+					broker.options.tracking.shutdownTimeout
+				);
+			}
 		};
 	};
 
-	const { METRIC: METRIC$6 }	= metrics;
+	/**
+	 * @typedef {import("../registry/endpoint-action")} ActionEndpoint
+	 * @typedef {import("../service")} Service
+	 * @typedef {import("../context")} Context
+	 * @typedef {import("../service").ActionSchema} ActionSchema
+	 */
+
+
+	const { METRIC: METRIC$6 } = metrics;
 
 	var circuitBreaker = function circuitBreakerMiddleware(broker) {
-
 		let windowTimer;
 		const store = new Map();
 		let logger;
@@ -10958,7 +18081,7 @@
 
 			logger.debug("Reset circuit-breaker endpoint states...");
 			store.forEach((item, key) => {
-				if (item.count == 0) {
+				if (item.count === 0) {
 					logger.debug(`Remove '${key}' endpoint state because it is not used`);
 					store.delete(key);
 					return;
@@ -10973,7 +18096,7 @@
 		/**
 		 * Get Endpoint state from store. If not exists, create it.
 		 *
-		 * @param {Endpoint} ep
+		 * @param {ActionEndpoint} ep
 		 * @param {Service} service
 		 * @param {Object} opts
 		 * @returns {Object}
@@ -11018,10 +18141,8 @@
 		function success(item, ctx) {
 			item.count++;
 
-			if (item.state === constants.CIRCUIT_HALF_OPEN_WAIT)
-				circuitClose(item);
-			else
-				checkThreshold(item);
+			if (item.state === constants.CIRCUIT_HALF_OPEN_WAIT) circuitClose(item);
+			else checkThreshold(item);
 		}
 
 		/**
@@ -11033,8 +18154,7 @@
 		function checkThreshold(item, ctx) {
 			if (item.count >= item.opts.minRequestCount) {
 				const rate = item.failures / item.count;
-				if (rate >= item.opts.threshold)
-					trip(item);
+				if (rate >= item.opts.threshold) trip(item);
 			}
 		}
 
@@ -11062,11 +18182,33 @@
 			const service = item.service.fullName;
 
 			const rate = item.count > 0 ? item.failures / item.count : 0;
-			logger.debug(`Circuit breaker has been opened on '${item.ep.name}' endpoint.`, { nodeID: item.ep.id, service, action: action.name, failures: item.failures, count: item.count, rate });
-			broker.broadcast("$circuit-breaker.opened", { nodeID: item.ep.id, service, action: action.name, failures: item.failures, count: item.count, rate });
+			logger.debug(`Circuit breaker has been opened on '${item.ep.name}' endpoint.`, {
+				nodeID: item.ep.id,
+				service,
+				action: action.name,
+				failures: item.failures,
+				count: item.count,
+				rate
+			});
+			broker.broadcast("$circuit-breaker.opened", {
+				nodeID: item.ep.id,
+				service,
+				action: action.name,
+				failures: item.failures,
+				count: item.count,
+				rate
+			});
 
-			broker.metrics.set(METRIC$6.MOLECULER_CIRCUIT_BREAKER_OPENED_ACTIVE, 1, { affectedNodeID: item.ep.id, service, action: action.name });
-			broker.metrics.increment(METRIC$6.MOLECULER_CIRCUIT_BREAKER_OPENED_TOTAL, { affectedNodeID: item.ep.id, service, action: action.name });
+			broker.metrics.set(METRIC$6.MOLECULER_CIRCUIT_BREAKER_OPENED_ACTIVE, 1, {
+				affectedNodeID: item.ep.id,
+				service,
+				action: action.name
+			});
+			broker.metrics.increment(METRIC$6.MOLECULER_CIRCUIT_BREAKER_OPENED_TOTAL, {
+				affectedNodeID: item.ep.id,
+				service,
+				action: action.name
+			});
 		}
 
 		/**
@@ -11075,19 +18217,35 @@
 		 * @param {Object} item
 		 * @param {Context} ctx
 		 */
-		function halfOpen(item) {
+		function halfOpen(item, ctx) {
 			item.state = constants.CIRCUIT_HALF_OPEN;
 			item.ep.state = true;
 
 			const action = item.ep.action;
 			const service = item.service.fullName;
 
-			logger.debug(`Circuit breaker has been half-opened on '${item.ep.name}' endpoint.`, { nodeID: item.ep.id, service, action: action.name });
+			logger.debug(`Circuit breaker has been half-opened on '${item.ep.name}' endpoint.`, {
+				nodeID: item.ep.id,
+				service,
+				action: action.name
+			});
 
-			broker.broadcast("$circuit-breaker.half-opened", { nodeID: item.ep.id, service, action: action.name });
+			broker.broadcast("$circuit-breaker.half-opened", {
+				nodeID: item.ep.id,
+				service,
+				action: action.name
+			});
 
-			broker.metrics.set(METRIC$6.MOLECULER_CIRCUIT_BREAKER_OPENED_ACTIVE, 0, { affectedNodeID: item.ep.id, service, action: action.name });
-			broker.metrics.set(METRIC$6.MOLECULER_CIRCUIT_BREAKER_HALF_OPENED_ACTIVE, 1, { affectedNodeID: item.ep.id, service, action: action.name });
+			broker.metrics.set(METRIC$6.MOLECULER_CIRCUIT_BREAKER_OPENED_ACTIVE, 0, {
+				affectedNodeID: item.ep.id,
+				service,
+				action: action.name
+			});
+			broker.metrics.set(METRIC$6.MOLECULER_CIRCUIT_BREAKER_HALF_OPENED_ACTIVE, 1, {
+				affectedNodeID: item.ep.id,
+				service,
+				action: action.name
+			});
 
 			if (item.cbTimer) {
 				clearTimeout(item.cbTimer);
@@ -11100,7 +18258,7 @@
 		 *
 		 * @param {Object} item
 		 * @param {Context} ctx
-		*/
+		 */
 		function halfOpenWait(item, ctx) {
 			item.state = constants.CIRCUIT_HALF_OPEN_WAIT;
 			item.ep.state = false;
@@ -11116,7 +18274,7 @@
 		 * @param {Object} item
 		 * @param {Context} ctx
 		 */
-		function circuitClose(item) {
+		function circuitClose(item, ctx) {
 			item.state = constants.CIRCUIT_CLOSE;
 			item.ep.state = true;
 			item.failures = 0;
@@ -11125,12 +18283,28 @@
 			const action = item.ep.action;
 			const service = item.service.fullName;
 
-			logger.debug(`Circuit breaker has been closed on '${item.ep.name}' endpoint.`, { nodeID: item.ep.id, service, action: action.name });
+			logger.debug(`Circuit breaker has been closed on '${item.ep.name}' endpoint.`, {
+				nodeID: item.ep.id,
+				service,
+				action: action.name
+			});
 
-			broker.broadcast("$circuit-breaker.closed", { nodeID: item.ep.id, service, action: action.name });
+			broker.broadcast("$circuit-breaker.closed", {
+				nodeID: item.ep.id,
+				service,
+				action: action.name
+			});
 
-			broker.metrics.set(METRIC$6.MOLECULER_CIRCUIT_BREAKER_OPENED_ACTIVE, 0, { affectedNodeID: item.ep.id, service, action: action.name });
-			broker.metrics.set(METRIC$6.MOLECULER_CIRCUIT_BREAKER_HALF_OPENED_ACTIVE, 0, { affectedNodeID: item.ep.id, service, action: action.name });
+			broker.metrics.set(METRIC$6.MOLECULER_CIRCUIT_BREAKER_OPENED_ACTIVE, 0, {
+				affectedNodeID: item.ep.id,
+				service,
+				action: action.name
+			});
+			broker.metrics.set(METRIC$6.MOLECULER_CIRCUIT_BREAKER_HALF_OPENED_ACTIVE, 0, {
+				affectedNodeID: item.ep.id,
+				service,
+				action: action.name
+			});
 
 			if (item.cbTimer) {
 				clearTimeout(item.cbTimer);
@@ -11142,13 +18316,17 @@
 		 * Middleware wrapper function
 		 *
 		 * @param {Function} handler
-		 * @param {Action} action
+		 * @param {ActionSchema} action
 		 * @returns {Function}
 		 */
 		function wrapCBMiddleware(handler, action) {
 			const service = action.service;
 			// Merge action option and broker options
-			const opts = Object.assign({}, this.options.circuitBreaker || {}, action.circuitBreaker || {});
+			const opts = Object.assign(
+				{},
+				this.options.circuitBreaker || {},
+				action.circuitBreaker || {}
+			);
 			if (opts.enabled) {
 				return function circuitBreakerMiddleware(ctx) {
 					// Get endpoint state item
@@ -11161,28 +18339,29 @@
 					}
 
 					// Call the handler
-					return handler(ctx).then(res => {
-						const item = getEpState(ep, service, opts);
-						success(item);
+					return handler(ctx)
+						.then(res => {
+							const item = getEpState(ep, service, opts);
+							success(item);
 
-						return res;
-					}).catch(err => {
-						if (opts.check && opts.check(err)) {
-							// Failure if error is created locally (not came from a 3rd node error)
-							if (item && (!err.nodeID || err.nodeID == ctx.nodeID)) {
-								const item = getEpState(ep, service, opts);
-								failure(item);
+							return res;
+						})
+						.catch(err => {
+							if (opts.check && opts.check(err)) {
+								// Failure if error is created locally (not came from a 3rd node error)
+								if (item && (!err.nodeID || err.nodeID == ctx.nodeID)) {
+									const item = getEpState(ep, service, opts);
+									failure(item);
+								}
 							}
-						}
 
-						return this.Promise.reject(err);
-					});
+							return this.Promise.reject(err);
+						});
 				}.bind(this);
 			}
 
 			return handler;
 		}
-
 
 		return {
 			name: "CircuitBreaker",
@@ -11198,9 +18377,24 @@
 					createWindowTimer(opts.windowTime);
 
 					if (broker.isMetricsEnabled()) {
-						broker.metrics.register({ name: METRIC$6.MOLECULER_CIRCUIT_BREAKER_OPENED_ACTIVE, type: METRIC$6.TYPE_GAUGE, labelNames: ["affectedNodeID", "service", "action"], description: "Number of active opened circuit-breakers" });
-						broker.metrics.register({ name: METRIC$6.MOLECULER_CIRCUIT_BREAKER_OPENED_TOTAL, type: METRIC$6.TYPE_COUNTER, labelNames: ["affectedNodeID", "service", "action"], description: "Number of opened circuit-breakers" });
-						broker.metrics.register({ name: METRIC$6.MOLECULER_CIRCUIT_BREAKER_HALF_OPENED_ACTIVE, type: METRIC$6.TYPE_GAUGE, labelNames: ["affectedNodeID", "service", "action"], description: "Number of active half-opened circuit-breakers" });
+						broker.metrics.register({
+							name: METRIC$6.MOLECULER_CIRCUIT_BREAKER_OPENED_ACTIVE,
+							type: METRIC$6.TYPE_GAUGE,
+							labelNames: ["affectedNodeID", "service", "action"],
+							description: "Number of active opened circuit-breakers"
+						});
+						broker.metrics.register({
+							name: METRIC$6.MOLECULER_CIRCUIT_BREAKER_OPENED_TOTAL,
+							type: METRIC$6.TYPE_COUNTER,
+							labelNames: ["affectedNodeID", "service", "action"],
+							description: "Number of opened circuit-breakers"
+						});
+						broker.metrics.register({
+							name: METRIC$6.MOLECULER_CIRCUIT_BREAKER_HALF_OPENED_ACTIVE,
+							type: METRIC$6.TYPE_GAUGE,
+							labelNames: ["affectedNodeID", "service", "action"],
+							description: "Number of active half-opened circuit-breakers"
+						});
 					}
 				}
 			},
@@ -11218,49 +18412,56 @@
 		};
 	};
 
-	const { RequestTimeoutError } = errors;
-	const { METRIC: METRIC$7 }	= metrics;
+	const { TimeoutError, RequestTimeoutError } = errors;
+	const { Stream } = require$$0__default$1;
+	const { METRIC: METRIC$7 } = metrics;
 
-	var timeout = function(broker) {
-
+	var timeout = function (broker) {
 		function wrapTimeoutMiddleware(handler, action) {
 			const actionTimeout = action.timeout;
 			const actionName = action.name;
 			const service = action.service ? action.service.fullName : null;
 
 			return function timeoutMiddleware(ctx) {
-
 				// Load opts with default values
 				if (ctx.options.timeout == null) {
-					if (actionTimeout != null)
-						ctx.options.timeout = actionTimeout;
-					else
-						ctx.options.timeout = broker.options.requestTimeout;
+					if (actionTimeout != null) ctx.options.timeout = actionTimeout;
+					else ctx.options.timeout = broker.options.requestTimeout;
 				}
 
 				if (ctx.options.timeout > 0 && !ctx.startHrTime) {
-				// For distributed timeout calculation need to be set
+					// For distributed timeout calculation need to be set
 					ctx.startHrTime = _process.hrtime();
 				}
 
 				// Call the handler
 				const p = handler(ctx);
 				if (ctx.options.timeout > 0 && p.timeout) {
-					return p.timeout(ctx.options.timeout)
-						.catch(err => {
-							if (err instanceof broker.Promise.TimeoutError) {
-								const nodeID = ctx.nodeID;
-								this.logger.warn(`Request '${actionName}' is timed out.`, { requestID: ctx.requestID, nodeID, timeout: ctx.options.timeout });
-								err = new RequestTimeoutError({ action: actionName, nodeID });
+					return p.timeout(ctx.options.timeout).catch(err => {
+						if (err instanceof TimeoutError) {
+							const nodeID = ctx.nodeID;
+							this.logger.warn(`Request '${actionName}' is timed out.`, {
+								requestID: ctx.requestID,
+								nodeID,
+								timeout: ctx.options.timeout
+							});
 
-								broker.metrics.increment(METRIC$7.MOLECULER_REQUEST_TIMEOUT_TOTAL, { service, action: actionName });
+							if (ctx.params instanceof Stream) {
+								ctx.params.emit("moleculer-timeout-middleware", ctx.options.timeout);
 							}
-							throw err;
-						});
+
+							err = new RequestTimeoutError({ action: actionName, nodeID });
+
+							broker.metrics.increment(METRIC$7.MOLECULER_REQUEST_TIMEOUT_TOTAL, {
+								service,
+								action: actionName
+							});
+						}
+						throw err;
+					});
 				}
 
 				return p;
-
 			}.bind(this);
 		}
 
@@ -11269,7 +18470,13 @@
 
 			created(broker) {
 				if (broker.isMetricsEnabled()) {
-					broker.metrics.register({ name: METRIC$7.MOLECULER_REQUEST_TIMEOUT_TOTAL, type: METRIC$7.TYPE_COUNTER, labelNames: ["service", "action"], rate: true });
+					broker.metrics.register({
+						name: METRIC$7.MOLECULER_REQUEST_TIMEOUT_TOTAL,
+						type: METRIC$7.TYPE_COUNTER,
+						labelNames: ["service", "action"],
+						description: "Number of timed out requests",
+						rate: true
+					});
 				}
 			},
 
@@ -11278,10 +18485,9 @@
 		};
 	};
 
-	const { METRIC: METRIC$8 }	= metrics;
+	const { METRIC: METRIC$8 } = metrics;
 
 	var retry = function RetryMiddleware(broker) {
-
 		function wrapRetryMiddleware(handler, action) {
 			const actionName = action.name;
 			const service = action.service ? action.service.fullName : null;
@@ -11289,13 +18495,12 @@
 			const opts = Object.assign({}, this.options.retryPolicy, action.retryPolicy || {});
 			if (opts.enabled) {
 				return function retryMiddleware(ctx) {
-					const attempts = typeof ctx.options.retries === "number" ? ctx.options.retries : opts.retries;
-					if (ctx._retryAttempts == null)
-						ctx._retryAttempts = 0;
+					const attempts =
+						typeof ctx.options.retries === "number" ? ctx.options.retries : opts.retries;
+					if (ctx._retryAttempts == null) ctx._retryAttempts = 0;
 
 					// Call the handler
 					return handler(ctx).catch(err => {
-
 						// Skip retry if it is a remote call. The retry logic will run on the caller node
 						// because the Retry middleware wrap the `remoteAction` hook, as well.
 						if (ctx.nodeID != broker.nodeID && ctx.endpoint.local)
@@ -11303,7 +18508,10 @@
 
 						// Check the error's `retryable` property.
 						if (opts.check(err)) {
-							broker.metrics.increment(METRIC$8.MOLECULER_REQUEST_RETRY_ATTEMPTS_TOTAL, { service, action: action.name });
+							broker.metrics.increment(METRIC$8.MOLECULER_REQUEST_RETRY_ATTEMPTS_TOTAL, {
+								service,
+								action: action.name
+							});
 
 							if (ctx._retryAttempts < attempts) {
 								// Retry call
@@ -11317,21 +18525,28 @@
 								}
 
 								// Calculate next delay
-								const delay = Math.min(opts.delay * Math.pow(opts.factor, ctx._retryAttempts - 1), opts.maxDelay);
+								const delay = Math.min(
+									opts.delay * Math.pow(opts.factor, ctx._retryAttempts - 1),
+									opts.maxDelay
+								);
 
-								broker.logger.warn(`Retry to call '${actionName}' action after ${delay} ms...`, { requestID: ctx.requestID, attempts: ctx._retryAttempts });
+								broker.logger.warn(
+									`Retry to call '${actionName}' action after ${delay} ms...`,
+									{ requestID: ctx.requestID, attempts: ctx._retryAttempts }
+								);
 
 								// Wait & recall
-								return broker.Promise.delay(delay)
-									.then(() => {
-										const newCtx = ctx.copy();
-										newCtx._retryAttempts = ctx._retryAttempts;
+								return broker.Promise.delay(delay).then(() => {
+									const newCtx = ctx.copy();
+									newCtx._retryAttempts = ctx._retryAttempts;
 
-										if (action.visibility == "private")
-											return ctx.service.actions[action.rawName](ctx.params, { ctx: newCtx });
+									if (action.visibility == "private")
+										return ctx.service.actions[action.rawName](ctx.params, {
+											ctx: newCtx
+										});
 
-										return broker.call(actionName, ctx.params, { ctx: newCtx });
-									});
+									return broker.call(actionName, ctx.params, { ctx: newCtx });
+								});
 							}
 						}
 
@@ -11349,7 +18564,13 @@
 
 			created() {
 				if (broker.isMetricsEnabled()) {
-					broker.metrics.register({ name: METRIC$8.MOLECULER_REQUEST_RETRY_ATTEMPTS_TOTAL, type: METRIC$8.TYPE_COUNTER, labelNames: ["service", "action"], rate: true });
+					broker.metrics.register({
+						name: METRIC$8.MOLECULER_REQUEST_RETRY_ATTEMPTS_TOTAL,
+						type: METRIC$8.TYPE_COUNTER,
+						labelNames: ["service", "action"],
+						description: "Number of retries",
+						rate: true
+					});
 				}
 			},
 
@@ -11359,27 +18580,28 @@
 	};
 
 	const { MoleculerError } = errors;
-	const { METRIC: METRIC$9 }	= metrics;
+	const { METRIC: METRIC$9 } = metrics;
 	const { isFunction: isFunction$6, isString: isString$d } = utils_1;
 
 	var fallback = function FallbackMiddleware(broker) {
-
 		function handleContextFallback(ctx, err) {
-			broker.logger.warn(`The '${ctx.action.name}' request is failed. Return fallback response.`, { requestID: ctx.requestID, err: err.message });
-			broker.metrics.increment(METRIC$9.MOLECULER_REQUEST_FALLBACK_TOTAL, { action: ctx.action.name });
+			broker.logger.warn(
+				`The '${ctx.action.name}' request is failed. Return fallback response.`,
+				{ requestID: ctx.requestID, err: err.message }
+			);
+			broker.metrics.increment(METRIC$9.MOLECULER_REQUEST_FALLBACK_TOTAL, {
+				action: ctx.action.name
+			});
 			ctx.fallbackResult = true;
 
-			if (isFunction$6(ctx.options.fallbackResponse))
-				return ctx.options.fallbackResponse(ctx, err);
-			else
-				return Promise.resolve(ctx.options.fallbackResponse);
+			if (isFunction$6(ctx.options.fallbackResponse)) return ctx.options.fallbackResponse(ctx, err);
+			else return Promise.resolve(ctx.options.fallbackResponse);
 		}
 
 		function wrapFallbackMiddleware(handler, action) {
 			return function fallbackMiddleware(ctx) {
 				// Call the handler
 				return handler(ctx).catch(err => {
-
 					// Handle fallback response from calling options
 					if (ctx.options.fallbackResponse) {
 						return handleContextFallback(ctx, err);
@@ -11389,14 +18611,24 @@
 					if (action.fallback && action.service) {
 						const svc = action.service;
 
-						const fallback = isString$d(action.fallback) ? svc[action.fallback] : action.fallback;
+						const fallback = isString$d(action.fallback)
+							? svc[action.fallback]
+							: action.fallback;
 						if (!isFunction$6(fallback)) {
 							/* istanbul ignore next */
-							throw new MoleculerError(`The 'fallback' of '${action.name}' action is not a Function or valid method name: ${action.fallback}`);
+							throw new MoleculerError(
+								`The 'fallback' of '${action.name}' action is not a Function or valid method name: ${action.fallback}`
+							);
 						}
 
-						svc.logger.warn(`The '${ctx.action.name}' request is failed. Return fallback response.`, { requestID: ctx.requestID, err: err.message });
-						broker.metrics.increment(METRIC$9.MOLECULER_REQUEST_FALLBACK_TOTAL, { service: svc.fullName, action: action.name });
+						svc.logger.warn(
+							`The '${ctx.action.name}' request is failed. Return fallback response.`,
+							{ requestID: ctx.requestID, err: err.message }
+						);
+						broker.metrics.increment(METRIC$9.MOLECULER_REQUEST_FALLBACK_TOTAL, {
+							service: svc.fullName,
+							action: action.name
+						});
 						ctx.fallbackResult = true;
 
 						return fallback.call(svc, ctx, err);
@@ -11412,12 +18644,18 @@
 
 			created(broker) {
 				if (broker.isMetricsEnabled()) {
-					broker.metrics.register({ name: METRIC$9.MOLECULER_REQUEST_FALLBACK_TOTAL, type: METRIC$9.TYPE_COUNTER, labelNames: ["service", "action"], rate: true });
+					broker.metrics.register({
+						name: METRIC$9.MOLECULER_REQUEST_FALLBACK_TOTAL,
+						type: METRIC$9.TYPE_COUNTER,
+						labelNames: ["service", "action"],
+						description: "Number of fallbacked requests",
+						rate: true
+					});
 				}
 			},
 
 			localAction: wrapFallbackMiddleware,
-			remoteAction: wrapFallbackMiddleware,
+			remoteAction: wrapFallbackMiddleware
 
 			/*call(next) {
 				return (actionName, params, opts) => {
@@ -11437,67 +18675,65 @@
 	function wrapActionErrorHandler(handler) {
 		return function errorHandlerMiddleware(ctx) {
 			// Call the handler
-			return handler(ctx)
-				.catch(err => {
-					if (!(err instanceof Error))
-						err = new MoleculerError$1(err, 500);
+			return handler(ctx).catch(err => {
+				if (!(err instanceof Error)) err = new MoleculerError$1(err, 500);
 
-					if (ctx.nodeID !== this.nodeID) {
-						// Remove pending request (the request didn't reach the target service)
-						if (this.transit)
-							this.transit.removePendingRequest(ctx.id);
-					}
+				if (ctx.nodeID !== this.nodeID) {
+					// Remove pending request (the request didn't reach the target service)
+					if (this.transit) this.transit.removePendingRequest(ctx.id);
+				}
 
-					this.logger.debug(`The '${ctx.action.name}' request is rejected.`, { requestID: ctx.requestID }, err);
+				this.logger.debug(
+					`The '${ctx.action.name}' request is rejected.`,
+					{ requestID: ctx.requestID },
+					err
+				);
 
-					Object.defineProperty(err, "ctx", {
-						value: ctx,
-						writable: true,
-						enumerable: false
-					});
-
-					// Call global errorHandler
-					return ctx.broker.errorHandler(err, {
-						ctx,
-						service: ctx.service,
-						action: ctx.action
-					});
+				Object.defineProperty(err, "ctx", {
+					value: ctx,
+					writable: true,
+					enumerable: false
 				});
 
+				// Call global errorHandler
+				return ctx.broker.errorHandler(err, {
+					ctx,
+					service: ctx.service,
+					action: ctx.action
+				});
+			});
 		}.bind(this);
 	}
 
 	function wrapEventErrorHandler(handler) {
 		return function errorHandlerMiddleware(ctx) {
 			// Call the handler
-			return handler(ctx)
-				.catch(err => {
-					if (!(err instanceof Error))
-						err = new MoleculerError$1(err, 500);
+			return handler(ctx).catch(err => {
+				if (!(err instanceof Error)) err = new MoleculerError$1(err, 500);
 
-					this.logger.debug(`Error occured in the '${ctx.event.name}' event handler in the '${ctx.service.fullName}' service.`, { requestID: ctx.requestID }, err);
+				this.logger.debug(
+					`Error occured in the '${ctx.event.name}' event handler in the '${ctx.service.fullName}' service.`,
+					{ requestID: ctx.requestID },
+					err
+				);
 
-					Object.defineProperty(err, "ctx", {
-						value: ctx,
-						writable: true,
-						enumerable: false
-					});
-
-					// Call global errorHandler
-					return ctx.broker.errorHandler(err, {
-						ctx,
-						service: ctx.service,
-						event: ctx.event
-					});
-				}).catch(err => {
-					// No global error Handler, or thrown further, so we handle it because it's an event handler.
-					ctx.broker.logger.error(err);
+				Object.defineProperty(err, "ctx", {
+					value: ctx,
+					writable: true,
+					enumerable: false
 				});
 
+				// Call global errorHandler
+				return ctx.broker.errorHandler(err, {
+					ctx,
+					service: ctx.service,
+					event: ctx.event
+				});
+			});
 		}.bind(this);
 	}
 
-	var errorHandler = function() {
+	var errorHandler = function () {
 		return {
 			name: "ErrorHandler",
 
@@ -11508,7 +18744,7 @@
 		};
 	};
 
-	const { METRIC: METRIC$a }	= metrics;
+	const { METRIC: METRIC$a } = metrics;
 
 	var metrics$1 = function MetricsMiddleware(broker) {
 		const metrics = broker.metrics;
@@ -11522,29 +18758,50 @@
 
 				metrics.increment(METRIC$a.MOLECULER_REQUEST_TOTAL, { service, action, caller, type });
 				metrics.increment(METRIC$a.MOLECULER_REQUEST_ACTIVE, { service, action, caller, type });
-				metrics.increment(METRIC$a.MOLECULER_REQUEST_LEVELS, { service, action, caller, level: ctx.level });
-				const timeEnd = metrics.timer(METRIC$a.MOLECULER_REQUEST_TIME, { service, action, caller, type });
-
-				// Call the next handler
-				return next(ctx).then(res => {
-					timeEnd();
-					metrics.decrement(METRIC$a.MOLECULER_REQUEST_ACTIVE, { service, action, caller, type });
-					return res;
-				}).catch(err => {
-					timeEnd();
-					metrics.decrement(METRIC$a.MOLECULER_REQUEST_ACTIVE, { service, action, caller, type });
-					metrics.increment(METRIC$a.MOLECULER_REQUEST_ERROR_TOTAL, {
-						service,
-						action,
-						caller,
-						type,
-						errorName: err ? err.name : null,
-						errorCode: err ? err.code : null,
-						errorType: err ? err.type : null
-					});
-					throw err;
+				metrics.increment(METRIC$a.MOLECULER_REQUEST_LEVELS, {
+					service,
+					action,
+					caller,
+					level: ctx.level
+				});
+				const timeEnd = metrics.timer(METRIC$a.MOLECULER_REQUEST_TIME, {
+					service,
+					action,
+					caller,
+					type
 				});
 
+				// Call the next handler
+				return next(ctx)
+					.then(res => {
+						timeEnd();
+						metrics.decrement(METRIC$a.MOLECULER_REQUEST_ACTIVE, {
+							service,
+							action,
+							caller,
+							type
+						});
+						return res;
+					})
+					.catch(err => {
+						timeEnd();
+						metrics.decrement(METRIC$a.MOLECULER_REQUEST_ACTIVE, {
+							service,
+							action,
+							caller,
+							type
+						});
+						metrics.increment(METRIC$a.MOLECULER_REQUEST_ERROR_TOTAL, {
+							service,
+							action,
+							caller,
+							type,
+							errorName: err ? err.name : null,
+							errorCode: err ? err.code : null,
+							errorType: err ? err.type : null
+						});
+						throw err;
+					});
 			};
 		}
 
@@ -11554,52 +18811,199 @@
 			created() {
 				if (broker.isMetricsEnabled()) {
 					// --- MOLECULER REQUEST METRICS ---
-					metrics.register({ name: METRIC$a.MOLECULER_REQUEST_TOTAL, type: METRIC$a.TYPE_COUNTER, labelNames: ["service", "action", "type", "caller"], unit: METRIC$a.UNIT_REQUEST, description: "Number of requests", rate: true });
-					metrics.register({ name: METRIC$a.MOLECULER_REQUEST_ACTIVE, type: METRIC$a.TYPE_GAUGE, labelNames: ["service", "action", "type", "caller"], unit: METRIC$a.UNIT_REQUEST, description: "Number of active requests" });
-					metrics.register({ name: METRIC$a.MOLECULER_REQUEST_ERROR_TOTAL, type: METRIC$a.TYPE_COUNTER, labelNames: ["service", "action", "type", "caller", "errorName", "errorCode", "errorType"], unit: METRIC$a.UNIT_REQUEST, description: "Number of request errors", rate: true });
-					metrics.register({ name: METRIC$a.MOLECULER_REQUEST_TIME, type: METRIC$a.TYPE_HISTOGRAM, labelNames: ["service", "action", "type", "caller"], quantiles: true, buckets: true, unit: METRIC$a.UNIT_MILLISECONDS, description: "Request times in milliseconds", rate: true });
-					metrics.register({ name: METRIC$a.MOLECULER_REQUEST_LEVELS, type: METRIC$a.TYPE_COUNTER, labelNames: ["level"], unit: METRIC$a.UNIT_REQUEST, description: "Number of requests by context level" });
+					metrics.register({
+						name: METRIC$a.MOLECULER_REQUEST_TOTAL,
+						type: METRIC$a.TYPE_COUNTER,
+						labelNames: ["service", "action", "type", "caller"],
+						unit: METRIC$a.UNIT_REQUEST,
+						description: "Number of requests",
+						rate: true
+					});
+					metrics.register({
+						name: METRIC$a.MOLECULER_REQUEST_ACTIVE,
+						type: METRIC$a.TYPE_GAUGE,
+						labelNames: ["service", "action", "type", "caller"],
+						unit: METRIC$a.UNIT_REQUEST,
+						description: "Number of active requests"
+					});
+					metrics.register({
+						name: METRIC$a.MOLECULER_REQUEST_ERROR_TOTAL,
+						type: METRIC$a.TYPE_COUNTER,
+						labelNames: [
+							"service",
+							"action",
+							"type",
+							"caller",
+							"errorName",
+							"errorCode",
+							"errorType"
+						],
+						unit: METRIC$a.UNIT_REQUEST,
+						description: "Number of request errors",
+						rate: true
+					});
+					metrics.register({
+						name: METRIC$a.MOLECULER_REQUEST_TIME,
+						type: METRIC$a.TYPE_HISTOGRAM,
+						labelNames: ["service", "action", "type", "caller"],
+						quantiles: true,
+						buckets: true,
+						unit: METRIC$a.UNIT_MILLISECONDS,
+						description: "Request times in milliseconds",
+						rate: true
+					});
+					metrics.register({
+						name: METRIC$a.MOLECULER_REQUEST_LEVELS,
+						type: METRIC$a.TYPE_COUNTER,
+						labelNames: ["level"],
+						unit: METRIC$a.UNIT_REQUEST,
+						description: "Number of requests by context level"
+					});
 					//metrics.register({ name: METRIC.MOLECULER_REQUEST_DIRECTCALL_TOTAL, type: METRIC.TYPE_COUNTER, labelNames: ["action"], unit: METRIC.UNIT_REQUEST, description: "Number of direct calls", rate: true });
 					//metrics.register({ name: METRIC.MOLECULER_REQUEST_MULTICALL_TOTAL, type: METRIC.TYPE_COUNTER, unit: METRIC.UNIT_REQUEST, description: "Number of multicalls", rate: true });
 
 					// --- MOLECULER EVENTS METRICS ---
-					metrics.register({ name: METRIC$a.MOLECULER_EVENT_EMIT_TOTAL, type: METRIC$a.TYPE_COUNTER, labelNames: ["event", "groups"], unit: METRIC$a.UNIT_EVENT, description: "Number of emitted events", rate: true });
-					metrics.register({ name: METRIC$a.MOLECULER_EVENT_BROADCAST_TOTAL, type: METRIC$a.TYPE_COUNTER, labelNames: ["event", "groups"], unit: METRIC$a.UNIT_EVENT, description: "Number of broadcast events", rate: true });
-					metrics.register({ name: METRIC$a.MOLECULER_EVENT_BROADCASTLOCAL_TOTAL, type: METRIC$a.TYPE_COUNTER, labelNames: ["event", "groups"], unit: METRIC$a.UNIT_EVENT, description: "Number of local broadcast events", rate: true });
+					metrics.register({
+						name: METRIC$a.MOLECULER_EVENT_EMIT_TOTAL,
+						type: METRIC$a.TYPE_COUNTER,
+						labelNames: ["event", "groups"],
+						unit: METRIC$a.UNIT_EVENT,
+						description: "Number of emitted events",
+						rate: true
+					});
+					metrics.register({
+						name: METRIC$a.MOLECULER_EVENT_BROADCAST_TOTAL,
+						type: METRIC$a.TYPE_COUNTER,
+						labelNames: ["event", "groups"],
+						unit: METRIC$a.UNIT_EVENT,
+						description: "Number of broadcast events",
+						rate: true
+					});
+					metrics.register({
+						name: METRIC$a.MOLECULER_EVENT_BROADCASTLOCAL_TOTAL,
+						type: METRIC$a.TYPE_COUNTER,
+						labelNames: ["event", "groups"],
+						unit: METRIC$a.UNIT_EVENT,
+						description: "Number of local broadcast events",
+						rate: true
+					});
 
-					metrics.register({ name: METRIC$a.MOLECULER_EVENT_RECEIVED_TOTAL, type: METRIC$a.TYPE_COUNTER, labelNames: ["service", "group", "event", "caller"], unit: METRIC$a.UNIT_EVENT, description: "Number of received events", rate: true });
-					metrics.register({ name: METRIC$a.MOLECULER_EVENT_RECEIVED_ACTIVE, type: METRIC$a.TYPE_GAUGE, labelNames: ["service", "group", "event", "caller"], unit: METRIC$a.UNIT_REQUEST, description: "Number of active event executions" });
-					metrics.register({ name: METRIC$a.MOLECULER_EVENT_RECEIVED_ERROR_TOTAL, type: METRIC$a.TYPE_COUNTER, labelNames: ["service", "group", "event", "caller", "errorName", "errorCode", "errorType"], unit: METRIC$a.UNIT_REQUEST, description: "Number of event execution errors", rate: true });
-					metrics.register({ name: METRIC$a.MOLECULER_EVENT_RECEIVED_TIME, type: METRIC$a.TYPE_HISTOGRAM, labelNames: ["service", "group", "event", "caller"], quantiles: true, buckets: true, unit: METRIC$a.UNIT_MILLISECONDS, description: "Execution time of events in milliseconds", rate: true });
+					metrics.register({
+						name: METRIC$a.MOLECULER_EVENT_RECEIVED_TOTAL,
+						type: METRIC$a.TYPE_COUNTER,
+						labelNames: ["service", "group", "event", "caller"],
+						unit: METRIC$a.UNIT_EVENT,
+						description: "Number of received events",
+						rate: true
+					});
+					metrics.register({
+						name: METRIC$a.MOLECULER_EVENT_RECEIVED_ACTIVE,
+						type: METRIC$a.TYPE_GAUGE,
+						labelNames: ["service", "group", "event", "caller"],
+						unit: METRIC$a.UNIT_REQUEST,
+						description: "Number of active event executions"
+					});
+					metrics.register({
+						name: METRIC$a.MOLECULER_EVENT_RECEIVED_ERROR_TOTAL,
+						type: METRIC$a.TYPE_COUNTER,
+						labelNames: [
+							"service",
+							"group",
+							"event",
+							"caller",
+							"errorName",
+							"errorCode",
+							"errorType"
+						],
+						unit: METRIC$a.UNIT_REQUEST,
+						description: "Number of event execution errors",
+						rate: true
+					});
+					metrics.register({
+						name: METRIC$a.MOLECULER_EVENT_RECEIVED_TIME,
+						type: METRIC$a.TYPE_HISTOGRAM,
+						labelNames: ["service", "group", "event", "caller"],
+						quantiles: true,
+						buckets: true,
+						unit: METRIC$a.UNIT_MILLISECONDS,
+						description: "Execution time of events in milliseconds",
+						rate: true
+					});
 
 					// --- MOLECULER TRANSIT METRICS ---
 
-					metrics.register({ name: METRIC$a.MOLECULER_TRANSIT_PUBLISH_TOTAL, type: METRIC$a.TYPE_COUNTER, labelNames: ["type"], unit: METRIC$a.UNIT_PACKET, description: "Number of published packets", rate: true });
-					metrics.register({ name: METRIC$a.MOLECULER_TRANSIT_RECEIVE_TOTAL, type: METRIC$a.TYPE_COUNTER, labelNames: ["type"], unit: METRIC$a.UNIT_PACKET, description: "Number of received packets", rate: true });
+					metrics.register({
+						name: METRIC$a.MOLECULER_TRANSIT_PUBLISH_TOTAL,
+						type: METRIC$a.TYPE_COUNTER,
+						labelNames: ["type"],
+						unit: METRIC$a.UNIT_PACKET,
+						description: "Number of published packets",
+						rate: true
+					});
+					metrics.register({
+						name: METRIC$a.MOLECULER_TRANSIT_RECEIVE_TOTAL,
+						type: METRIC$a.TYPE_COUNTER,
+						labelNames: ["type"],
+						unit: METRIC$a.UNIT_PACKET,
+						description: "Number of received packets",
+						rate: true
+					});
 
-					metrics.register({ name: METRIC$a.MOLECULER_TRANSIT_REQUESTS_ACTIVE, type: METRIC$a.TYPE_GAUGE, unit: METRIC$a.UNIT_REQUEST, description: "Number of active requests." });
-					metrics.register({ name: METRIC$a.MOLECULER_TRANSIT_STREAMS_SEND_ACTIVE, type: METRIC$a.TYPE_GAUGE, unit: METRIC$a.UNIT_STREAM, description: "Number of active sent streams" });
+					metrics.register({
+						name: METRIC$a.MOLECULER_TRANSIT_REQUESTS_ACTIVE,
+						type: METRIC$a.TYPE_GAUGE,
+						unit: METRIC$a.UNIT_REQUEST,
+						description: "Number of active requests"
+					});
+					metrics.register({
+						name: METRIC$a.MOLECULER_TRANSIT_STREAMS_SEND_ACTIVE,
+						type: METRIC$a.TYPE_GAUGE,
+						unit: METRIC$a.UNIT_STREAM,
+						description: "Number of active sent streams"
+					});
 					//metrics.register({ name: METRIC.MOLECULER_TRANSIT_STREAMS_RECEIVE_ACTIVE, type: METRIC.TYPE_GAUGE, description: "" });
 
 					// --- MOLECULER TRANSPORTER METRICS ---
 
-					metrics.register({ name: METRIC$a.MOLECULER_TRANSPORTER_PACKETS_SENT_TOTAL, type: METRIC$a.TYPE_COUNTER, unit: METRIC$a.UNIT_PACKET, description: "Number of sent packets", rate: true });
-					metrics.register({ name: METRIC$a.MOLECULER_TRANSPORTER_PACKETS_SENT_BYTES, type: METRIC$a.TYPE_COUNTER, unit: METRIC$a.UNIT_BYTE, description: "Number of sent bytes", rate: true });
-					metrics.register({ name: METRIC$a.MOLECULER_TRANSPORTER_PACKETS_RECEIVED_TOTAL, type: METRIC$a.TYPE_COUNTER, unit: METRIC$a.UNIT_PACKET, description: "Number of received packets", rate: true });
-					metrics.register({ name: METRIC$a.MOLECULER_TRANSPORTER_PACKETS_RECEIVED_BYTES, type: METRIC$a.TYPE_COUNTER, unit: METRIC$a.UNIT_BYTE, description: "Number of received packets", rate: true });
+					metrics.register({
+						name: METRIC$a.MOLECULER_TRANSPORTER_PACKETS_SENT_TOTAL,
+						type: METRIC$a.TYPE_COUNTER,
+						unit: METRIC$a.UNIT_PACKET,
+						description: "Number of sent packets",
+						rate: true
+					});
+					metrics.register({
+						name: METRIC$a.MOLECULER_TRANSPORTER_PACKETS_SENT_BYTES,
+						type: METRIC$a.TYPE_COUNTER,
+						unit: METRIC$a.UNIT_BYTE,
+						description: "Number of sent bytes",
+						rate: true
+					});
+					metrics.register({
+						name: METRIC$a.MOLECULER_TRANSPORTER_PACKETS_RECEIVED_TOTAL,
+						type: METRIC$a.TYPE_COUNTER,
+						unit: METRIC$a.UNIT_PACKET,
+						description: "Number of received packets",
+						rate: true
+					});
+					metrics.register({
+						name: METRIC$a.MOLECULER_TRANSPORTER_PACKETS_RECEIVED_BYTES,
+						type: METRIC$a.TYPE_COUNTER,
+						unit: METRIC$a.UNIT_BYTE,
+						description: "Number of received bytes",
+						rate: true
+					});
 				}
 			},
 
 			localAction(next, action) {
-				if (broker.isMetricsEnabled())
-					return getActionHandler("local", action, next);
+				if (broker.isMetricsEnabled()) return getActionHandler("local", action, next);
 
 				return next;
 			},
 
 			remoteAction(next, action) {
-				if (broker.isMetricsEnabled())
-					return getActionHandler("remote", action, next);
+				if (broker.isMetricsEnabled()) return getActionHandler("remote", action, next);
 
 				return next;
 			},
@@ -11610,24 +19014,55 @@
 				if (broker.isMetricsEnabled()) {
 					return function metricsMiddleware(ctx) {
 						const group = event.group || service;
-						metrics.increment(METRIC$a.MOLECULER_EVENT_RECEIVED_TOTAL, { service, event: ctx.eventName, group, caller: ctx.caller });
-						metrics.increment(METRIC$a.MOLECULER_EVENT_RECEIVED_ACTIVE, { service, event: ctx.eventName, group, caller: ctx.caller });
-						const timeEnd = metrics.timer(METRIC$a.MOLECULER_EVENT_RECEIVED_TIME, { service, event: ctx.eventName, group, caller: ctx.caller });
-						return next.apply(this, arguments).then(res => {
-							timeEnd();
-							metrics.decrement(METRIC$a.MOLECULER_EVENT_RECEIVED_ACTIVE, { service, event: ctx.eventName, group, caller: ctx.caller });
-							return res;
-						}).catch(err => {
-							timeEnd();
-							metrics.decrement(METRIC$a.MOLECULER_EVENT_RECEIVED_ACTIVE, { service, event: ctx.eventName, group, caller: ctx.caller });
-							metrics.increment(METRIC$a.MOLECULER_EVENT_RECEIVED_ERROR_TOTAL, {
-								service, event: ctx.eventName, group, caller: ctx.caller,
-								errorName: err ? err.name : null,
-								errorCode: err ? err.code : null,
-								errorType: err ? err.type : null
-							});
-							throw err;
+						metrics.increment(METRIC$a.MOLECULER_EVENT_RECEIVED_TOTAL, {
+							service,
+							event: ctx.eventName,
+							group,
+							caller: ctx.caller
 						});
+						metrics.increment(METRIC$a.MOLECULER_EVENT_RECEIVED_ACTIVE, {
+							service,
+							event: ctx.eventName,
+							group,
+							caller: ctx.caller
+						});
+						const timeEnd = metrics.timer(METRIC$a.MOLECULER_EVENT_RECEIVED_TIME, {
+							service,
+							event: ctx.eventName,
+							group,
+							caller: ctx.caller
+						});
+						return next
+							.apply(this, arguments)
+							.then(res => {
+								timeEnd();
+								metrics.decrement(METRIC$a.MOLECULER_EVENT_RECEIVED_ACTIVE, {
+									service,
+									event: ctx.eventName,
+									group,
+									caller: ctx.caller
+								});
+								return res;
+							})
+							.catch(err => {
+								timeEnd();
+								metrics.decrement(METRIC$a.MOLECULER_EVENT_RECEIVED_ACTIVE, {
+									service,
+									event: ctx.eventName,
+									group,
+									caller: ctx.caller
+								});
+								metrics.increment(METRIC$a.MOLECULER_EVENT_RECEIVED_ERROR_TOTAL, {
+									service,
+									event: ctx.eventName,
+									group,
+									caller: ctx.caller,
+									errorName: err ? err.name : null,
+									errorCode: err ? err.code : null,
+									errorType: err ? err.type : null
+								});
+								throw err;
+							});
 					}.bind(this);
 				}
 
@@ -11649,7 +19084,9 @@
 			broadcast(next) {
 				if (broker.isMetricsEnabled()) {
 					return function metricsMiddleware(/* event, payload */) {
-						metrics.increment(METRIC$a.MOLECULER_EVENT_BROADCAST_TOTAL, { event: arguments[0] });
+						metrics.increment(METRIC$a.MOLECULER_EVENT_BROADCAST_TOTAL, {
+							event: arguments[0]
+						});
 						return next.apply(this, arguments);
 					};
 				}
@@ -11660,7 +19097,9 @@
 			broadcastLocal(next) {
 				if (broker.isMetricsEnabled()) {
 					return function metricsMiddleware(/* event, payload */) {
-						metrics.increment(METRIC$a.MOLECULER_EVENT_BROADCASTLOCAL_TOTAL, { event: arguments[0] });
+						metrics.increment(METRIC$a.MOLECULER_EVENT_BROADCASTLOCAL_TOTAL, {
+							event: arguments[0]
+						});
 						return next.apply(this, arguments);
 					};
 				}
@@ -11672,13 +19111,23 @@
 				const transit = this;
 				if (broker.isMetricsEnabled()) {
 					return function metricsMiddleware(/* packet */) {
-						metrics.increment(METRIC$a.MOLECULER_TRANSIT_PUBLISH_TOTAL, { type: arguments[0].type });
+						metrics.increment(METRIC$a.MOLECULER_TRANSIT_PUBLISH_TOTAL, {
+							type: arguments[0].type
+						});
 
 						const p = next.apply(this, arguments);
 
-						metrics.increment(METRIC$a.MOLECULER_TRANSIT_REQUESTS_ACTIVE, null, transit.pendingRequests.size);
+						metrics.increment(
+							METRIC$a.MOLECULER_TRANSIT_REQUESTS_ACTIVE,
+							null,
+							transit.pendingRequests.size
+						);
 						//metrics.increment(METRIC.MOLECULER_TRANSIT_STREAMS_RECEIVE_ACTIVE, null, transit.);
-						metrics.increment(METRIC$a.MOLECULER_TRANSIT_STREAMS_SEND_ACTIVE, null, transit.pendingReqStreams.size + this.pendingResStreams.size);
+						metrics.increment(
+							METRIC$a.MOLECULER_TRANSIT_STREAMS_SEND_ACTIVE,
+							null,
+							transit.pendingReqStreams.size + this.pendingResStreams.size
+						);
 
 						return p;
 					};
@@ -11690,7 +19139,9 @@
 			transitMessageHandler(next) {
 				if (broker.isMetricsEnabled()) {
 					return function metricsMiddleware(/* cmd, packet */) {
-						metrics.increment(METRIC$a.MOLECULER_TRANSIT_RECEIVE_TOTAL, { type: arguments[0] });
+						metrics.increment(METRIC$a.MOLECULER_TRANSIT_RECEIVE_TOTAL, {
+							type: arguments[0]
+						});
 						return next.apply(this, arguments);
 					};
 				}
@@ -11703,7 +19154,11 @@
 					return function metricsMiddleware(/* topic, data, meta */) {
 						const data = arguments[1];
 						metrics.increment(METRIC$a.MOLECULER_TRANSPORTER_PACKETS_SENT_TOTAL);
-						metrics.increment(METRIC$a.MOLECULER_TRANSPORTER_PACKETS_SENT_BYTES, null, data && data.length ? data.length : 0);
+						metrics.increment(
+							METRIC$a.MOLECULER_TRANSPORTER_PACKETS_SENT_BYTES,
+							null,
+							data && data.length ? data.length : 0
+						);
 						return next.apply(this, arguments);
 					};
 				}
@@ -11716,49 +19171,53 @@
 					return function metricsMiddleware(/* cmd, data, s */) {
 						const data = arguments[1];
 						metrics.increment(METRIC$a.MOLECULER_TRANSPORTER_PACKETS_RECEIVED_TOTAL);
-						metrics.increment(METRIC$a.MOLECULER_TRANSPORTER_PACKETS_RECEIVED_BYTES, null, data && data.length ? data.length : 0);
+						metrics.increment(
+							METRIC$a.MOLECULER_TRANSPORTER_PACKETS_RECEIVED_BYTES,
+							null,
+							data && data.length ? data.length : 0
+						);
 						return next.apply(this, arguments);
 					};
 				}
 				return next;
 			}
-
 		};
 	};
 
-	const { isFunction: isFunction$7, isPlainObject: isPlainObject$3 } = utils_1;
+	const { isFunction: isFunction$7, isPlainObject: isPlainObject$3, safetyObject } = utils_1;
 
 	var tracing = function TracingMiddleware(broker) {
-
 		const tracer = broker.tracer;
 
 		function tracingLocalActionMiddleware(handler, action) {
 			let opts = action.tracing;
-			if (opts === true || opts === false)
-				opts = { enabled: !!opts };
+			if (opts === true || opts === false) opts = { enabled: !!opts };
 			opts = ___default.defaultsDeep({}, opts, { enabled: true });
 
 			if (opts.enabled) {
 				return function tracingLocalActionMiddleware(ctx) {
-
 					ctx.requestID = ctx.requestID || tracer.getCurrentTraceID();
 					ctx.parentID = ctx.parentID || tracer.getActiveSpanID();
 
-					const tags = {
+					let tags = {
 						callingLevel: ctx.level,
-						action: ctx.action ? {
-							name: ctx.action.name,
-							rawName: ctx.action.rawName
-						} : null,
+						action: ctx.action
+							? {
+									name: ctx.action.name,
+									rawName: ctx.action.rawName
+								}
+							: null,
 						remoteCall: ctx.nodeID !== ctx.broker.nodeID,
 						callerNodeID: ctx.nodeID,
 						nodeID: ctx.broker.nodeID,
 						options: {
 							timeout: ctx.options.timeout,
 							retries: ctx.options.retries
-						}
+						},
+						requestID: ctx.requestID
 					};
 					const globalActionTags = tracer.opts.tags.action;
+					/** @type {Record<string, any>} */
 					let actionTags;
 					// local action tags take precedence
 					if (isFunction$7(opts.tags)) {
@@ -11772,12 +19231,13 @@
 
 					if (isFunction$7(actionTags)) {
 						const res = actionTags.call(ctx.service, ctx);
-						if (res)
-							Object.assign(tags, res);
-
+						if (res) Object.assign(tags, res);
 					} else if (isPlainObject$3(actionTags)) {
 						if (actionTags.params === true)
-							tags.params = ctx.params != null && isPlainObject$3(ctx.params) ? Object.assign({}, ctx.params) : ctx.params;
+							tags.params =
+								ctx.params != null && isPlainObject$3(ctx.params)
+									? Object.assign({}, ctx.params)
+									: ctx.params;
 						else if (Array.isArray(actionTags.params))
 							tags.params = ___default.pick(ctx.params, actionTags.params);
 
@@ -11787,9 +19247,13 @@
 							tags.meta = ___default.pick(ctx.meta, actionTags.meta);
 					}
 
+					if (opts.safetyTags) {
+						tags = safetyObject(tags);
+					}
+
 					let spanName = `action '${ctx.action.name}'`;
 					if (opts.spanName) {
-						switch(typeof opts.spanName) {
+						switch (typeof opts.spanName) {
 							case "string":
 								spanName = opts.spanName;
 								break;
@@ -11812,36 +19276,38 @@
 					ctx.tracing = span.sampled;
 
 					// Call the handler
-					return handler(ctx).then(res => {
-						const tags = {
-							fromCache: ctx.cachedResult
-						};
+					return handler(ctx)
+						.then(res => {
+							const tags = {
+								fromCache: ctx.cachedResult
+							};
 
-						if (isFunction$7(actionTags)) {
-							const r = actionTags.call(ctx.service, ctx, res);
-							if (r)
-								Object.assign(tags, r);
+							if (isFunction$7(actionTags)) {
+								const r = actionTags.call(ctx.service, ctx, res);
+								if (r) Object.assign(tags, r);
+							} else if (isPlainObject$3(actionTags)) {
+								if (actionTags.response === true)
+									tags.response =
+										res != null && isPlainObject$3(res)
+											? Object.assign({}, res)
+											: res;
+								else if (Array.isArray(actionTags.response))
+									tags.response = ___default.pick(res, actionTags.response);
+							}
 
-						} else if (isPlainObject$3(actionTags)) {
-							if (actionTags.response === true)
-								tags.response = res != null && isPlainObject$3(res) ? Object.assign({}, res) : res;
-							else if (Array.isArray(actionTags.response))
-								tags.response = ___default.pick(res, actionTags.response);
-						}
+							span.addTags(tags);
+							ctx.finishSpan(span);
 
-						span.addTags(tags);
-						ctx.finishSpan(span);
+							//ctx.duration = span.duration;
 
-						//ctx.duration = span.duration;
+							return res;
+						})
+						.catch(err => {
+							span.setError(err);
+							ctx.finishSpan(span);
 
-						return res;
-					}).catch(err => {
-						span.setError(err);
-						ctx.finishSpan(span);
-
-						throw err;
-					});
-
+							throw err;
+						});
 				}.bind(this);
 			}
 
@@ -11852,17 +19318,15 @@
 			const service = event.service;
 
 			let opts = event.tracing;
-			if (opts === true || opts === false)
-				opts = { enabled: !!opts };
-			opts = ___default.defaultsDeep({}, opts, { enabled: true  });
+			if (opts === true || opts === false) opts = { enabled: !!opts };
+			opts = ___default.defaultsDeep({}, opts, { enabled: true });
 
 			if (opts.enabled) {
 				return function tracingLocalEventMiddleware(ctx) {
-
 					ctx.requestID = ctx.requestID || tracer.getCurrentTraceID();
 					ctx.parentID = ctx.parentID || tracer.getActiveSpanID();
 
-					const tags = {
+					let tags = {
 						event: {
 							name: event.name,
 							group: event.group
@@ -11872,10 +19336,12 @@
 						callerNodeID: ctx.nodeID,
 						callingLevel: ctx.level,
 						remoteCall: ctx.nodeID !== broker.nodeID,
-						nodeID: broker.nodeID
+						nodeID: broker.nodeID,
+						requestID: ctx.requestID
 					};
 
 					const globalEventTags = tracer.opts.tags.event;
+					/** @type {Record<string, any>} */
 					let eventTags;
 					// local event tags take precedence
 					if (isFunction$7(opts.tags)) {
@@ -11889,12 +19355,13 @@
 
 					if (isFunction$7(eventTags)) {
 						const res = eventTags.call(service, ctx);
-						if (res)
-							Object.assign(tags, res);
-
+						if (res) Object.assign(tags, res);
 					} else if (isPlainObject$3(eventTags)) {
 						if (eventTags.params === true)
-							tags.params = ctx.params != null && isPlainObject$3(ctx.params) ? Object.assign({}, ctx.params) : ctx.params;
+							tags.params =
+								ctx.params != null && isPlainObject$3(ctx.params)
+									? Object.assign({}, ctx.params)
+									: ctx.params;
 						else if (Array.isArray(eventTags.params))
 							tags.params = ___default.pick(ctx.params, eventTags.params);
 
@@ -11904,9 +19371,13 @@
 							tags.meta = ___default.pick(ctx.meta, eventTags.meta);
 					}
 
+					if (opts.safetyTags) {
+						tags = safetyObject(tags);
+					}
+
 					let spanName = `event '${ctx.eventName}' in '${service.fullName}'`;
 					if (opts.spanName) {
-						switch(typeof opts.spanName) {
+						switch (typeof opts.spanName) {
 							case "string":
 								spanName = opts.spanName;
 								break;
@@ -11929,14 +19400,16 @@
 					ctx.tracing = span.sampled;
 
 					// Call the handler
-					return handler.apply(service, arguments).then(() => {
-						ctx.finishSpan(span);
-					}).catch(err => {
-						span.setError(err);
-						ctx.finishSpan(span);
-						throw err;
-					});
-
+					return handler
+						.apply(service, arguments)
+						.then(() => {
+							ctx.finishSpan(span);
+						})
+						.catch(err => {
+							span.setError(err);
+							ctx.finishSpan(span);
+							throw err;
+						});
 				}.bind(this);
 			}
 
@@ -11961,21 +19434,21 @@
 		return {
 			name: "Tracing",
 
-			localAction: broker.isTracingEnabled() && tracer.opts.actions ? tracingLocalActionMiddleware : null,
-			localEvent: broker.isTracingEnabled() && tracer.opts.events ? tracingLocalEventMiddleware : null,
+			localAction:
+				broker.isTracingEnabled() && tracer.opts.actions ? tracingLocalActionMiddleware : null,
+			localEvent:
+				broker.isTracingEnabled() && tracer.opts.events ? tracingLocalEventMiddleware : null
 			//remoteAction: wrapRemoteTracingMiddleware
 		};
 	};
 
 	var debounce = function debounceMiddleware(broker) {
-
 		function wrapEventDebounceMiddleware(handler, event) {
 			if (event.debounce > 0) {
 				let timer;
 
 				return function debounceMiddleware(ctx) {
-					if (timer)
-						clearTimeout(timer);
+					if (timer) clearTimeout(timer);
 
 					timer = timersBrowserify.setTimeout(() => {
 						timer = null;
@@ -12002,7 +19475,6 @@
 	 */
 
 	var throttle = function throttleMiddleware(broker) {
-
 		function wrapEventThrottleMiddleware(handler, event) {
 			if (event.throttle > 0) {
 				let lastInvoke = 0;
@@ -12026,230 +19498,10 @@
 		};
 	};
 
-	const { makeDirs } = utils_1;
-
-	var transitLogger = function TransitLoggerMiddleware(opts) {
-		opts = ___default.defaultsDeep(opts, {
-			logger: null,
-			logLevel: "info",
-			logPacketData: false,
-
-			folder: null,
-			extension: ".json",
-
-			colors: {
-				receive: "grey",
-				send: "grey"
-			},
-
-			packetFilter: ["HEARTBEAT"]
-		});
-
-		let logger;
-		let nodeID;
-
-		let targetFolder;
-
-		function saveToFile(filename, payload) {
-			const data = JSON.stringify(payload, payload instanceof Error ? Object.getOwnPropertyNames(payload) : null, 4);
-			fs__default.writeFile(path__default.join(targetFolder, filename), data, () => { /* Silent error */ });
-		}
-
-		const coloringSend = opts.colors && opts.colors.send ? opts.colors.send.split(".").reduce((a,b) => a[b] || a()[b], kleur_1) : s => s;
-		const coloringReceive = opts.colors && opts.colors.receive ? opts.colors.receive.split(".").reduce((a,b) => a[b] || a()[b], kleur_1) : s => s;
-
-		let logFn;
-
-		return {
-			name: "TransitLogger",
-			created(broker) {
-				logger = opts.logger || broker.getLogger("debug");
-				nodeID = broker.nodeID;
-
-				if (opts.folder) {
-					targetFolder = path__default.join(opts.folder, nodeID);
-					makeDirs(targetFolder);
-				}
-
-				logFn = opts.logLevel ? logger[opts.logLevel] : null;
-			},
-
-			transitPublish(next) {
-				return packet => {
-					// Packet filtering
-					if (opts.packetFilter.includes(packet.type)) {
-						return next(packet);
-					}
-
-					const payload = packet.payload;
-
-					// Logging to logger
-					if (logFn) {
-						logFn(coloringSend(`=> Send ${packet.type} packet to '${packet.target || "<all nodes>"}'`));
-						if (opts.logPacketData) {
-							logFn("=>", payload);
-						}
-					}
-
-					if (targetFolder) {
-						saveToFile(`${Date.now()}-send-${packet.type}-to-${packet.target || "all"}${opts.extension}`, payload);
-					}
-
-					return next(packet);
-				};
-			},
-
-			transitMessageHandler(next) {
-				return (cmd, packet) => {
-					// Packet filtering
-					if (opts.packetFilter.includes(cmd)) {
-						return next(cmd, packet);
-					}
-
-					const payload = packet.payload;
-
-					if (logFn) {
-						logFn(coloringReceive(`<= Receive ${cmd} packet from '${payload.sender}'`));
-						if (opts.logPacketData) {
-							logFn("<=", packet.payload);
-						}
-					}
-
-					if (targetFolder) {
-						saveToFile(`${Date.now()}-receive-${cmd}-from-${payload.sender}${opts.extension}`, payload);
-					}
-
-					return next(cmd, packet);
-				};
-			}
-		};
-	};
-
-	const { makeDirs: makeDirs$1, match: match$3, isObject: isObject$b } = utils_1;
-
-	var actionLogger = function ActionLoggerMiddleware(opts) {
-		opts = ___default.defaultsDeep(opts, {
-			logger: null,
-			logLevel: "info",
-			logParams: false,
-			logResponse: false,
-			logMeta: false,
-
-			folder: null,
-			extension: ".json",
-
-			colors: {
-				request: "yellow",
-				response: "cyan",
-				error: "red"
-			},
-			whitelist: ["**"]
-		});
-
-		let logger;
-		let nodeID;
-
-		let targetFolder;
-
-		function saveToFile(filename, payload) {
-			const data = JSON.stringify(payload, payload instanceof Error ? Object.getOwnPropertyNames(payload) : null, 4);
-			fs__default.writeFile(path__default.join(targetFolder, filename), data, () => { /* Silent error */ });
-		}
-
-		function isWhiteListed(actionName) {
-			return !!opts.whitelist.find(pattern => match$3(actionName, pattern));
-		}
-
-		const coloringRequest = opts.colors && opts.colors.request ? opts.colors.request.split(".").reduce((a,b) => a[b] || a()[b], kleur_1) : s => s;
-		const coloringResponse = opts.colors && opts.colors.response ? opts.colors.response.split(".").reduce((a,b) => a[b] || a()[b], kleur_1) : s => s;
-		const coloringError = opts.colors && opts.colors.error ? opts.colors.error.split(".").reduce((a,b) => a[b] || a()[b], kleur_1) : s => s;
-
-		let logFn;
-
-		return {
-			name: "ActionLogger",
-			created(broker) {
-				logger = opts.logger || broker.getLogger("debug");
-				nodeID = broker.nodeID;
-
-				if (opts.folder) {
-					targetFolder = path__default.join(opts.folder, nodeID);
-					makeDirs$1(targetFolder);
-				}
-
-				logFn = opts.logLevel ? logger[opts.logLevel] : null;
-			},
-
-			call(next) {
-				return (actionName, params, callingOpts) => {
-					// Whitelist filtering
-					if (!isWhiteListed(isObject$b(actionName) ? actionName.action.name : actionName)) {
-						return next(actionName, params, callingOpts);
-					}
-
-					// Logging to logger
-					if (logFn) {
-						const msg = coloringRequest(`Calling '${actionName}'` + (opts.logParams ? " with params:" : "."));
-						opts.logParams ? logFn(msg, params) : logFn(msg);
-						if (opts.logMeta && callingOpts && callingOpts.meta) {
-							logFn("Meta:", callingOpts.meta);
-						}
-					}
-
-					// Logging to file
-					if (targetFolder) {
-						if (opts.logParams) {
-							saveToFile(`${Date.now()}-call-${actionName}-request${opts.extension}`, params);
-						}
-
-						if (opts.logMeta && callingOpts && callingOpts.meta) {
-							saveToFile(`${Date.now()}-call-${actionName}-meta${opts.extension}`, callingOpts.meta);
-						}
-					}
-
-					// Call the original method
-					const p = next(actionName, params, callingOpts);
-
-					const p2 = p
-						.then(response => {
-
-							// Log response to logger
-							if (logFn) {
-								const msg = coloringResponse(`Response for '${actionName}' is received` + (opts.logResponse ? ":" : "."));
-								opts.logResponse ? logFn(msg, response) : logFn(msg);
-							}
-
-							// Log response to file
-							if (targetFolder && opts.logResponse)
-								saveToFile(`${Date.now()}-call-${actionName}-response${opts.extension}`, response);
-
-							return response;
-						})
-						.catch(err => {
-
-							// Log error to logger
-							if (logFn) {
-								logFn(coloringError(`Error for '${actionName}' is received:`), err);
-							}
-
-							// Logger error to file
-							if (targetFolder && opts.logResponse)
-								saveToFile(`${Date.now()}-call-${actionName}-error${opts.extension}`, err);
-
-							throw err;
-						});
-
-					// Context issue workaround: https://github.com/moleculerjs/moleculer/issues/413
-					p2.ctx = p.ctx;
-
-					return p2;
-				};
-			}
-		};
-	};
-
 	const Middlewares = {
 		ActionHook: actionHook,
+		Cacher: cacher,
+		Validator: validator$1,
 		Bulkhead: bulkhead,
 		ContextTracker: contextTracker,
 		CircuitBreaker: circuitBreaker,
@@ -12271,24 +19523,41 @@
 		},
 
 		Debugging: {
-			TransitLogger: transitLogger,
-			ActionLogger: actionLogger,
+			TransitLogger: require$$19,
+			ActionLogger: require$$19
 		}
 	};
 
-	var middlewares = Middlewares;
+	function register$9(name, value) {
+		Middlewares[name] = value;
+	}
+
+	var middlewares = Object.assign(Middlewares, { register: register$9 });
 
 	const { BrokerOptionsError: BrokerOptionsError$9 } = errors;
-	const { isObject: isObject$c, isFunction: isFunction$8, isString: isString$e }	= utils_1;
+	const { isObject: isObject$b, isFunction: isFunction$8, isString: isString$e } = utils_1;
 
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("./middleware")} MiddlewareClass
+	 * @typedef {import("./middleware").MiddlewareCallHandlerOptions} MiddlewareCallHandlerOptions
+	 * @typedef {import("./service").ActionHandler} ActionHandler
+	 */
+
+	/**
+	 * class MiddlewareHandler
+	 * @implements {MiddlewareClass}
+	 */
 	class MiddlewareHandler {
-
 		constructor(broker) {
 			this.broker = broker;
 
 			this.list = [];
 
 			this.registeredHooks = {};
+
+			this.middlewareInterceptors = {};
 		}
 
 		add(mw) {
@@ -12297,22 +19566,31 @@
 			if (isString$e(mw)) {
 				const found = ___default.get(middlewares, mw);
 				if (!found)
-					throw new BrokerOptionsError$9(`Invalid built-in middleware type '${mw}'.`, { type: mw });
+					throw new BrokerOptionsError$9(`Invalid built-in middleware type '${mw}'.`, {
+						type: mw
+					});
 				mw = found;
 			}
 
-			if (isFunction$8(mw))
-				mw = mw.call(this.broker, this.broker);
+			if (isFunction$8(mw)) mw = mw.call(this.broker, this.broker);
+			if (!mw) return;
 
-			if (!isObject$c(mw))
-				throw new BrokerOptionsError$9(`Invalid middleware type '${typeof mw}'. Accepted only Object of Function.`, { type: typeof mw });
+			if (!isObject$b(mw))
+				throw new BrokerOptionsError$9(
+					`Invalid middleware type '${typeof mw}'. Accept only Object or Function.`,
+					{ type: typeof mw, value: mw }
+				);
 
 			Object.keys(mw).forEach(key => {
 				if (isFunction$8(mw[key])) {
-					if (Array.isArray(this.registeredHooks[key]))
-						this.registeredHooks[key].push(mw[key]);
-					else
-						this.registeredHooks[key] = [mw[key]];
+					const handle = isFunction$8(this.middlewareInterceptors[key])
+						? this.middlewareInterceptors[key](mw[key])
+						: mw[key];
+					if (Array.isArray(this.registeredHooks[key])) {
+						this.registeredHooks[key].push(handle);
+					} else {
+						this.registeredHooks[key] = [handle];
+					}
 				}
 			});
 
@@ -12343,14 +19621,19 @@
 		 *
 		 * @param {String} method
 		 * @param {Array<any>} args
-		 * @param {Object} opts
+		 * @param {MiddlewareCallHandlerOptions=} opts
 		 * @returns {Promise}
 		 * @memberof MiddlewareHandler
 		 */
 		callHandlers(method, args, opts = {}) {
 			if (this.registeredHooks[method] && this.registeredHooks[method].length) {
-				const list = opts.reverse ? Array.from(this.registeredHooks[method]).reverse() : this.registeredHooks[method];
-				return list.reduce((p, fn) => p.then(() => fn.apply(this.broker, args)), this.broker.Promise.resolve());
+				const list = opts.reverse
+					? Array.from(this.registeredHooks[method]).reverse()
+					: this.registeredHooks[method];
+				return list.reduce(
+					(p, fn) => p.then(() => fn.apply(this.broker, args)),
+					this.broker.Promise.resolve()
+				);
 			}
 
 			return this.broker.Promise.resolve();
@@ -12361,13 +19644,15 @@
 		 *
 		 * @param {String} method
 		 * @param {Array<any>} args
-		 * @param {Object} opts
-		 * @returns {Array<any}
+		 * @param {MiddlewareCallHandlerOptions=} opts
+		 * @returns {Array<any>}
 		 * @memberof MiddlewareHandler
 		 */
 		callSyncHandlers(method, args, opts = {}) {
 			if (this.registeredHooks[method] && this.registeredHooks[method].length) {
-				const list = opts.reverse ? Array.from(this.registeredHooks[method]).reverse() : this.registeredHooks[method];
+				const list = opts.reverse
+					? Array.from(this.registeredHooks[method]).reverse()
+					: this.registeredHooks[method];
 				return list.map(fn => fn.apply(this.broker, args));
 			}
 			return;
@@ -12388,40 +19673,56 @@
 		 *
 		 * @param {string} method
 		 * @param {Function} handler
-		 * @param {any} bindTo
-		 * @param {Object} opts
+		 * @param {any=} bindTo
+		 * @param {MiddlewareCallHandlerOptions=} opts
 		 * @returns {Function}
 		 * @memberof MiddlewareHandler
 		 */
 		wrapMethod(method, handler, bindTo = this.broker, opts = {}) {
 			if (this.registeredHooks[method] && this.registeredHooks[method].length) {
-				const list = opts.reverse ? Array.from(this.registeredHooks[method]).reverse() : this.registeredHooks[method];
+				const list = opts.reverse
+					? Array.from(this.registeredHooks[method]).reverse()
+					: this.registeredHooks[method];
 				handler = list.reduce((next, fn) => fn.call(bindTo, next), handler.bind(bindTo));
 			}
 
 			return handler;
 		}
-
 	}
 
 	var middleware = MiddlewareHandler;
 
-	const { isObject: isObject$d } = utils_1;
+	/* eslint-disable no-unused-vars */
+
+
+	const { isObject: isObject$c, safetyObject: safetyObject$1 } = utils_1;
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("./base")} BaseTraceExporterClass
+	 * @typedef {import("./base").BaseTraceExporterOptions} BaseTraceExporterOptions
+	 * @typedef {import("../tracer")} Tracer
+	 * @typedef {import("../span")} Span
+	 */
 
 	/**
 	 * Abstract Trace Exporter
 	 *
 	 * @class BaseTraceExporter
+	 * @implements {BaseTraceExporterClass}
 	 */
 	class BaseTraceExporter {
-
 		/**
 		 * Creates an instance of BaseTraceExporter.
-		 * @param {Object?} opts
+		 * @param {BaseTraceExporterOptions?} opts
 		 * @memberof BaseTraceExporter
 		 */
 		constructor(opts) {
-			this.opts = opts || {};
+			/** @type {BaseTraceExporterOptions} */
+			this.opts = ___default.defaultsDeep(opts, {
+				safetyTags: false
+			});
 			this.Promise = Promise; // default promise before logger is initialized
 		}
 
@@ -12451,7 +19752,7 @@
 		 * @param {Span} span
 		 * @memberof BaseTraceExporter
 		 */
-		spanStarted(/*span*/) {
+		spanStarted(span) {
 			// Not implemented
 		}
 
@@ -12461,7 +19762,7 @@
 		 * @param {Span} span
 		 * @memberof BaseTraceExporter
 		 */
-		spanFinished(/*span*/) {
+		spanFinished(span) {
 			// Not implemented
 		}
 
@@ -12484,21 +19785,24 @@
 		 *  }
 		 *  ```
 		 *
-		 * @param {Object} obj
+		 * @param {Record<string, any>} obj
 		 * @param {boolean} [convertToString=false]
 		 * @param {string} [path=""]
-		 * @returns {Object}
+		 * @returns {Record<string, any>}
 		 * @memberof BaseTraceExporter
 		 */
 		flattenTags(obj, convertToString = false, path = "") {
 			if (!obj) return null;
 
+			if (this.opts.safetyTags) {
+				obj = safetyObject$1(obj);
+			}
+
 			return Object.keys(obj).reduce((res, k) => {
 				const o = obj[k];
 				const pp = (path ? path + "." : "") + k;
 
-				if (isObject$d(o))
-					Object.assign(res, this.flattenTags(o, convertToString, pp));
+				if (isObject$c(o)) Object.assign(res, this.flattenTags(o, convertToString, pp));
 				else if (o !== undefined) {
 					res[pp] = convertToString ? String(o) : o;
 				}
@@ -12510,12 +19814,12 @@
 		/**
 		 * Convert Error to POJO.
 		 *
-		 * @param {Error} err
-		 * @returns {Object}
+		 * @param {Error|boolean} err
+		 * @returns {Record<string, any>}
 		 * @memberof BaseTraceExporter
 		 */
 		errorToObject(err) {
-			if (!err) return null;
+			if (!err || !isObject$c(err)) return null;
 
 			return ___default.pick(err, this.tracer.opts.errorFields);
 		}
@@ -12523,27 +19827,37 @@
 
 	var base$9 = BaseTraceExporter;
 
-	const r 						= ___default.repeat;
+	const r = ___default.repeat;
 
-	const { humanize, isFunction: isFunction$9 }  = utils_1;
+	const { humanize, isFunction: isFunction$9 } = utils_1;
 
 
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("./console")} ConsoleTraceExporterClass
+	 * @typedef {import("./console").ConsoleTraceExporterOptions} ConsoleTraceExporterOptions
+	 * @typedef {import("../tracer")} Tracer
+	 * @typedef {import("../span")} Span
+	 */
 
 	/**
 	 * Console Trace Exporter only for debugging
 	 *
 	 * @class ConsoleTraceExporter
+	 * @implements {ConsoleTraceExporterClass}
 	 */
 	class ConsoleTraceExporter extends base$9 {
-
 		/**
 		 * Creates an instance of ConsoleTraceExporter.
-		 * @param {Object?} opts
+		 * @param {ConsoleTraceExporterOptions?} opts
 		 * @memberof ConsoleTraceExporter
 		 */
 		constructor(opts) {
 			super(opts);
 
+			/** @type {ConsoleTraceExporterOptions} */
 			this.opts = ___default.defaultsDeep(this.opts, {
 				logger: null,
 				colors: true,
@@ -12551,8 +19865,7 @@
 				gaugeWidth: 40
 			});
 
-			if (!this.opts.colors)
-				kleur_1.enabled = false;
+			if (!this.opts.colors) kleur_1.enabled = false;
 
 			this.spans = {};
 		}
@@ -12590,8 +19903,7 @@
 
 			if (span.parentID) {
 				const parentItem = this.spans[span.parentID];
-				if (parentItem)
-					parentItem.children.push(span.id);
+				if (parentItem) parentItem.children.push(span.id);
 			}
 		}
 
@@ -12647,8 +19959,7 @@
 			const len = str.length;
 
 			let left;
-			if (len <= space)
-				left = str + r(" ", space - len);
+			if (len <= space) left = str + r(" ", space - len);
 			else {
 				left = str.slice(0, Math.max(space - 3, 0));
 				left += r(".", Math.min(3, space));
@@ -12659,8 +19970,8 @@
 
 		drawGauge(gstart, gstop) {
 			const gw = this.opts.gaugeWidth;
-			const p1 = Math.floor(gw * gstart / 100);
-			const p2 = Math.max(Math.floor(gw * gstop / 100) - p1, 1);
+			const p1 = Math.floor((gw * gstart) / 100);
+			const p2 = Math.max(Math.floor((gw * gstop) / 100) - p1, 1);
 			const p3 = Math.max(gw - (p1 + p2), 0);
 
 			return [
@@ -12675,26 +19986,19 @@
 		getCaption(span) {
 			let caption = span.name;
 
-			if (span.tags.fromCache)
-				caption += " *";
-			if (span.tags.remoteCall)
-				caption += " »";
-			if (span.error)
-				caption += " ×";
+			if (span.tags.fromCache) caption += " *";
+			if (span.tags.remoteCall) caption += " »";
+			if (span.error) caption += " ×";
 
 			return caption;
 		}
 
 		getColor(span) {
 			let c = kleur_1.bold;
-			if (span.tags.fromCache)
-				c = c().yellow;
-			if (span.tags.remoteCall)
-				c = c().cyan;
-			if (span.duration == null)
-				c = c().grey;
-			if (span.error)
-				c = c().red;
+			if (span.tags.fromCache) c = c().yellow;
+			if (span.tags.remoteCall) c = c().cyan;
+			if (span.duration == null) c = c().grey;
+			if (span.error) c = c().red;
 
 			return c;
 		}
@@ -12706,14 +20010,13 @@
 				item.level = level;
 				item.parents = parents || [];
 				total++;
-				if (level > depth)
-					depth = level;
+				if (level > depth) depth = level;
 
 				if (item.children.length > 0) {
 					item.children.forEach((spanID, idx) => {
 						const span = this.spans[spanID];
-						span.first = idx == 0;
-						span.last = idx == item.children.length - 1;
+						span.first = idx === 0;
+						span.last = idx === item.children.length - 1;
 						check(span, item.level + 1, [].concat(item.parents, [item]));
 					});
 				}
@@ -12726,12 +20029,13 @@
 
 		getSpanIndent(spanItem) {
 			if (spanItem.level > 1) {
-				let s = spanItem.parents.map((item, idx) => {
-					if (idx > 0)
-						return item.last ? "  " : "│ ";
+				let s = spanItem.parents
+					.map((item, idx) => {
+						if (idx > 0) return item.last ? "  " : "│ ";
 
-					return "";
-				}).join("");
+						return "";
+					})
+					.join("");
 
 				s += spanItem.last ? "└─" : "├─";
 
@@ -12744,8 +20048,9 @@
 		/**
 		 * Print a span row
 		 *
-		 * @param {Object} span
-		 * @param {Object} main
+		 * @param {Object} spanItem
+		 * @param {Object} mainItem
+		 * @param {number} level
 		 */
 		printSpanTime(spanItem, mainItem, level) {
 			const span = spanItem.span;
@@ -12757,30 +20062,32 @@
 			const time = span.duration == null ? "?" : humanize(span.duration);
 			const indent = this.getSpanIndent(spanItem);
 			const caption = this.getCaption(span);
-			const info = kleur_1.grey(indent) + this.getAlignedTexts(caption, w - gw - 3 - time.length - 1 - indent.length) + " " + time;
+			const info =
+				kleur_1.grey(indent) +
+				this.getAlignedTexts(caption, w - gw - 3 - time.length - 1 - indent.length) +
+				" " +
+				time;
 
 			const startTime = span.startTime || mainSpan.startTime;
 			const finishTime = span.finishTime || mainSpan.finishTime;
 
-			let gstart = (startTime - mainSpan.startTime) / (mainSpan.finishTime - mainSpan.startTime) * 100;
-			let gstop = (finishTime - mainSpan.startTime) / (mainSpan.finishTime - mainSpan.startTime) * 100;
+			let gstart =
+				((startTime - mainSpan.startTime) / (mainSpan.finishTime - mainSpan.startTime)) * 100;
+			let gstop =
+				((finishTime - mainSpan.startTime) / (mainSpan.finishTime - mainSpan.startTime)) * 100;
 
 			if (Number.isNaN(gstart) && Number.isNaN(gstop)) {
 				gstart = 0;
 				gstop = 100;
 			}
-			if (gstop > 100)
-				gstop = 100;
+			if (gstop > 100) gstop = 100;
 
 			const c = this.getColor(span);
 			this.drawLine(c(info + " " + this.drawGauge(gstart, gstop)));
 
 			if (spanItem.children.length > 0)
-				spanItem.children.forEach((spanID, idx) =>
-					this.printSpanTime(this.spans[spanID], mainItem, level + 1, spanItem, {
-						first: idx == 0,
-						last: idx == spanItem.children.length - 1
-					})
+				spanItem.children.forEach(spanID =>
+					this.printSpanTime(this.spans[spanID], mainItem, level + 1)
 				);
 		}
 
@@ -12791,7 +20098,7 @@
 		 */
 		printRequest(id) {
 			const main = this.spans[id];
-			if (!main) return ; // Async span
+			if (!main) return; // Async span
 
 			const margin = 2 * 2;
 			const w = this.opts.width - margin;
@@ -12800,13 +20107,30 @@
 
 			const { total, depth } = this.getTraceInfo(main);
 
-			const truncatedID = this.getAlignedTexts(id, w - "ID: ".length - "Depth: ".length - (""+depth).length - "Total: ".length - (""+total).length - 2);
-			const line = kleur_1.grey("ID: ") + kleur_1.bold(truncatedID) + " " + kleur_1.grey("Depth: ") + kleur_1.bold(depth) + " " + kleur_1.grey("Total: ") + kleur_1.bold(total);
+			const truncatedID = this.getAlignedTexts(
+				id,
+				w -
+					"ID: ".length -
+					"Depth: ".length -
+					("" + depth).length -
+					"Total: ".length -
+					("" + total).length -
+					2
+			);
+			const line =
+				kleur_1.grey("ID: ") +
+				kleur_1.bold(truncatedID) +
+				" " +
+				kleur_1.grey("Depth: ") +
+				kleur_1.bold(depth) +
+				" " +
+				kleur_1.grey("Total: ") +
+				kleur_1.bold(total);
 			this.drawLine(line);
 
 			this.drawHorizonalLine();
 
-			this.printSpanTime(main, main, 1, null, {});
+			this.printSpanTime(main, main, 1);
 
 			this.drawTableBottom();
 		}
@@ -12822,25 +20146,34 @@
 
 	var console$2 = ConsoleTraceExporter;
 
-	const { isFunction: isFunction$a } 		= utils_1;
+	const { isFunction: isFunction$a } = utils_1;
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("./event")} EventTraceExporterClass
+	 * @typedef {import("./event").EventTraceExporterOptions} EventTraceExporterOptions
+	 * @typedef {import("../tracer")} Tracer
+	 * @typedef {import("../span")} Span
+	 */
 
 	/**
 	 * Event Trace Exporter.
 	 *
 	 * @class EventTraceExporter
+	 * @implements {EventTraceExporterClass}
 	 */
 	class EventTraceExporter extends base$9 {
-
 		/**
 		 * Creates an instance of EventTraceExporter.
-		 * @param {Object?} opts
+		 * @param {EventTraceExporterOptions?} opts
 		 * @memberof EventTraceExporter
 		 */
 		constructor(opts) {
 			super(opts);
 
+			/** @type {EventTraceExporterOptions} */
 			this.opts = ___default.defaultsDeep(this.opts, {
-				/** @type {String} Base URL for Zipkin server. */
 				eventName: "$tracing.spans",
 
 				sendStartSpan: false,
@@ -12850,12 +20183,10 @@
 
 				groups: null,
 
-				/** @type {Number} Batch send time interval. */
 				interval: 5,
 
 				spanConverter: null,
 
-				/** @type {Object?} Default span tags */
 				defaultTags: null
 			});
 
@@ -12876,7 +20207,9 @@
 				this.timer.unref();
 			}
 
-			this.defaultTags = isFunction$a(this.opts.defaultTags) ? this.opts.defaultTags.call(this, tracer) : this.opts.defaultTags;
+			this.defaultTags = isFunction$a(this.opts.defaultTags)
+				? this.opts.defaultTags.call(this, tracer)
+				: this.opts.defaultTags;
 		}
 
 		/**
@@ -12898,9 +20231,10 @@
 		 */
 		spanStarted(span) {
 			if (this.opts.sendStartSpan) {
+				if (span.tags.eventName == this.opts.eventName) return;
+
 				this.queue.push(span);
-				if (!this.timer)
-					this.flush();
+				if (!this.timer) this.flush();
 			}
 		}
 
@@ -12912,9 +20246,10 @@
 		 */
 		spanFinished(span) {
 			if (this.opts.sendFinishSpan) {
+				if (span.tags.eventName == this.opts.eventName) return;
+
 				this.queue.push(span);
-				if (!this.timer)
-					this.flush();
+				if (!this.timer) this.flush();
 			}
 		}
 
@@ -12924,7 +20259,7 @@
 		 * @memberof EventTraceExporter
 		 */
 		flush() {
-			if (this.queue.length == 0) return;
+			if (this.queue.length === 0) return;
 
 			const data = this.generateTracingData();
 			this.queue.length = 0;
@@ -12941,7 +20276,7 @@
 		/**
 		 * Generate tracing data with custom converter
 		 *
-		 * @returns {Array<Object>}
+		 * @returns {Record<string, any>[]}
 		 * @memberof EventTraceExporter
 		 */
 		generateTracingData() {
@@ -12950,157 +20285,16 @@
 
 			return Array.from(this.queue).map(span => {
 				const newSpan = Object.assign({}, span);
-				if (newSpan.error)
-					newSpan.error = this.errorToObject(span.error);
+				if (newSpan.error) newSpan.error = this.errorToObject(span.error);
 
 				return newSpan;
 			});
 		}
-
 	}
 
 	var event$1 = EventTraceExporter;
 
-	const { isObject: isObject$e, isFunction: isFunction$b }	= utils_1;
-
-	/**
-	 * Event Trace Exporter. It sends same trace events as in Moleculer <= v0.13.
-	 *
-	 * @class EventLegacyTraceExporter
-	 */
-	class EventLegacyTraceExporter extends base$9 {
-
-		/**
-		 * Creates an instance of EventLegacyTraceExporter.
-		 * @param {Object?} opts
-		 * @memberof EventLegacyTraceExporter
-		 */
-		constructor(opts) {
-			super(opts);
-
-			this.opts = ___default.defaultsDeep(this.opts, {
-			});
-		}
-
-		/**
-		 * Initialize Trace Exporter.
-		 *
-		 * @param {Tracer} tracer
-		 * @memberof EventLegacyTraceExporter
-		 */
-		init(tracer) {
-			super.init(tracer);
-			this.broker = tracer.broker;
-		}
-
-		/**
-		 * Span is started.
-		 *
-		 * @param {Span} span
-		 * @memberof BaseTraceExporter
-		 */
-		spanStarted(span) {
-			const payload = this.generateMetricPayload(span);
-			this.broker.emit("metrics.trace.span.start", payload);
-		}
-
-		/**
-		 * Span is finished.
-		 *
-		 * @param {Span} span
-		 * @memberof EventLegacyTraceExporter
-		 */
-		spanFinished(span) {
-			const payload = this.generateMetricPayload(span);
-			this.broker.emit("metrics.trace.span.finish", payload);
-		}
-
-		/**
-		 * Generate metrics payload
-		 *
-		 * @param {Context} ctx
-		 * @returns {Object}
-		 */
-		generateMetricPayload(span) {
-			let payload = {
-				id: span.id,
-				requestID: span.traceID,
-				level: span.tags.callingLevel,
-				startTime: span.startTime,
-				remoteCall: span.tags.remoteCall
-			};
-
-			// Process extra metrics
-			if (span.opts.ctx)
-				this.processExtraMetrics(span.opts.ctx, payload);
-
-			payload.action = span.tags.action;
-			payload.service = span.service;
-
-			if (span.parentID)
-				payload.parent = span.parentID;
-
-			payload.nodeID = this.broker.nodeID;
-			if (payload.remoteCall)
-				payload.callerNodeID = span.tags.callerNodeID;
-
-			if (span.finishTime) {
-				payload.endTime = span.finishTime;
-				payload.duration = span.duration;
-				payload.fromCache = span.tags.fromCache;
-
-				if (span.error) {
-					payload.error = this.errorToObject(span.error);
-				}
-			}
-
-			return payload;
-		}
-
-		/**
-		 * Assign extra metrics taking into account action definitions
-		 *
-		 * @param {Context} ctx
-		 * @param {string} name Field of the context to be assigned.
-		 * @param {any} payload Object for assignment.
-		 *
-		 * @private
-		 */
-		assignExtraMetrics(ctx, name, payload) {
-			let def = ctx.action.metrics[name];
-			// if metrics definitions is boolean do default, metrics=true
-			if (def === true) {
-				payload[name] = ctx[name];
-			} else if (Array.isArray(def)) {
-				payload[name] = ___default.pick(ctx[name], def);
-			} else if (isFunction$b(def)) {
-				payload[name] = def(ctx[name]);
-			}
-		}
-
-		/**
-		 * Decide and process extra metrics taking into account action definitions
-		 *
-		 * @param {Context} ctx
-		 * @param {any} payload Object for assignment.
-		 *
-		 * @private
-		 */
-		processExtraMetrics(ctx, payload) {
-			// extra metrics (params and meta)
-			if (isObject$e(ctx.action.metrics)) {
-				// custom metrics def
-				this.assignExtraMetrics(ctx, "params", payload);
-				this.assignExtraMetrics(ctx, "meta", payload);
-			}
-		}
-
-
-	}
-
-	var eventLegacy = EventLegacyTraceExporter;
-
-	const { isObject: isObject$f, isString: isString$f } = utils_1;
+	const { isObject: isObject$d, isString: isString$f, isInheritedClass: isInheritedClass$7 } = utils_1;
 	const { BrokerOptionsError: BrokerOptionsError$a } = errors;
 
 	const Exporters = {
@@ -13109,7 +20303,6 @@
 		Datadog: require$$19,
 		//DatadogSimple: require("./datadog-simple"),
 		Event: event$1,
-		EventLegacy: eventLegacy,
 		Jaeger: require$$19,
 		Zipkin: require$$19,
 		NewRelic: require$$19
@@ -13117,47 +20310,50 @@
 
 	function getByName$9(name) {
 		/* istanbul ignore next */
-		if (!name)
-			return null;
+		if (!name) return null;
 
 		let n = Object.keys(Exporters).find(n => n.toLowerCase() == name.toLowerCase());
-		if (n)
-			return Exporters[n];
+		if (n) return Exporters[n];
 	}
 
 	/**
 	 * Resolve exporter by name
 	 *
-	 * @param {object|string} opt
-	 * @returns {Exporters.Base}
+	 * @param {Record<string,any>|string} opt
+	 * @returns {any}
 	 * @memberof ServiceBroker
 	 */
 	function resolve$9(opt) {
-		if (opt instanceof Exporters.Base) {
+		if (isObject$d(opt) && isInheritedClass$7(opt, Exporters.Base)) {
 			return opt;
 		} else if (isString$f(opt)) {
 			let ExporterClass = getByName$9(opt);
-			if (ExporterClass)
-				return new ExporterClass();
-			else
-				throw new BrokerOptionsError$a(`Invalid tracing exporter type '${opt}'.`, { type: opt });
-
-		} else if (isObject$f(opt)) {
+			if (ExporterClass) return new ExporterClass();
+			else throw new BrokerOptionsError$a(`Invalid tracing exporter type '${opt}'.`, { type: opt });
+		} else if (isObject$d(opt)) {
 			let ExporterClass = getByName$9(opt.type);
-			if (ExporterClass)
-				return new ExporterClass(opt.options);
+			if (ExporterClass) return new ExporterClass(opt.options);
 			else
-				throw new BrokerOptionsError$a(`Invalid tracing exporter type '${opt.type}'.`, { type: opt.type });
+				throw new BrokerOptionsError$a(`Invalid tracing exporter type '${opt.type}'.`, {
+					type: opt.type
+				});
 		}
 
 		throw new BrokerOptionsError$a(`Invalid tracing exporter type '${opt}'.`, { type: opt });
 	}
 
-	function register$9(name, value) {
+	function register$a(name, value) {
 		Exporters[name] = value;
 	}
 
-	var exporters = Object.assign(Exporters, { resolve: resolve$9, register: register$9 });
+	var exporters = Object.assign(Exporters, { resolve: resolve$9, register: register$a });
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("./rate-limiter")} RateLimiterClass
+	 * @typedef {import("./rate-limiter").RateLimiterOptions} RateLimiterOptions
+	 */
 
 	/**
 	 * Rate Limiter class for Tracing.
@@ -13166,9 +20362,11 @@
 	 * 	https://github.com/jaegertracing/jaeger-client-node/blob/master/src/rate_limiter.js
 	 *
 	 * @class RateLimiter
+	 * @implements {RateLimiterClass}
 	 */
 	class RateLimiter {
 		constructor(opts) {
+			/** @type {RateLimiterOptions} */
 			this.opts = ___default.defaultsDeep(opts, {
 				tracesPerSecond: 1
 			});
@@ -13184,8 +20382,7 @@
 			this.lastTime = now;
 
 			this.balance += elapsedTime * this.opts.tracesPerSecond;
-			if (this.balance > this.maxBalance)
-				this.balance = this.maxBalance;
+			if (this.balance > this.maxBalance) this.balance = this.maxBalance;
 
 			if (this.balance >= cost) {
 				this.balance -= cost;
@@ -13198,22 +20395,11 @@
 
 	var rateLimiter = RateLimiter;
 
-	const loadTime = getNanoSeconds();
-	const nodeLoadTime = loadTime - _process.uptime() * 1e9;
+	var perf_hooks = {
+		performance: typeof performance !== 'undefined' ? performance : Date
+	};
 
-	function getNanoSeconds() {
-		const time = _process.hrtime();
-		return time[0] * 1e9 + time[1];
-	}
-
-	function now() {
-		return (getNanoSeconds() - nodeLoadTime) / 1e6;
-	}
-
-	const loadNs = now();
-	const loadMs = Date.now();
-
-	var now_1 = () => loadMs + now() - loadNs;
+	const perf$1 = perf_hooks.performance;
 
 	function defProp(instance, propName, value, readOnly = false) {
 		Object.defineProperty(instance, propName, {
@@ -13224,23 +20410,45 @@
 	}
 
 	/**
+	 * Import types
+	 *
+	 * @typedef {import("./tracer")} Tracer
+	 * @typedef {import("./span")} SpanClass
+	 * @typedef {import("./span").SpanOptions} SpanOptions
+	 * @typedef {import("./span").SpanServiceInfo} SpanServiceInfo
+	 * @typedef {import("../logger-factory").Logger} Logger
+	 */
+
+	/**
 	 * Trace Span class
 	 *
 	 * @class Span
+	 * @property {Tracer} tracer
+	 * @implements {SpanClass}
 	 */
 	class Span {
+		/** @type {Tracer} */
+		tracer;
+		/** @type {SpanOptions} */
+		opts;
+		/** @type {Object} */
+		meta;
+		/** @type {Logger} */
+		logger;
+		/** @type {SpanServiceInfo} */
+		service;
 
 		/**
 		 * Creates an instance of Span.
 		 * @param {Tracer} tracer
 		 * @param {String} name
-		 * @param {Object?} opts
+		 * @param {SpanOptions?} opts
 		 *
 		 * @memberof Span
 		 */
 		constructor(tracer, name, opts) {
 			defProp(this, "tracer", tracer, true);
-			defProp(this, "logger", this.tracer.logger, true);
+			defProp(this, "logger", tracer.logger, true);
 			defProp(this, "opts", opts || {});
 			defProp(this, "meta", {});
 
@@ -13254,21 +20462,23 @@
 				if (typeof this.opts.service == "string") {
 					this.service = {
 						name: this.opts.service,
-						fullName: this.opts.service,
+						fullName: this.opts.service
 					};
 				} else {
 					this.service = {
 						name: this.opts.service.name,
 						version: this.opts.service.version,
-						fullName: this.opts.service.fullName,
+						fullName: this.opts.service.fullName
 					};
 				}
 			}
 
 			this.priority = this.opts.priority != null ? this.opts.priority : 5;
-			this.sampled = this.opts.sampled != null ? this.opts.sampled : this.tracer.shouldSample(this);
+			this.sampled =
+				this.opts.sampled != null ? this.opts.sampled : this.tracer.shouldSample(this);
 
 			this.startTime = null;
+			this.startTicks = null;
 			this.finishTime = null;
 			this.duration = null;
 
@@ -13277,29 +20487,38 @@
 			this.logs = [];
 			this.tags = {};
 
-			if (this.opts.defaultTags)
-				this.addTags(this.opts.defaultTags);
+			if (this.opts.defaultTags) this.addTags(this.opts.defaultTags);
 
-			if (this.opts.tags)
-				this.addTags(this.opts.tags);
+			if (this.opts.tags) this.addTags(this.opts.tags);
 		}
 
 		/**
 		 * Start span.
 		 *
-		 * @param {Number?} time
+		 * @param {Number=} time
 		 * @returns {Span}
 		 * @memberof Span
 		 */
 		start(time) {
 			this.logger.debug(`[${this.id}] Span '${this.name}' is started.`);
 
-			this.startTime = time || now_1();
+			this.startTime = time || Date.now();
+			this.startTicks = perf$1.now();
 			// console.log(`"${this.name}" start time: ${this.startTime}`);
 
 			this.tracer.spanStarted(this);
 
 			return this;
+		}
+
+		/**
+		 * Get the current time.
+		 *
+		 * @returns {Number}
+		 * @memberof Span
+		 */
+		getTime() {
+			return this.startTime + perf$1.now() - this.startTicks;
 		}
 
 		/**
@@ -13326,7 +20545,7 @@
 		 * @memberof Span
 		 */
 		log(name, fields, time) {
-			time = time || now_1();
+			time = time || this.getTime();
 
 			this.logs.push({
 				name,
@@ -13355,17 +20574,22 @@
 		/**
 		 * Finish span.
 		 *
-		 * @param {Number?} time
+		 * @param {Number=} time
 		 * @returns {Span}
 		 * @memberof Span
 		 */
 		finish(time) {
-			this.finishTime = time ? time : now_1();
+			this.finishTime = time ? time : this.getTime();
 			this.duration = this.finishTime - this.startTime;
 
 			// console.log(`"${this.name}" stop time: ${this.finishTime}  Duration: ${this.duration}`);
 
-			this.logger.debug(`[${this.id}] Span '${this.name}' is finished. Duration: ${Number(this.duration).toFixed(3)} ms`, this.tags);
+			this.logger.debug(
+				`[${this.id}] Span '${this.name}' is finished. Duration: ${Number(
+				this.duration
+			).toFixed(3)} ms`,
+				this.tags
+			);
 
 			this.tracer.spanFinished(this);
 
@@ -13385,7 +20609,7 @@
 		 * Start a child span.
 		 *
 		 * @param {String} name
-		 * @param {Object?} opts
+		 * @param {SpanOptions?} opts
 		 * @returns {Span} Child span
 		 * @memberof Span
 		 */
@@ -13398,7 +20622,6 @@
 			};
 			return this.tracer.startSpan(name, opts ? Object.assign(r, opts) : r);
 		}
-
 	}
 
 	var span = Span;
@@ -13406,26 +20629,36 @@
 	//const AsyncStorage = require("../async-storage");
 
 
-	const { isFunction: isFunction$c } = utils_1;
+	const { isFunction: isFunction$b } = utils_1;
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("./tracer")} TracerClass
+	 * @typedef {import("./tracer").TracerOptions} TracerOptions
+	 *
+	 * @typedef {import("./span").SpanOptions} SpanOptions
+	 * @typedef {import("../service-broker")} ServiceBroker
+	 */
 
 	/**
 	 * Moleculer Tracer class
+	 * @class Tracer
+	 * @implements {TracerClass}
 	 */
 	class Tracer {
-
 		/**
 		 * Creates an instance of Tracer.
 		 *
 		 * @param {ServiceBroker} broker
-		 * @param {Object} opts
+		 * @param {boolean|TracerOptions} opts
 		 * @memberof Tracer
 		 */
 		constructor(broker, opts) {
 			this.broker = broker;
 			this.logger = broker.getLogger("tracer");
 
-			if (opts === true || opts === false)
-				opts = { enabled: opts };
+			if (opts === true || opts === false) opts = { enabled: opts };
 
 			this.opts = ___default.defaultsDeep({}, opts, {
 				enabled: true,
@@ -13452,7 +20685,7 @@
 
 				tags: {
 					action: null,
-					event: null,
+					event: null
 				}
 			});
 
@@ -13471,8 +20704,7 @@
 			//this.scope.enable();
 			//this._scopeEnabled = true;
 
-			if (this.opts.enabled)
-				this.logger.info("Tracing: Enabled");
+			if (this.opts.enabled) this.logger.info("Tracing: Enabled");
 		}
 
 		/**
@@ -13480,12 +20712,15 @@
 		 */
 		init() {
 			if (this.opts.enabled) {
-
-				this.defaultTags = isFunction$c(this.opts.defaultTags) ? this.opts.defaultTags.call(this, this) : this.opts.defaultTags;
+				this.defaultTags = isFunction$b(this.opts.defaultTags)
+					? this.opts.defaultTags.call(this, this)
+					: this.opts.defaultTags;
 
 				// Create Exporter instances
 				if (this.opts.exporter) {
-					const exporters$1 = Array.isArray(this.opts.exporter) ? this.opts.exporter : [this.opts.exporter];
+					const exporters$1 = Array.isArray(this.opts.exporter)
+						? this.opts.exporter
+						: [this.opts.exporter];
 
 					this.exporter = ___default.compact(exporters$1).map(r => {
 						const exporter = exporters.resolve(r);
@@ -13493,10 +20728,15 @@
 						return exporter;
 					});
 
-					const exporterNames = this.exporter.map(exporter => this.broker.getConstructorName(exporter));
-					this.logger.info(`Tracing exporter${exporterNames.length > 1 ? "s": ""}: ${exporterNames.join(", ")}`);
+					const exporterNames = this.exporter.map(exporter =>
+						this.broker.getConstructorName(exporter)
+					);
+					this.logger.info(
+						`Tracing exporter${exporterNames.length > 1 ? "s" : ""}: ${exporterNames.join(
+						", "
+					)}`
+					);
 				}
-
 			}
 		}
 
@@ -13553,19 +20793,16 @@
 		 */
 		shouldSample(span) {
 			if (this.opts.sampling.minPriority != null) {
-				if (span.priority < this.opts.sampling.minPriority)
-					return false;
+				if (span.priority < this.opts.sampling.minPriority) return false;
 			}
 
 			if (this.rateLimiter) {
 				return this.rateLimiter.check();
 			}
 
-			if (this.opts.sampling.rate == 0)
-				return false;
+			if (this.opts.sampling.rate === 0) return false;
 
-			if (this.opts.sampling.rate == 1)
-				return true;
+			if (this.opts.sampling.rate === 1) return true;
 
 			if (++this.sampleCounter * this.opts.sampling.rate >= 1.0) {
 				this.sampleCounter = 0;
@@ -13579,7 +20816,7 @@
 		 * Start a new Span.
 		 *
 		 * @param {String} name
-		 * @param {Object?} opts
+		 * @param {SpanOptions?} opts
 		 * @returns {Span}
 		 *
 		 * @memberof Tracer
@@ -13592,10 +20829,19 @@
 				parentOpts.sampled = opts.parentSpan.sampled;
 			}
 
-			const span$1 = new span(this, name, Object.assign({
-				type: "custom",
-				defaultTags: this.defaultTags
-			}, parentOpts, opts, { parentSpan: undefined }));
+			const span$1 = new span(
+				this,
+				name,
+				Object.assign(
+					{
+						type: "custom",
+						defaultTags: this.defaultTags
+					},
+					parentOpts,
+					opts,
+					{ parentSpan: undefined }
+				)
+			);
 
 			span$1.start();
 
@@ -13691,8 +20937,7 @@
 		spanStarted(span) {
 			//this.setCurrentSpan(span);
 
-			if (span.sampled)
-				this.invokeExporter("spanStarted", [span]);
+			if (span.sampled) this.invokeExporter("spanStarted", [span]);
 		}
 
 		/**
@@ -13704,8 +20949,7 @@
 		spanFinished(span) {
 			//this.removeCurrentSpan(span);
 
-			if (span.sampled)
-				this.invokeExporter("spanFinished", [span]);
+			if (span.sampled) this.invokeExporter("spanFinished", [span]);
 		}
 	}
 
@@ -13714,11 +20958,22 @@
 	var tracing$1 = {
 		Tracer: tracer,
 		Span: span,
-		Exporters: exporters,
+		Exporters: exporters
 	};
 
-	const { ServiceSchemaError, MoleculerError: MoleculerError$2 } 	= errors;
-	const { isObject: isObject$g, isFunction: isFunction$d, flatten: flatten$1 }	= utils_1;
+	const { ServiceSchemaError, MoleculerError: MoleculerError$2 } = errors;
+	const { isObject: isObject$e, isFunction: isFunction$c, flatten: flatten$1, uniq } = utils_1;
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("./service")} ServiceClass
+	 * @typedef {import("./service-broker")} ServiceBroker
+	 * @typedef {import("./service").ServiceSchema} ServiceSchema
+	 * @typedef {import("./service").ServiceDependency} ServiceDependency
+	 * @typedef {import("./registry/endpoint-event")} EventEndpoint
+	 * @typedef {import("./registry/service-item")} ServiceItem
+	 */
 
 	/**
 	 * Wrap a handler Function to an object with a `handler` property.
@@ -13726,8 +20981,8 @@
 	 * @param {Function|Object} o
 	 * @returns {Object}
 	 */
-	function wrapToHander(o) {
-		return isFunction$d(o) ? { handler: o } : o;
+	function wrapToHandler(o) {
+		return isFunction$c(o) ? { handler: o } : o;
 	}
 
 	/**
@@ -13739,69 +20994,75 @@
 		return Array.isArray(o) ? o : [o];
 	}
 
-	function isNewSignature(args) {
-		return args.length > 0 && ["ctx", "context"].indexOf(args[0].toLowerCase()) !== -1;
-	}
-
-
 	/**
 	 * Service class
 	 *
-	 * @class Service
+	 * @implements {ServiceClass}
 	 */
 	class Service {
-
 		/**
 		 * Creates an instance of Service by schema.
 		 *
 		 * @param {ServiceBroker} 	broker	broker of service
-		 * @param {Object} 			schema	schema of service
+		 * @param {Partial<ServiceSchema>}	schema	schema of service
 		 *
-		 * @memberof Service
 		 */
 		constructor(broker, schema) {
-			if (!isObject$g(broker))
-				throw new ServiceSchemaError("Must set a ServiceBroker instance!");
+			if (!isObject$e(broker)) throw new ServiceSchemaError("Must set a ServiceBroker instance!");
 
 			this.broker = broker;
 
-			if (broker)
-				this.Promise = broker.Promise;
-
-			if (schema)
-				this.parseServiceSchema(schema);
+			if (broker) this.Promise = broker.Promise;
+			if (schema) this.parseServiceSchema(schema);
 		}
 
 		/**
 		 * Parse Service schema & register as local service
 		 *
-		 * @param {Object} schema of Service
+		 * @param {Partial<ServiceSchema>} schema of Service
 		 */
 		parseServiceSchema(schema) {
-			if (!isObject$g(schema))
-				throw new ServiceSchemaError("The service schema can't be null. Maybe is it not a service schema?");
+			if (!isObject$e(schema))
+				throw new ServiceSchemaError(
+					"The service schema can't be null. Maybe is it not a service schema?"
+				);
 
 			this.originalSchema = ___default.cloneDeep(schema);
 
 			if (schema.mixins) {
-				schema = Service.applyMixins(schema);
+				schema = this.applyMixins(schema);
+			}
+
+			if (isFunction$c(schema.merged)) {
+				schema.merged.call(this, schema);
+			} else if (Array.isArray(schema.merged)) {
+				schema.merged.forEach(fn => fn.call(this, schema));
 			}
 
 			this.broker.callMiddlewareHookSync("serviceCreating", [this, schema]);
 
 			if (!schema.name) {
-				/* eslint-disable-next-line */
-				console.error("Service name can't be empty! Maybe it is not a valid Service schema. Maybe is it not a service schema?", { schema });
-				throw new ServiceSchemaError("Service name can't be empty! Maybe it is not a valid Service schema. Maybe is it not a service schema?", { schema });
+				/* eslint-disable-next-line no-console */
+				console.error(
+					"Service name can't be empty! Maybe it is not a valid Service schema. Maybe is it not a service schema?",
+					{ schema }
+				);
+				throw new ServiceSchemaError(
+					"Service name can't be empty! Maybe it is not a valid Service schema. Maybe is it not a service schema?",
+					{ schema }
+				);
 			}
 
 			this.name = schema.name;
 			this.version = schema.version;
 			this.settings = schema.settings || {};
 			this.metadata = schema.metadata || {};
-			this.schema = schema;
+			this.schema = /** @type {ServiceSchema} */ (schema);
 
-			this.fullName = Service.getVersionedFullName(this.name, this.settings.$noVersionPrefix !== true ? this.version : undefined);
+			this.fullName = Service.getVersionedFullName(
+				this.name,
+				this.settings.$noVersionPrefix !== true ? this.version : undefined
+			);
 
 			this.logger = this.broker.getLogger(this.fullName, {
 				svc: this.name,
@@ -13823,12 +21084,33 @@
 			};
 
 			// Register methods
-			if (isObject$g(schema.methods)) {
-
+			if (isObject$e(schema.methods)) {
 				___default.forIn(schema.methods, (method, name) => {
 					/* istanbul ignore next */
-					if (["name", "version", "settings", "metadata", "dependencies", "schema", "broker", "actions", "logger", "created", "started", "stopped", "_start", "_stop", "_init"].indexOf(name) != -1) {
-						throw new ServiceSchemaError(`Invalid method name '${name}' in '${this.name}' service!`);
+					if (
+						[
+							"name",
+							"version",
+							"settings",
+							"metadata",
+							"dependencies",
+							"schema",
+							"broker",
+							"actions",
+							"logger",
+							"created",
+							"started",
+							"stopped",
+							"_start",
+							"_stop",
+							"_init",
+							"applyMixins"
+						].indexOf(name) !== -1 ||
+						name.startsWith("mergeSchema")
+					) {
+						throw new ServiceSchemaError(
+							`Invalid method name '${name}' in '${this.name}' service!`
+						);
 					}
 
 					this._createMethod(method, name);
@@ -13836,16 +21118,19 @@
 			}
 
 			// Register actions
-			if (isObject$g(schema.actions)) {
+			if (isObject$e(schema.actions)) {
 				___default.forIn(schema.actions, (action, name) => {
-					if (action === false)
-						return;
+					if (action === false) return;
 
 					let innerAction = this._createAction(action, name);
 
 					serviceSpecification.actions[innerAction.name] = innerAction;
 
-					const wrappedHandler = this.broker.middlewares.wrapHandler("localAction", innerAction.handler, innerAction);
+					const wrappedHandler = this.broker.middlewares.wrapHandler(
+						"localAction",
+						innerAction.handler,
+						innerAction
+					);
 
 					// Expose to be callable as `this.actions.find({ ...params })`
 					const ep = this.broker.registry.createPrivateActionEndpoint(innerAction);
@@ -13855,16 +21140,20 @@
 							// Reused context (in case of retry)
 							ctx = opts.ctx;
 						} else {
-							ctx = this.broker.ContextFactory.create(this.broker, ep, params, opts || {});
+							ctx = this.broker.ContextFactory.create(
+								this.broker,
+								ep,
+								params,
+								opts || {}
+							);
 						}
 						return wrappedHandler(ctx);
 					};
-
 				});
 			}
 
 			// Event subscriptions
-			if (isObject$g(schema.events)) {
+			if (isObject$e(schema.events)) {
 				___default.forIn(schema.events, (event, name) => {
 					const innerEvent = this._createEvent(event, name);
 					serviceSpecification.events[innerEvent.name] = innerEvent;
@@ -13876,11 +21165,21 @@
 							// Reused context (in case of retry)
 							ctx = opts.ctx;
 						} else {
-							const ep = {
+							const ep = /** @type {EventEndpoint} */ ({
 								id: this.broker.nodeID,
-								event: innerEvent
-							};
-							ctx = this.broker.ContextFactory.create(this.broker, ep, params, opts || {});
+								event: innerEvent,
+								broker: this.broker,
+								service: null,
+								node: null,
+								local: true,
+								state: true
+							});
+							ctx = this.broker.ContextFactory.create(
+								this.broker,
+								ep,
+								params,
+								opts || {}
+							);
 						}
 						ctx.eventName = name;
 						ctx.eventType = "emit";
@@ -13900,7 +21199,7 @@
 		/**
 		 * Return a service settings without protected properties.
 		 *
-		 * @param {Object?} settings
+		 * @param {Record<string, any>?} settings
 		 */
 		_getPublicSettings(settings) {
 			if (settings && Array.isArray(settings.$secureSettings)) {
@@ -13912,13 +21211,10 @@
 
 		/**
 		 * Initialize service. It called `created` handler in schema
-		 *
-		 * @private
-		 * @memberof Service
 		 */
 		_init() {
 			this.logger.debug(`Service '${this.fullName}' is creating...`);
-			if (isFunction$d(this.schema.created)) {
+			if (isFunction$c(this.schema.created)) {
 				this.schema.created.call(this);
 			} else if (Array.isArray(this.schema.created)) {
 				this.schema.created.forEach(fn => fn.call(this));
@@ -13935,8 +21231,6 @@
 		 * Start service
 		 *
 		 * @returns {Promise}
-		 * @private
-		 * @memberof Service
 		 */
 		_start() {
 			this.logger.debug(`Service '${this.fullName}' is starting...`);
@@ -13947,10 +21241,14 @@
 				.then(() => {
 					// Wait for dependent services
 					if (this.schema.dependencies)
-						return this.waitForServices(this.schema.dependencies, this.settings.$dependencyTimeout || 0, this.settings.$dependencyInterval || this.broker.options.dependencyInterval);
+						return this.waitForServices(
+							this.schema.dependencies,
+							this.settings.$dependencyTimeout || this.broker.options.dependencyTimeout,
+							this.settings.$dependencyInterval || this.broker.options.dependencyInterval
+						);
 				})
 				.then(() => {
-					if (isFunction$d(this.schema.started))
+					if (isFunction$c(this.schema.started))
 						return this.Promise.method(this.schema.started).call(this);
 
 					if (Array.isArray(this.schema.started)) {
@@ -13961,8 +21259,9 @@
 				})
 				.then(() => {
 					// Register service
-					this.broker.registerLocalService(this._serviceSpecification);
-					return null;
+					return this.broker.registerLocalService(
+						/** @type {ServiceItem} */ (this._serviceSpecification)
+					);
 				})
 				.then(() => {
 					return this.broker.callMiddlewareHook("serviceStarted", [this]);
@@ -13974,8 +21273,6 @@
 		 * Stop service
 		 *
 		 * @returns {Promise}
-		 * @private
-		 * @memberof Service
 		 */
 		_stop() {
 			this.logger.debug(`Service '${this.fullName}' is stopping...`);
@@ -13984,7 +21281,7 @@
 					return this.broker.callMiddlewareHook("serviceStopping", [this], { reverse: true });
 				})
 				.then(() => {
-					if (isFunction$d(this.schema.stopped))
+					if (isFunction$c(this.schema.stopped))
 						return this.Promise.method(this.schema.stopped).call(this);
 
 					if (Array.isArray(this.schema.stopped)) {
@@ -14010,31 +21307,33 @@
 		 * @returns {Object}
 		 *
 		 * @private
-		 * @memberof Service
 		 */
 		_createAction(actionDef, name) {
 			let action;
-			if (isFunction$d(actionDef)) {
+			if (isFunction$c(actionDef)) {
 				// Wrap to an object
 				action = {
 					handler: actionDef
 				};
-			} else if (isObject$g(actionDef)) {
+			} else if (isObject$e(actionDef)) {
 				action = ___default.cloneDeep(actionDef);
 			} else {
-				throw new ServiceSchemaError(`Invalid action definition in '${name}' action in '${this.fullName}' service!`);
+				throw new ServiceSchemaError(
+					`Invalid action definition in '${name}' action in '${this.fullName}' service!`
+				);
 			}
 
 			let handler = action.handler;
-			if (!isFunction$d(handler)) {
-				throw new ServiceSchemaError(`Missing action handler on '${name}' action in '${this.fullName}' service!`);
+			if (!isFunction$c(handler)) {
+				throw new ServiceSchemaError(
+					`Missing action handler on '${name}' action in '${this.fullName}' service!`
+				);
 			}
 
 			action.rawName = action.name || name;
 			if (this.settings.$noServiceNamePrefix !== true)
 				action.name = this.fullName + "." + action.rawName;
-			else
-				action.name = action.rawName;
+			else action.name = action.rawName;
 
 			if (action.cache === undefined && this.settings.$cache !== undefined) {
 				action.cache = this.settings.$cache;
@@ -14049,25 +21348,29 @@
 		/**
 		 * Create an internal service method.
 		 *
-		 * @param {Object|Function} methodDef
+		 * @param {Record<string, any>|Function} methodDef
 		 * @param {String} name
-		 * @returns {Object}
+		 * @returns {Record<string, any>}
 		 */
 		_createMethod(methodDef, name) {
 			let method;
-			if (isFunction$d(methodDef)) {
+			if (isFunction$c(methodDef)) {
 				// Wrap to an object
 				method = {
 					handler: methodDef
 				};
-			} else if (isObject$g(methodDef)) {
+			} else if (isObject$e(methodDef)) {
 				method = methodDef;
 			} else {
-				throw new ServiceSchemaError(`Invalid method definition in '${name}' method in '${this.fullName}' service!`);
+				throw new ServiceSchemaError(
+					`Invalid method definition in '${name}' method in '${this.fullName}' service!`
+				);
 			}
 
-			if (!isFunction$d(method.handler)) {
-				throw new ServiceSchemaError(`Missing method handler on '${name}' method in '${this.fullName}' service!`);
+			if (!isFunction$c(method.handler)) {
+				throw new ServiceSchemaError(
+					`Missing method handler on '${name}' method in '${this.fullName}' service!`
+				);
 			}
 
 			method.name = name;
@@ -14082,60 +21385,58 @@
 		/**
 		 * Create an event subscription for broker
 		 *
-		 * @param {Object|Function} eventDef
+		 * @param {Record<string, any>|Function} eventDef
 		 * @param {String} name
-		 * @returns {Object}
+		 * @returns {Record<string, any>}
 		 *
 		 * @private
-		 * @memberof Service
 		 */
 		_createEvent(eventDef, name) {
 			let event;
-			if (isFunction$d(eventDef) || Array.isArray(eventDef)) {
+			if (isFunction$c(eventDef) || Array.isArray(eventDef)) {
 				event = {
 					handler: eventDef
 				};
-			} else if (isObject$g(eventDef)) {
+			} else if (isObject$e(eventDef)) {
 				event = ___default.cloneDeep(eventDef);
 			} else {
-				throw new ServiceSchemaError(`Invalid event definition in '${name}' event in '${this.fullName}' service!`);
+				throw new ServiceSchemaError(
+					`Invalid event definition in '${name}' event in '${this.fullName}' service!`
+				);
 			}
 
-			if (!isFunction$d(event.handler) && !Array.isArray(event.handler)) {
-				throw new ServiceSchemaError(`Missing event handler on '${name}' event in '${this.fullName}' service!`);
+			if (!isFunction$c(event.handler) && !Array.isArray(event.handler)) {
+				throw new ServiceSchemaError(
+					`Missing event handler on '${name}' event in '${this.fullName}' service!`
+				);
 			}
 
 			// Detect new or legacy parameter list of event handler
 			// Legacy: handler(payload, sender, eventName)
 			// New: handler(ctx)
 			let handler;
-			if (isFunction$d(event.handler)) {
-				const args = functionArguments__default(event.handler);
+			if (isFunction$c(event.handler)) {
 				handler = this.Promise.method(event.handler);
-				handler.__newSignature = event.context === true || isNewSignature(args);
 			} else if (Array.isArray(event.handler)) {
 				handler = event.handler.map(h => {
-					const args = functionArguments__default(h);
 					h = this.Promise.method(h);
-					h.__newSignature = event.context === true || isNewSignature(args);
 					return h;
 				});
 			}
 
-			if (!event.name)
-				event.name = name;
+			if (!event.name) event.name = name;
 
 			event.service = this;
 			const self = this;
-			if (isFunction$d(handler)) {
+			if (isFunction$c(handler)) {
 				// Call single handler
-				event.handler = function(ctx) {
-					return handler.apply(self, handler.__newSignature ? [ctx] : [ctx.params, ctx.nodeID, ctx.eventName, ctx]);
+				event.handler = function (ctx) {
+					return handler.call(self, ctx);
 				};
 			} else if (Array.isArray(handler)) {
 				// Call multiple handler
-				event.handler = function(ctx) {
-					return self.Promise.all(handler.map(fn => fn.apply(self, fn.__newSignature ? [ctx] : [ctx.params, ctx.nodeID, ctx.eventName, ctx])));
+				event.handler = function (ctx) {
+					return self.Promise.all(handler.map(fn => fn.call(self, ctx)));
 				};
 			}
 
@@ -14147,11 +21448,18 @@
 		 *
 		 * @param {String} eventName
 		 * @param {any?} params
-		 * @param {Object?} opts
+		 * @param {Record<string, any>?} opts
 		 */
 		emitLocalEventHandler(eventName, params, opts) {
 			if (!this.events[eventName])
-				return Promise.reject(new MoleculerError$2(`No '${eventName}' registered local event handler`, 500, "NOT_FOUND_EVENT", { eventName }));
+				return Promise.reject(
+					new MoleculerError$2(
+						`No '${eventName}' registered local event handler`,
+						500,
+						"NOT_FOUND_EVENT",
+						{ eventName }
+					)
+				);
 
 			return this.events[eventName](params, opts);
 		}
@@ -14160,7 +21468,6 @@
 		 * Getter of current Context.
 		 * @returns {Context?}
 		 *
-		 * @memberof Service
 		 *
 		get currentContext() {
 			return this.broker.getCurrentContext();
@@ -14169,7 +21476,6 @@
 		/**
 		 * Setter of current Context
 		 *
-		 * @memberof Service
 		 *
 		set currentContext(ctx) {
 			this.broker.setCurrentContext(ctx);
@@ -14178,11 +21484,10 @@
 		/**
 		 * Wait for other services
 		 *
-		 * @param {String|Array<String>} serviceNames
-		 * @param {Number} timeout Timeout in milliseconds
-		 * @param {Number} interval Check interval in milliseconds
+		 * @param {string | ServiceDependency | (string | ServiceDependency)[]} serviceNames
+		 * @param {number?} timeout Timeout in milliseconds
+		 * @param {number?} interval Check interval in milliseconds
 		 * @returns {Promise}
-		 * @memberof Service
 		 */
 		waitForServices(serviceNames, timeout, interval) {
 			return this.broker.waitForServices(serviceNames, timeout, interval, this.logger);
@@ -14191,24 +21496,23 @@
 		/**
 		 * Apply `mixins` list in schema. Merge the schema with mixins schemas. Returns with the mixed schema
 		 *
-		 * @static
-		 * @param {Schema} schema
-		 * @returns {Schema}
+		 * @param {Partial<ServiceSchema>} schema
+		 * @returns {Partial<ServiceSchema>}
 		 *
-		 * @memberof Service
 		 */
-		static applyMixins(schema) {
+		applyMixins(schema) {
 			if (schema.mixins) {
 				const mixins = Array.isArray(schema.mixins) ? schema.mixins : [schema.mixins];
 				if (mixins.length > 0) {
-					const mixedSchema = Array.from(mixins).reverse().reduce((s, mixin) => {
-						if (mixin.mixins)
-							mixin = Service.applyMixins(mixin);
+					const mixedSchema = Array.from(mixins)
+						.reverse()
+						.reduce((s, mixin) => {
+							if (mixin.mixins) mixin = this.applyMixins(mixin);
 
-						return s ? Service.mergeSchemas(s, mixin) : mixin;
-					}, null);
+							return s ? this.mergeSchemas(s, mixin) : mixin;
+						}, null);
 
-					return Service.mergeSchemas(mixedSchema, schema);
+					return this.mergeSchemas(mixedSchema, schema);
 				}
 			}
 
@@ -14219,63 +21523,55 @@
 		/**
 		 * Merge two Service schema
 		 *
-		 * @static
-		 * @param {Object} mixinSchema		Mixin schema
-		 * @param {Object} svcSchema 		Service schema
-		 * @returns {Object} Mixed schema
+		 * @param {Partial<ServiceSchema>} mixinSchema		Mixin schema
+		 * @param {Partial<ServiceSchema>} svcSchema 		Service schema
+		 * @returns {Partial<ServiceSchema>} Mixed schema
 		 *
-		 * @memberof Service
 		 */
-		static mergeSchemas(mixinSchema, svcSchema) {
+		mergeSchemas(mixinSchema, svcSchema) {
 			const res = ___default.cloneDeep(mixinSchema);
+			if (!svcSchema) return res;
 			const mods = ___default.cloneDeep(svcSchema);
+			if (!mixinSchema) return mods;
 
 			Object.keys(mods).forEach(key => {
-				if (["name", "version"].indexOf(key) !== -1 && mods[key] !== undefined) {
+				if ((key === "name" || key === "version") && mods[key] !== undefined) {
 					// Simple overwrite
 					res[key] = mods[key];
-				} else if (key == "settings") {
+				} else if (key === "settings") {
 					// Merge with defaultsDeep
-					res[key] = Service.mergeSchemaSettings(mods[key], res[key]);
-
-				} else if (key == "metadata") {
+					res[key] = this.mergeSchemaSettings(mods[key], res[key]);
+				} else if (key === "metadata") {
 					// Merge with defaultsDeep
-					res[key] = Service.mergeSchemaMetadata(mods[key], res[key]);
-
-				} else if (key == "hooks") {
+					res[key] = this.mergeSchemaMetadata(mods[key], res[key]);
+				} else if (key === "hooks") {
 					// Merge & concat
-					res[key] = Service.mergeSchemaHooks(mods[key], res[key] || {});
-
-				} else if (key == "actions") {
+					res[key] = this.mergeSchemaHooks(mods[key], res[key] || {});
+				} else if (key === "actions") {
 					// Merge with defaultsDeep
-					res[key] = Service.mergeSchemaActions(mods[key], res[key] || {});
-
-				} else if (key == "methods") {
+					res[key] = this.mergeSchemaActions(mods[key], res[key] || {});
+				} else if (key === "methods") {
 					// Overwrite
-					res[key] = Service.mergeSchemaMethods(mods[key], res[key]);
-
-				} else if (key == "events") {
+					res[key] = this.mergeSchemaMethods(mods[key], res[key]);
+				} else if (key === "events") {
 					// Merge & concat by groups
-					res[key] = Service.mergeSchemaEvents(mods[key], res[key] || {});
-
-				} else if (["created", "started", "stopped"].indexOf(key) !== -1) {
+					res[key] = this.mergeSchemaEvents(mods[key], res[key] || {});
+				} else if (["merged", "created", "started", "stopped"].indexOf(key) !== -1) {
 					// Concat lifecycle event handlers
-					res[key] = Service.mergeSchemaLifecycleHandlers(mods[key], res[key]);
-
-				} else if (key == "mixins") {
+					res[key] = this.mergeSchemaLifecycleHandlers(mods[key], res[key]);
+				} else if (key === "mixins") {
 					// Concat mixins
-					res[key] = Service.mergeSchemaUniqArray(mods[key], res[key]);
-
-				} else if (key == "dependencies") {
+					res[key] = this.mergeSchemaUniqArray(mods[key], res[key]);
+				} else if (key === "dependencies") {
 					// Concat mixins
-					res[key] = Service.mergeSchemaUniqArray(mods[key], res[key]);
-
+					res[key] = this.mergeSchemaUniqArray(mods[key], res[key]);
 				} else {
 					const customFnName = "mergeSchema" + key.replace(/./, key[0].toUpperCase()); // capitalize first letter
-					if (isFunction$d(Service[customFnName])) {
-						res[key] = Service[customFnName](mods[key], res[key]);
+					// TODO: add middleware hook
+					if (isFunction$c(this[customFnName])) {
+						res[key] = this[customFnName](mods[key], res[key]);
 					} else {
-						res[key] = Service.mergeSchemaUnknown(mods[key], res[key]);
+						res[key] = this.mergeSchemaUnknown(mods[key], res[key]);
 					}
 				}
 			});
@@ -14286,15 +21582,19 @@
 		/**
 		 * Merge `settings` property in schema
 		 *
-		 * @static
 		 * @param {Object} src Source schema property
 		 * @param {Object} target Target schema property
 		 *
 		 * @returns {Object} Merged schema
 		 */
-		static mergeSchemaSettings(src, target) {
-			if ((target && target.$secureSettings) || (src && src.$secureSettings))
-				target.$secureSettings = ___default.uniq([].concat(src.$secureSettings || [], target.$secureSettings || []));
+		mergeSchemaSettings(src, target) {
+			if ((target && target.$secureSettings) || (src && src.$secureSettings)) {
+				const srcSS = src && src.$secureSettings ? src.$secureSettings : [];
+				const targetSS = target && target.$secureSettings ? target.$secureSettings : [];
+				if (!target) target = {};
+
+				target.$secureSettings = uniq([...srcSS, ...targetSS]);
+			}
 
 			return ___default.defaultsDeep(src, target);
 		}
@@ -14302,61 +21602,58 @@
 		/**
 		 * Merge `metadata` property in schema
 		 *
-		 * @static
 		 * @param {Object} src Source schema property
 		 * @param {Object} target Target schema property
 		 *
 		 * @returns {Object} Merged schema
 		 */
-		static mergeSchemaMetadata(src, target) {
+		mergeSchemaMetadata(src, target) {
 			return ___default.defaultsDeep(src, target);
 		}
 
 		/**
 		 * Merge `mixins` property in schema
 		 *
-		 * @static
 		 * @param {Object} src Source schema property
 		 * @param {Object} target Target schema property
 		 *
 		 * @returns {Object} Merged schema
 		 */
-		static mergeSchemaUniqArray(src, target) {
+		mergeSchemaUniqArray(src, target) {
 			return ___default.uniqWith(___default.compact(flatten$1([src, target])), ___default.isEqual);
 		}
 
 		/**
 		 * Merge `dependencies` property in schema
 		 *
-		 * @static
 		 * @param {Object} src Source schema property
 		 * @param {Object} target Target schema property
 		 *
 		 * @returns {Object} Merged schema
 		 */
-		static mergeSchemaDependencies(src, target) {
-			return Service.mergeSchemaUniqArray(src, target);
+		mergeSchemaDependencies(src, target) {
+			return this.mergeSchemaUniqArray(src, target);
 		}
 
 		/**
 		 * Merge `hooks` property in schema
 		 *
-		 * @static
 		 * @param {Object} src Source schema property
 		 * @param {Object} target Target schema property
 		 *
 		 * @returns {Object} Merged schema
 		 */
-		static mergeSchemaHooks(src, target) {
+		mergeSchemaHooks(src, target) {
 			Object.keys(src).forEach(k => {
-				if (target[k] == null)
-					target[k] = {};
+				if (target[k] == null) target[k] = {};
 
 				Object.keys(src[k]).forEach(k2 => {
 					const modHook = wrapToArray(src[k][k2]);
 					const resHook = wrapToArray(target[k][k2]);
 
-					target[k][k2] = ___default.compact(flatten$1(k == "before" ? [resHook, modHook] : [modHook, resHook]));
+					target[k][k2] = ___default.compact(
+						flatten$1(k === "before" ? [resHook, modHook] : [modHook, resHook])
+					);
 				});
 			});
 
@@ -14366,28 +21663,29 @@
 		/**
 		 * Merge `actions` property in schema
 		 *
-		 * @static
 		 * @param {Object} src Source schema property (real schema)
 		 * @param {Object} target Target schema property (mixin schema)
 		 *
 		 * @returns {Object} Merged schema
 		 */
-		static mergeSchemaActions(src, target) {
+		mergeSchemaActions(src, target) {
 			Object.keys(src).forEach(k => {
 				if (src[k] === false && target[k]) {
 					delete target[k];
 					return;
 				}
 
-				const srcAction = wrapToHander(src[k]);
-				const targetAction = wrapToHander(target[k]);
+				const srcAction = wrapToHandler(src[k]);
+				const targetAction = wrapToHandler(target[k]);
 
 				if (srcAction && srcAction.hooks && targetAction && targetAction.hooks) {
 					Object.keys(srcAction.hooks).forEach(k => {
 						const modHook = wrapToArray(srcAction.hooks[k]);
 						const resHook = wrapToArray(targetAction.hooks[k]);
 
-						srcAction.hooks[k] = ___default.compact(flatten$1(k == "before" ? [resHook, modHook] : [modHook, resHook]));
+						srcAction.hooks[k] = ___default.compact(
+							flatten$1(k === "before" ? [resHook, modHook] : [modHook, resHook])
+						);
 					});
 				}
 
@@ -14400,32 +21698,32 @@
 		/**
 		 * Merge `methods` property in schema
 		 *
-		 * @static
 		 * @param {Object} src Source schema property
 		 * @param {Object} target Target schema property
 		 *
 		 * @returns {Object} Merged schema
 		 */
-		static mergeSchemaMethods(src, target) {
+		mergeSchemaMethods(src, target) {
 			return Object.assign(target || {}, src || {});
 		}
 
 		/**
 		 * Merge `events` property in schema
 		 *
-		 * @static
 		 * @param {Object} src Source schema property
 		 * @param {Object} target Target schema property
 		 *
 		 * @returns {Object} Merged schema
 		 */
-		static mergeSchemaEvents(src, target) {
+		mergeSchemaEvents(src, target) {
 			Object.keys(src).forEach(k => {
-				const modEvent = wrapToHander(src[k]);
-				const resEvent = wrapToHander(target[k]);
+				const modEvent = wrapToHandler(src[k]);
+				const resEvent = wrapToHandler(target[k]);
 
-				let handler = ___default.compact(flatten$1([resEvent ? resEvent.handler : null, modEvent ? modEvent.handler : null]));
-				if (handler.length == 1) handler = handler[0];
+				let handler = ___default.compact(
+					flatten$1([resEvent ? resEvent.handler : null, modEvent ? modEvent.handler : null])
+				);
+				if (handler.length === 1) handler = handler[0];
 
 				target[k] = ___default.defaultsDeep(modEvent, resEvent);
 				target[k].handler = handler;
@@ -14437,28 +21735,25 @@
 		/**
 		 * Merge `started`, `stopped`, `created` event handler properties in schema
 		 *
-		 * @static
 		 * @param {Object} src Source schema property
 		 * @param {Object} target Target schema property
 		 *
 		 * @returns {Object} Merged schema
 		 */
-		static mergeSchemaLifecycleHandlers(src, target) {
+		mergeSchemaLifecycleHandlers(src, target) {
 			return ___default.compact(flatten$1([target, src]));
 		}
 
 		/**
 		 * Merge unknown properties in schema
 		 *
-		 * @static
 		 * @param {Object} src Source schema property
 		 * @param {Object} target Target schema property
 		 *
 		 * @returns {Object} Merged schema
 		 */
-		static mergeSchemaUnknown(src, target) {
-			if (src !== undefined)
-				return src;
+		mergeSchemaUnknown(src, target) {
+			if (src !== undefined) return src;
 
 			return target;
 		}
@@ -14470,58 +21765,56 @@
 		 */
 		static getVersionedFullName(name, version) {
 			if (version != null)
-				return (typeof(version) == "number" ? "v" + version : version) + "." + name;
+				return (typeof version == "number" ? "v" + version : version) + "." + name;
 
 			return name;
 		}
-
 	}
 
 	var service = Service;
 
-	const { isString: isString$g } = utils_1;
-
+	const { pick: pick$2 } = ___default;
 	const { RequestSkippedError, MaxCallLevelError } = errors;
+
+	/**
+	 * @typedef {import("./context")} ContextClass
+	 * @typedef {import("./service-broker").MCallDefinition} MCallDefinition
+	 * @typedef {import("./service-broker").MCallCallingOptions} MCallCallingOptions
+	 * @typedef {import("./service-broker")} ServiceBroker Moleculer Service Broker instance
+	 * @typedef {import("./service-broker").CallingOptions} CallingOptions Calling Options
+	 * @typedef {import("./registry/endpoint")} Endpoint Registry Endpoint
+	 * @typedef {import("./registry/endpoint-action")} ActionEndpoint Registry Action Endpoint
+	 * @typedef {import("./registry/endpoint-event")} EventEndpoint Registry Event Endpoint
+	 * @typedef {import("./tracing/span")} Span Tracing Span
+	 */
 
 	/**
 	 * Merge metadata
 	 *
+	 * @param {Context} ctx
 	 * @param {Object} newMeta
-	 *
-	 * @private
-	 * @memberof Context
 	 */
 	function mergeMeta(ctx, newMeta) {
-		if (newMeta)
-			Object.assign(ctx.meta, newMeta);
+		if (newMeta) Object.assign(ctx.meta, newMeta);
 		return ctx.meta;
 	}
 
 	/**
 	 * Context class for action calls
 	 *
-	 * @property {String} id - Context ID
-	 * @property {ServiceBroker} broker - Broker instance
-	 * @property {Action} action - Action definition
-	 * @property {String} [nodeID=null] - Node ID
-	 * @property {String} parentID - Parent Context ID
-	 * @property {Boolean} tracing - Enable tracing
-	 * @property {Number} [level=1] - Level of context
-	 *
 	 * @class Context
+	 * @implements {ContextClass}
 	 */
 	class Context {
-
 		/**
 		 * Creates an instance of Context.
 		 *
 		 * @param {ServiceBroker} broker - Broker instance
-		 * @param {Endpoint} endpoint
+		 * @param {ActionEndpoint|EventEndpoint=} endpoint
 		 *
 		 * @memberof Context
 		 */
 		constructor(broker, endpoint) {
-
 			this.broker = broker;
 			if (this.broker) {
 				this.nodeID = this.broker.nodeID;
@@ -14546,9 +21839,10 @@
 			// The groups of event
 			this.eventGroups = null;
 
+			/** @type {CallingOptions} */
 			this.options = {
 				timeout: null,
-				retries: null,
+				retries: null
 			};
 
 			this.parentID = null;
@@ -14558,7 +21852,11 @@
 
 			this.params = null;
 			this.meta = {};
+			this.headers = {};
+			this.responseHeaders = {};
 			this.locals = {};
+
+			this.stream = null;
 
 			this.requestID = this.id;
 
@@ -14569,12 +21867,8 @@
 			this.needAck = null;
 			this.ackID = null;
 
-			//this.startTime = null;
-			//his.startHrTime = null;
-			//this.stopTime = null;
-			//this.duration = null;
+			this.startHrTime = null;
 
-			//this.error = null;
 			this.cachedResult = false;
 		}
 
@@ -14582,9 +21876,9 @@
 		 * Create a new Context instance
 		 *
 		 * @param {ServiceBroker} broker
-		 * @param {Endpoint} endpoint
+		 * @param {ActionEndpoint|EventEndpoint} endpoint
 		 * @param {Object?} params
-		 * @param {Object} opts
+		 * @param {CallingOptions} opts
 		 * @returns {Context}
 		 *
 		 * @static
@@ -14593,13 +21887,11 @@
 		static create(broker, endpoint, params, opts = {}) {
 			const ctx = new broker.ContextFactory(broker, endpoint);
 
-			if (endpoint != null)
-				ctx.setEndpoint(endpoint);
+			if (endpoint != null) ctx.setEndpoint(endpoint);
 
 			if (params != null) {
 				let cloning = broker ? broker.options.contextParamsCloning : false;
-				if (opts.paramsCloning != null)
-					cloning = opts.paramsCloning;
+				if (opts.paramsCloning != null) cloning = opts.paramsCloning;
 				ctx.setParams(params, cloning);
 			}
 
@@ -14607,29 +21899,29 @@
 			ctx.options = opts;
 
 			// RequestID
-			if (opts.requestID != null)
-				ctx.requestID = opts.requestID;
+			if (opts.requestID != null) ctx.requestID = opts.requestID;
 			else if (opts.parentCtx != null && opts.parentCtx.requestID != null)
 				ctx.requestID = opts.parentCtx.requestID;
 
 			// Meta
 			if (opts.parentCtx != null && opts.parentCtx.meta != null)
 				ctx.meta = Object.assign({}, opts.parentCtx.meta || {}, opts.meta || {});
-			else if (opts.meta != null)
-				ctx.meta = opts.meta;
+			else if (opts.meta != null) ctx.meta = opts.meta;
+
+			// Headers
+			if (opts.headers) {
+				ctx.headers = opts.headers;
+			}
 
 			// ParentID, Level, Caller, Tracing
 			if (opts.parentCtx != null) {
 				ctx.tracing = opts.parentCtx.tracing;
 				ctx.level = opts.parentCtx.level + 1;
 
-				if (opts.parentCtx.span)
-					ctx.parentID = opts.parentCtx.span.id;
-				else
-					ctx.parentID = opts.parentCtx.id;
+				if (opts.parentCtx.span) ctx.parentID = opts.parentCtx.span.id;
+				else ctx.parentID = opts.parentCtx.id;
 
-				if (opts.parentCtx.service)
-					ctx.caller = opts.parentCtx.service.fullName;
+				if (opts.parentCtx.service) ctx.caller = opts.parentCtx.service.fullName;
 			}
 
 			// caller
@@ -14645,20 +21937,25 @@
 			}
 
 			// Event acknowledgement
-			if (opts.needAck) {
-				ctx.needAck = opts.needAck;
-			}
+			// if (opts.needAck) {
+			// 	ctx.needAck = opts.needAck;
+			// }
 
 			return ctx;
 		}
 
 		/**
 		 * Copy itself without ID.
-		 * @param {Endpoint} ep
+		 *
+		 * @param {ActionEndpoint|EventEndpoint} ep
 		 * @returns {Context}
 		 */
 		copy(ep) {
-			const newCtx = new this.constructor(this.broker);
+			/** @type {any} */
+			const ctor = this.constructor;
+
+			/** @type {Context} */
+			const newCtx = new ctor(this.broker);
 
 			newCtx.nodeID = this.nodeID;
 			newCtx.setEndpoint(ep || this.endpoint);
@@ -14668,6 +21965,8 @@
 			newCtx.level = this.level;
 			newCtx.params = this.params;
 			newCtx.meta = this.meta;
+			newCtx.headers = this.headers;
+			newCtx.responseHeaders = this.responseHeaders;
 			newCtx.locals = this.locals;
 			newCtx.requestID = this.requestID;
 			newCtx.tracing = this.tracing;
@@ -14677,6 +21976,7 @@
 			newCtx.eventName = this.eventName;
 			newCtx.eventType = this.eventType;
 			newCtx.eventGroups = this.eventGroups;
+			newCtx.stream = this.stream;
 
 			newCtx.cachedResult = this.cachedResult;
 
@@ -14684,21 +21984,41 @@
 		}
 
 		/**
+		 *
+		 * @param {ActionEndpoint|EventEndpoint} ep
+		 * @returns {ep is ActionEndpoint}
+		 */
+		isActionEndpoint(ep) {
+			// @ts-ignore
+			return ep?.action != null;
+		}
+
+		/**
+		 *
+		 * @param {ActionEndpoint|EventEndpoint} ep
+		 * @returns {ep is EventEndpoint}
+		 */
+		isEventEndpoint(ep) {
+			// @ts-ignore
+			return ep?.event != null;
+		}
+
+		/**
 		 * Set endpoint of context
 		 *
-		 * @param {Endpoint} endpoint
+		 * @param {ActionEndpoint|EventEndpoint} endpoint
 		 * @memberof Context
 		 */
 		setEndpoint(endpoint) {
 			this.endpoint = endpoint;
 			if (endpoint) {
 				this.nodeID = endpoint.id;
-				if (endpoint.action) {
+				if (this.isActionEndpoint(endpoint)) {
 					this.action = endpoint.action;
 					this.service = this.action.service;
 					this.event = null;
-				} else if (endpoint.event) {
-					this.event =  endpoint.event;
+				} else if (this.isEventEndpoint(endpoint)) {
+					this.event = endpoint.event;
 					this.service = this.event.service;
 					this.action = null;
 				}
@@ -14714,18 +22034,16 @@
 		 * @memberof Context
 		 */
 		setParams(newParams, cloning = false) {
-			if (cloning && newParams)
-				this.params = Object.assign({}, newParams);
-			else
-				this.params = newParams;
+			if (cloning && newParams) this.params = structuredClone(newParams);
+			else this.params = newParams;
 		}
 
 		/**
 		 * Call an other action. It creates a sub-context.
 		 *
 		 * @param {String} actionName
-		 * @param {Object?} params
-		 * @param {Object?} opts
+		 * @param {Object=} params
+		 * @param {Object=} _opts
 		 * @returns {Promise}
 		 *
 		 * @example <caption>Call an other service with params & options</caption>
@@ -14734,94 +22052,136 @@
 		 * @memberof Context
 		 */
 		call(actionName, params, _opts) {
-			const opts = Object.assign({
-				parentCtx: this
-			}, _opts);
+			const opts = Object.assign(
+				{
+					parentCtx: this
+				},
+				_opts
+			);
 
 			if (this.options.timeout > 0 && this.startHrTime) {
 				// Distributed timeout handling. Decrementing the timeout value with the elapsed time.
 				// If the timeout below 0, skip the call.
 				const diff = _process.hrtime(this.startHrTime);
-				const duration = (diff[0] * 1e3) + (diff[1] / 1e6);
+				const duration = diff[0] * 1e3 + diff[1] / 1e6;
 				const distTimeout = this.options.timeout - duration;
 
 				if (distTimeout <= 0) {
-					return this.broker.Promise.reject(new RequestSkippedError({ action: actionName, nodeID: this.broker.nodeID }));
+					return this.broker.Promise.reject(
+						new RequestSkippedError({ action: actionName, nodeID: this.broker.nodeID })
+					);
 				}
 
-				if (!opts.timeout || distTimeout < opts.timeout)
-					opts.timeout = distTimeout;
+				if (!opts.timeout || distTimeout < opts.timeout) opts.timeout = distTimeout;
 			}
 
 			// Max calling level check to avoid calling loops
-			if (this.broker.options.maxCallLevel > 0 && this.level >= this.broker.options.maxCallLevel) {
-				return this.broker.Promise.reject(new MaxCallLevelError({ nodeID: this.broker.nodeID, level: this.level }));
+			if (
+				this.broker.options.maxCallLevel > 0 &&
+				this.level >= this.broker.options.maxCallLevel
+			) {
+				return this.broker.Promise.reject(
+					new MaxCallLevelError({ nodeID: this.broker.nodeID, level: this.level })
+				);
 			}
 
 			let p = this.broker.call(actionName, params, opts);
 
 			// Merge metadata with sub context metadata
-			return p.then(res => {
-				if (p.ctx)
-					mergeMeta(this, p.ctx.meta);
+			return p
+				.then(res => {
+					if (p.ctx) mergeMeta(this, p.ctx.meta);
 
-				return res;
-			}).catch(err => {
-				if (p.ctx)
-					mergeMeta(this, p.ctx.meta);
+					return res;
+				})
+				.catch(err => {
+					if (p.ctx) mergeMeta(this, p.ctx.meta);
 
-				return this.broker.Promise.reject(err);
-			});
+					return this.broker.Promise.reject(err);
+				});
 		}
 
+		/**
+		 * @overload
+		 * @param {Record<string, MCallDefinition>} def
+		 * @param {MCallCallingOptions=} _opts
+		 * @returns {Promise<Record<string, TResult>>}
+		 */
+		/**
+		 * @overload
+		 * @param {MCallDefinition[]} def
+		 * @param {MCallCallingOptions=} _opts
+		 * @returns {Promise<TResult[]>}
+		 */
+		/**
+		 * Multiple action calls.
+		 *
+		 * @template TResult
+		 * @param {Record<string, MCallDefinition>|MCallDefinition[]} def
+		 * @param {MCallCallingOptions=} _opts
+		 * @returns {Promise<Record<string, TResult> | TResult[]>}
+		 */
 		mcall(def, _opts) {
-			const opts = Object.assign({
-				parentCtx: this
-			}, _opts);
+			const opts = Object.assign(
+				{
+					parentCtx: this
+				},
+				_opts
+			);
 
 			if (this.options.timeout > 0 && this.startHrTime) {
 				// Distributed timeout handling. Decrementing the timeout value with the elapsed time.
 				// If the timeout below 0, skip the call.
 				const diff = _process.hrtime(this.startHrTime);
-				const duration = (diff[0] * 1e3) + (diff[1] / 1e6);
+				const duration = diff[0] * 1e3 + diff[1] / 1e6;
 				const distTimeout = this.options.timeout - duration;
 
 				if (distTimeout <= 0) {
-					const action = (Array.isArray(def) ? def : Object.values(def)).map(d => d.action).join(", ");
-					return this.broker.Promise.reject(new RequestSkippedError({ action, nodeID: this.broker.nodeID }));
+					const action = (Array.isArray(def) ? def : Object.values(def))
+						.map(d => d.action)
+						.join(", ");
+					return this.broker.Promise.reject(
+						new RequestSkippedError({ action, nodeID: this.broker.nodeID })
+					);
 				}
 
-				if (!opts.timeout || distTimeout < opts.timeout)
-					opts.timeout = distTimeout;
+				if (!opts.timeout || distTimeout < opts.timeout) opts.timeout = distTimeout;
 			}
 
 			// Max calling level check to avoid calling loops
-			if (this.broker.options.maxCallLevel > 0 && this.level >= this.broker.options.maxCallLevel) {
-				return this.broker.Promise.reject(new MaxCallLevelError({ nodeID: this.broker.nodeID, level: this.level }));
+			if (
+				this.broker.options.maxCallLevel > 0 &&
+				this.level >= this.broker.options.maxCallLevel
+			) {
+				return this.broker.Promise.reject(
+					new MaxCallLevelError({ nodeID: this.broker.nodeID, level: this.level })
+				);
 			}
 
-			let p = this.broker.mcall(def, opts);
+			let p = this.broker.mcall(/** @type {MCallDefinition[]} */ (def), opts);
 
 			// Merge metadata with sub context metadata
-			return p.then(res => {
-				if (Array.isArray(p.ctx) && p.ctx.length)
-					p.ctx.forEach(ctx => mergeMeta(this, ctx.meta));
+			return p
+				.then(res => {
+					if (Array.isArray(p.ctx) && p.ctx.length)
+						p.ctx.forEach(ctx => mergeMeta(this, ctx.meta));
 
-				return res;
-			}).catch(err => {
-				if (Array.isArray(p.ctx) && p.ctx.length)
-					p.ctx.forEach(ctx => mergeMeta(this, ctx.meta));
+					return res;
+				})
+				.catch(err => {
+					if (Array.isArray(p.ctx) && p.ctx.length)
+						p.ctx.forEach(ctx => mergeMeta(this, ctx.meta));
 
-				return this.broker.Promise.reject(err);
-			});
+					return this.broker.Promise.reject(err);
+				});
 		}
 
 		/**
 		 * Emit an event (grouped & balanced global event)
 		 *
 		 * @param {string} eventName
-		 * @param {any?} payload
-		 * @param {Object?} opts
+		 * @param {any=} data
+		 * @param {Object=} opts
 		 * @returns {Promise}
 		 *
 		 * @example
@@ -14830,15 +22190,11 @@
 		 * @memberof Context
 		 */
 		emit(eventName, data, opts) {
-			if (Array.isArray(opts) || isString$g(opts))
-				opts = { groups: opts };
-			else if (opts == null)
-				opts = {};
-
-			if (opts.groups && !Array.isArray(opts.groups))
-				opts.groups = [opts.groups];
-
+			opts = opts ?? {};
 			opts.parentCtx = this;
+
+			if (opts.groups && !Array.isArray(opts.groups)) opts.groups = [opts.groups];
+
 			return this.broker.emit(eventName, data, opts);
 		}
 
@@ -14846,8 +22202,8 @@
 		 * Emit an event for all local & remote services
 		 *
 		 * @param {string} eventName
-		 * @param {any?} payload
-		 * @param {Object?} opts
+		 * @param {any=} data
+		 * @param {Object=} opts
 		 * @returns {Promise}
 		 *
 		 * @example
@@ -14856,15 +22212,11 @@
 		 * @memberof Context
 		 */
 		broadcast(eventName, data, opts) {
-			if (Array.isArray(opts) || isString$g(opts))
-				opts = { groups: opts };
-			else if (opts == null)
-				opts = {};
-
-			if (opts.groups && !Array.isArray(opts.groups))
-				opts.groups = [opts.groups];
-
+			opts = opts ?? {};
 			opts.parentCtx = this;
+
+			if (opts.groups && !Array.isArray(opts.groups)) opts.groups = [opts.groups];
+
 			return this.broker.broadcast(eventName, data, opts);
 		}
 
@@ -14872,7 +22224,7 @@
 		 * Start a new child tracing span.
 		 *
 		 * @param {String} name
-		 * @param {Object?} opts
+		 * @param {Object=} opts
 		 * @returns {Span}
 		 * @memberof Context
 		 */
@@ -14894,7 +22246,7 @@
 		 * Finish an active span.
 		 *
 		 * @param {Span} span
-		 * @param {Number?} time
+		 * @param {Number=} time
 		 */
 		finishSpan(span, time) {
 			if (!span.isActive()) return;
@@ -14915,7 +22267,7 @@
 		 * Convert Context to a printable POJO object.
 		 */
 		toJSON() {
-			const res = ___default.pick(this, [
+			const res = pick$2(this, [
 				"id",
 				"nodeID",
 				"action.name",
@@ -14929,6 +22281,8 @@
 				"level",
 				"params",
 				"meta",
+				"headers",
+				"responseHeaders",
 				//"locals",
 				"requestID",
 				"tracing",
@@ -14961,7 +22315,11 @@
 	const { MoleculerClientError } = errors;
 
 
-	var internals = function() {
+	/**
+	 * Internal service ($node.*)
+	 */
+	var internals = function () {
+		/** @type {import("./service").ServiceSchema} */
 		const schema = {
 			name: "$node",
 
@@ -14970,8 +22328,18 @@
 					cache: false,
 					tracing: false,
 					params: {
-						withServices: { type: "boolean", optional: true, convert: true, default: false },
-						onlyAvailable: { type: "boolean", optional: true, convert: true, default: false },
+						withServices: {
+							type: "boolean",
+							optional: true,
+							convert: true,
+							default: false
+						},
+						onlyAvailable: {
+							type: "boolean",
+							optional: true,
+							convert: true,
+							default: false
+						}
 					},
 					handler(ctx) {
 						return this.broker.registry.getNodeList(ctx.params);
@@ -14983,11 +22351,21 @@
 					tracing: false,
 					params: {
 						onlyLocal: { type: "boolean", optional: true, convert: true, default: false },
-						skipInternal: { type: "boolean", optional: true, convert: true, default: false },
+						skipInternal: {
+							type: "boolean",
+							optional: true,
+							convert: true,
+							default: false
+						},
 						withActions: { type: "boolean", optional: true, convert: true, default: false },
 						withEvents: { type: "boolean", optional: true, convert: true, default: false },
-						onlyAvailable: { type: "boolean", optional: true, convert: true, default: false },
-						grouping: { type: "boolean", optional: true, convert: true, default: true },
+						onlyAvailable: {
+							type: "boolean",
+							optional: true,
+							convert: true,
+							default: false
+						},
+						grouping: { type: "boolean", optional: true, convert: true, default: true }
 					},
 					handler(ctx) {
 						return this.broker.registry.getServiceList(ctx.params);
@@ -14999,9 +22377,24 @@
 					tracing: false,
 					params: {
 						onlyLocal: { type: "boolean", optional: true, convert: true, default: false },
-						skipInternal: { type: "boolean", optional: true, convert: true, default: false },
-						withEndpoints: { type: "boolean", optional: true, convert: true, default: false },
-						onlyAvailable: { type: "boolean", optional: true, convert: true, default: false },
+						skipInternal: {
+							type: "boolean",
+							optional: true,
+							convert: true,
+							default: false
+						},
+						withEndpoints: {
+							type: "boolean",
+							optional: true,
+							convert: true,
+							default: false
+						},
+						onlyAvailable: {
+							type: "boolean",
+							optional: true,
+							convert: true,
+							default: false
+						}
 					},
 					handler(ctx) {
 						return this.broker.registry.getActionList(ctx.params);
@@ -15013,9 +22406,24 @@
 					tracing: false,
 					params: {
 						onlyLocal: { type: "boolean", optional: true, convert: true, default: false },
-						skipInternal: { type: "boolean", optional: true, convert: true, default: false },
-						withEndpoints: { type: "boolean", optional: true, convert: true, default: false },
-						onlyAvailable: { type: "boolean", optional: true, convert: true, default: false },
+						skipInternal: {
+							type: "boolean",
+							optional: true,
+							convert: true,
+							default: false
+						},
+						withEndpoints: {
+							type: "boolean",
+							optional: true,
+							convert: true,
+							default: false
+						},
+						onlyAvailable: {
+							type: "boolean",
+							optional: true,
+							convert: true,
+							default: false
+						}
 					},
 					handler(ctx) {
 						return this.broker.registry.getEventList(ctx.params);
@@ -15043,13 +22451,31 @@
 					cache: false,
 					tracing: false,
 					params: {
-						types: { type: "multi", optional: true, rules: [ { type: "string" }, { type: "array", items: "string" } ] },
-						includes: { type: "multi", optional: true, rules: [ { type: "string" }, { type: "array", items: "string" } ] },
-						excludes: { type: "multi", optional: true, rules: [ { type: "string" }, { type: "array", items: "string" } ] }
+						types: {
+							type: "multi",
+							optional: true,
+							rules: [{ type: "string" }, { type: "array", items: "string" }]
+						},
+						includes: {
+							type: "multi",
+							optional: true,
+							rules: [{ type: "string" }, { type: "array", items: "string" }]
+						},
+						excludes: {
+							type: "multi",
+							optional: true,
+							rules: [{ type: "string" }, { type: "array", items: "string" }]
+						}
 					},
 					handler(ctx) {
 						if (!this.broker.isMetricsEnabled())
-							return this.Promise.reject(new MoleculerClientError("Metrics feature is disabled", 400, "METRICS_DISABLED"));
+							return this.Promise.reject(
+								new MoleculerClientError(
+									"Metrics feature is disabled",
+									400,
+									"METRICS_DISABLED"
+								)
+							);
 
 						return this.broker.metrics.list(ctx.params);
 					}
@@ -15060,10 +22486,11 @@
 		return schema;
 	};
 
-	const EventEmitter2$1 		= require$$0__default$2.EventEmitter2;
+	const EventEmitter2$1 = eventemitter2.EventEmitter2;
 
+	const { globSync } = null;
 
-
+	const { format } = util__default;
 
 
 
@@ -15076,15 +22503,39 @@
 
 
 
+	const Errors = errors;
 
 
 
 
-	const { MetricRegistry: MetricRegistry$1, METRIC: METRIC$b }	= metrics;
-	const { Tracer: Tracer$1 }			= tracing$1;
+	const { MetricRegistry: MetricRegistry$1, METRIC: METRIC$b } = metrics;
+	const { Tracer: Tracer$1 } = tracing$1;
+
+
+	/**
+	 * Import types
+	 *
+	 * @typedef {import("./context")} Context
+	 * @typedef {import("./registry/endpoint-action")} ActionEndpoint
+	 * @typedef {import("./service")} Service
+	 * @typedef {import("./service").ServiceSchema} ServiceSchema
+	 * @typedef {import("./service").ServiceDependency} ServiceDependency
+	 * @typedef {import("./service").ActionHandler} ActionHandler
+	 * @typedef {import("./service-broker")} ServiceBrokerClass
+	 * @typedef {import("./service-broker").BrokerOptions} BrokerOptions
+	 * @typedef {import("./service-broker").CallingOptions} CallingOptions
+	 * @typedef {import("./service-broker").NodeHealthStatus} NodeHealthStatus
+	 * @typedef {import("./service-broker").MCallDefinition} MCallDefinition
+	 * @typedef {import("./service-broker").MCallCallingOptions} MCallCallingOptions
+	 * @typedef {import("./logger-factory").Logger} Logger
+	 * @typedef {import("./registry").NodeRawInfo} NodeRawInfo
+	 * @typedef {import("./registry/service-item")} ServiceItem
+	 */
 
 	/**
 	 * Default broker options
+	 *
+	 * @type {BrokerOptions}
 	 */
 	const defaultOptions = {
 		namespace: "",
@@ -15095,6 +22546,8 @@
 
 		transporter: null, //"TCP",
 
+		errorRegenerator: null,
+
 		requestTimeout: 0 * 1000,
 		retryPolicy: {
 			enabled: false,
@@ -15102,6 +22555,7 @@
 			delay: 100,
 			maxDelay: 1000,
 			factor: 2,
+			// @ts-ignore
 			check: err => err && !!err.retryable
 		},
 
@@ -15112,14 +22566,16 @@
 
 		tracking: {
 			enabled: false,
-			shutdownTimeout: 5000,
+			shutdownTimeout: 5000
 		},
 
 		disableBalancer: false,
 
 		registry: {
 			strategy: "RoundRobin",
-			preferLocal: true
+			preferLocal: true,
+			stopDelay: 100,
+			discoverer: "Local"
 		},
 
 		circuitBreaker: {
@@ -15128,20 +22584,22 @@
 			windowTime: 60,
 			minRequestCount: 20,
 			halfOpenTime: 10 * 1000,
+			// @ts-ignore
 			check: err => err && err.code >= 500
 		},
 
 		bulkhead: {
 			enabled: false,
 			concurrency: 10,
-			maxQueueSize: 100,
+			maxQueueSize: 100
 		},
 
 		transit: {
 			maxQueueSize: 50 * 1000, // 50k ~ 400MB,
-			maxChunkSize: 256*1024, // 256KB
+			maxChunkSize: 256 * 1024, // 256KB
 			disableReconnect: false,
-			disableVersionCheck: false
+			disableVersionCheck: false,
+			serviceChangedDebounceTime: 1000
 		},
 
 		uidGenerator: null,
@@ -15153,19 +22611,20 @@
 
 		validator: true,
 
-		metrics: false,
-		tracing: false,
+		metrics: { enabled: false },
+		tracing: { enabled: false },
 
 		internalServices: true,
 		internalMiddlewares: true,
+
 		dependencyInterval: 1000,
+		dependencyTimeout: 0,
 
 		hotReload: false,
 
 		middlewares: null,
 
-		replCommands: null,
-		replDelimiter: null,
+		replOptions: null,
 
 		metadata: {},
 
@@ -15179,23 +22638,40 @@
 		 *
 		 * @type {(number|null)}
 		 */
-		maxSafeObjectSize: null,
+		maxSafeObjectSize: null
 		// ServiceFactory: null,
 		// ContextFactory: null
 		// Promise: null
 	};
 
+	const INTERNAL_MIDDLEWARES = [
+		"ActionHook",
+		"Validator",
+		"Bulkhead",
+		"Cacher",
+		"ContextTracker",
+		"CircuitBreaker",
+		"Timeout",
+		"Retry",
+		"Fallback",
+		"ErrorHandler",
+		"Tracing",
+		"Metrics",
+		"Debounce",
+		"Throttle"
+	];
+
 	/**
 	 * Service broker class
 	 *
 	 * @class ServiceBroker
+	 * @implements {ServiceBrokerClass}
 	 */
 	class ServiceBroker {
-
 		/**
 		 * Creates an instance of ServiceBroker.
 		 *
-		 * @param {Object} options
+		 * @param {BrokerOptions} options
 		 *
 		 * @memberof ServiceBroker
 		 */
@@ -15211,10 +22687,15 @@
 					this.Promise = Promise;
 				}
 				utils_1.polyfillPromise(this.Promise);
-				ServiceBroker.Promise = this.Promise;
 
 				// Broker started flag
 				this.started = false;
+
+				/** @type {Boolean} Broker is starting inital services flag*/
+				this.servicesStarting = false;
+
+				/** @type {Boolean} Broker stopping flag*/
+				this.stopping = false;
 
 				// Class factories
 				this.ServiceFactory = this.options.ServiceFactory || service;
@@ -15257,11 +22738,12 @@
 
 				// Metrics Registry
 				this.metrics = new MetricRegistry$1(this, this.options.metrics);
-				this.metrics.init();
+				this.metrics.init(this);
 				this.registerMoleculerMetrics();
 
 				// Middleware handler
 				this.middlewares = new middleware(this);
+				this.middlewares.middlewareInterceptors["call"] = this.interceptCallMiddleware;
 
 				// Service registry
 				this.registry = new registry$2(this);
@@ -15271,7 +22753,7 @@
 				if (this.cacher) {
 					this.cacher.init(this);
 
-					const name = this.getConstructorName(this.cacher);
+					const name = utils_1.getConstructorName(this.cacher);
 					this.logger.info(`Cacher: ${name}`);
 				}
 
@@ -15279,14 +22761,18 @@
 				this.serializer = serializers.resolve(this.options.serializer);
 				this.serializer.init(this);
 
-				const serializerName = this.getConstructorName(this.serializer);
+				// Error regenerator
+				this.errorRegenerator = Errors.resolveRegenerator(this.options.errorRegenerator);
+				this.errorRegenerator.init(this);
+
+				const serializerName = utils_1.getConstructorName(this.serializer);
 				this.logger.info(`Serializer: ${serializerName}`);
 
 				// Validator
 				if (this.options.validator) {
 					this.validator = validators.resolve(this.options.validator);
 					if (this.validator) {
-						const validatorName = this.getConstructorName(this.validator);
+						const validatorName = utils_1.getConstructorName(this.validator);
 						this.logger.info(`Validator: ${validatorName}`);
 						this.validator.init(this);
 					}
@@ -15304,14 +22790,16 @@
 					const tx = transporters.resolve(this.options.transporter);
 					this.transit = new transit(this, tx, this.options.transit);
 
-					const txName = this.getConstructorName(tx);
+					const txName = utils_1.getConstructorName(tx);
 					this.logger.info(`Transporter: ${txName}`);
 
 					if (this.options.disableBalancer) {
 						if (tx.hasBuiltInBalancer) {
 							this.logger.info("The broker built-in balancer is DISABLED.");
 						} else {
-							this.logger.warn(`The ${txName} has no built-in balancer. Broker balancer is ENABLED.`);
+							this.logger.warn(
+								`The ${txName} has no built-in balancer. Broker balancer is ENABLED.`
+							);
 							this.options.disableBalancer = false;
 						}
 					}
@@ -15322,7 +22810,16 @@
 					this.call = this.callWithoutBalancer;
 				}
 
-				this.registry.init(this);
+				if (this.options.transit.serviceChangedDebounceTime > 0) {
+					// Create debounced localServiceChanged
+					const origLocalServiceChanged = this.localServiceChanged;
+					this.localServiceChanged = ___default.debounce(
+						() => origLocalServiceChanged.call(this),
+						this.options.transit.serviceChangedDebounceTime
+					);
+				}
+
+				this.registry.init();
 
 				// Register internal actions
 				if (this.options.internalServices)
@@ -15332,8 +22829,7 @@
 				this.callMiddlewareHookSync("created", [this]);
 
 				// Call `created` event handler from options
-				if (utils_1.isFunction(this.options.created))
-					this.options.created(this);
+				if (utils_1.isFunction(this.options.created)) this.options.created(this);
 
 				// Graceful exit
 				this._closeFn = () => {
@@ -15350,10 +22846,8 @@
 					_process.on("SIGINT", this._closeFn);
 					_process.on("SIGTERM", this._closeFn);
 				}
-
-			} catch(err) {
-				if (this.logger)
-					this.fatal("Unable to create ServiceBroker.", err, true);
+			} catch (err) {
+				if (this.logger) this.fatal("Unable to create ServiceBroker.", err, true);
 				else {
 					/* eslint-disable-next-line no-console */
 					console.error("Unable to create ServiceBroker.", err);
@@ -15365,85 +22859,31 @@
 		/**
 		 * Register middlewares (user & internal)
 		 *
+		 * @param {MiddlewareHandler.Middleware[]} userMiddlewares
 		 * @memberof ServiceBroker
 		 */
 		registerMiddlewares(userMiddlewares) {
 			// Register user middlewares
 			if (Array.isArray(userMiddlewares) && userMiddlewares.length > 0) {
 				___default.compact(userMiddlewares).forEach(mw => this.middlewares.add(mw));
-
-				this.logger.info(`Registered ${this.middlewares.count()} custom middleware(s).`);
 			}
 
 			if (this.options.internalMiddlewares) {
 				// Register internal middlewares
-
-				const prevCount = this.middlewares.count();
-
-				// 0. ActionHook
-				this.middlewares.add("ActionHook");
-
-				// 1. Validator
-				if (this.validator && utils_1.isFunction(this.validator.middleware)) {
-					const mw = this.validator.middleware(this);
-					if (utils_1.isPlainObject(mw))
-						this.middlewares.add(mw);
-					else
-						this.middlewares.add({ localAction: mw });
-				}
-
-				// 2. Bulkhead
-				this.middlewares.add("Bulkhead");
-
-				// 3. Cacher
-				if (this.cacher && utils_1.isFunction(this.cacher.middleware)) {
-					const mw = this.cacher.middleware();
-					if (utils_1.isPlainObject(mw))
-						this.middlewares.add(mw);
-					else
-						this.middlewares.add({ localAction: mw });
-				}
-
-				// 4. Context tracker
-				this.middlewares.add("ContextTracker");
-
-				// 5. CircuitBreaker
-				this.middlewares.add("CircuitBreaker");
-
-				// 6. Timeout
-				this.middlewares.add("Timeout");
-
-				// 7. Retry
-				this.middlewares.add("Retry");
-
-				// 8. Fallback
-				this.middlewares.add("Fallback");
-
-				// 9. Error handler
-				this.middlewares.add("ErrorHandler");
-
-				// 10. Tracing
-				this.middlewares.add("Tracing");
-
-				// 11. Metrics
-				this.middlewares.add("Metrics");
-
-				// 12. Debounce
-				this.middlewares.add("Debounce");
-
-				// 13. Throttle
-				this.middlewares.add("Throttle");
+				INTERNAL_MIDDLEWARES.forEach(mw => this.middlewares.add(mw));
 
 				if (this.options.hotReload) {
 					// 14. Hot Reload
 					this.middlewares.add("HotReload");
 				}
-
-				this.logger.info(`Registered ${this.middlewares.count() - prevCount} internal middleware(s).`);
 			}
+			this.logger.info(`Registered ${this.middlewares.count()} middleware(s).`);
 
 			this.createService = this.wrapMethod("createService", this.createService);
-			this.registerLocalService = this.wrapMethod("registerLocalService", this.registerLocalService);
+			this.registerLocalService = this.wrapMethod(
+				"registerLocalService",
+				this.registerLocalService
+			);
 			this.destroyService = this.wrapMethod("destroyService", this.destroyService);
 			this.call = this.wrapMethod("call", this.call);
 			this.callWithoutBalancer = this.wrapMethod("call", this.callWithoutBalancer);
@@ -15452,7 +22892,22 @@
 			this.broadcast = this.wrapMethod("broadcast", this.broadcast);
 			this.broadcastLocal = this.wrapMethod("broadcastLocal", this.broadcastLocal);
 
-			this.metrics.set(METRIC$b.MOLECULER_BROKER_MIDDLEWARES_TOTAL,this.middlewares.count());
+			this.metrics.set(METRIC$b.MOLECULER_BROKER_MIDDLEWARES_TOTAL, this.middlewares.count());
+		}
+
+		/**
+		 * It is necessary to keep the context of the call when using call middleware.
+		 */
+		interceptCallMiddleware(createMiddleware) {
+			return next => {
+				let result = null;
+				const call = createMiddleware((...args) => (result = next(...args)));
+				return (...args) => {
+					const promise = call(...args);
+					if (result) promise.ctx = result.ctx;
+					return promise;
+				};
+			};
 		}
 
 		/**
@@ -15463,16 +22918,58 @@
 
 			// --- MOLECULER NODE METRICS ---
 
-			this.metrics.register({ name: METRIC$b.MOLECULER_NODE_TYPE, type: METRIC$b.TYPE_INFO, description: "Moleculer implementation type" }).set("nodejs");
-			this.metrics.register({ name: METRIC$b.MOLECULER_NODE_VERSIONS_MOLECULER, type: METRIC$b.TYPE_INFO, description: "Moleculer version number" }).set(ServiceBroker.MOLECULER_VERSION);
-			this.metrics.register({ name: METRIC$b.MOLECULER_NODE_VERSIONS_PROTOCOL, type: METRIC$b.TYPE_INFO, description: "Moleculer protocol version" }).set(ServiceBroker.PROTOCOL_VERSION);
+			this.metrics
+				.register({
+					name: METRIC$b.MOLECULER_NODE_TYPE,
+					type: METRIC$b.TYPE_INFO,
+					description: "Moleculer implementation type"
+				})
+				.set("nodejs");
+			this.metrics
+				.register({
+					name: METRIC$b.MOLECULER_NODE_VERSIONS_MOLECULER,
+					type: METRIC$b.TYPE_INFO,
+					description: "Moleculer version number"
+				})
+				.set(ServiceBroker.MOLECULER_VERSION);
+			this.metrics
+				.register({
+					name: METRIC$b.MOLECULER_NODE_VERSIONS_PROTOCOL,
+					type: METRIC$b.TYPE_INFO,
+					description: "Moleculer protocol version"
+				})
+				.set(ServiceBroker.PROTOCOL_VERSION);
 
 			// --- MOLECULER BROKER METRICS ---
 
-			this.metrics.register({ name: METRIC$b.MOLECULER_BROKER_NAMESPACE, type: METRIC$b.TYPE_INFO, description: "Moleculer namespace" }).set(this.namespace);
-			this.metrics.register({ name: METRIC$b.MOLECULER_BROKER_STARTED, type: METRIC$b.TYPE_GAUGE, description: "ServiceBroker started" }).set(0);
-			this.metrics.register({ name: METRIC$b.MOLECULER_BROKER_LOCAL_SERVICES_TOTAL, type: METRIC$b.TYPE_GAUGE, description: "Number of local services" }).set(0);
-			this.metrics.register({ name: METRIC$b.MOLECULER_BROKER_MIDDLEWARES_TOTAL, type: METRIC$b.TYPE_GAUGE, description: "Number of local middlewares" }).set(0);
+			this.metrics
+				.register({
+					name: METRIC$b.MOLECULER_BROKER_NAMESPACE,
+					type: METRIC$b.TYPE_INFO,
+					description: "Moleculer namespace"
+				})
+				.set(this.namespace);
+			this.metrics
+				.register({
+					name: METRIC$b.MOLECULER_BROKER_STARTED,
+					type: METRIC$b.TYPE_GAUGE,
+					description: "ServiceBroker started"
+				})
+				.set(0);
+			this.metrics
+				.register({
+					name: METRIC$b.MOLECULER_BROKER_LOCAL_SERVICES_TOTAL,
+					type: METRIC$b.TYPE_GAUGE,
+					description: "Number of local services"
+				})
+				.set(0);
+			this.metrics
+				.register({
+					name: METRIC$b.MOLECULER_BROKER_MIDDLEWARES_TOTAL,
+					type: METRIC$b.TYPE_GAUGE,
+					description: "Number of local middlewares"
+				})
+				.set(0);
 		}
 
 		/**
@@ -15492,38 +22989,42 @@
 					return this.callMiddlewareHook("starting", [this]);
 				})
 				.then(() => {
-					if (this.transit)
-						return this.transit.connect();
+					if (this.transit) return this.transit.connect();
 				})
 				.then(() => {
 					// Call service `started` handlers
-					return this.Promise.all(this.services.map(svc => svc._start.call(svc)))
-						.catch(err => {
-							/* istanbul ignore next */
-							this.logger.error("Unable to start all services.", err);
-							throw err;
-						});
+					const startingServices = this.services.map(svc => svc._start.call(svc));
+					// Set servicesStarting, so new services created from now on will be started when registered
+					this.servicesStarting = true;
+					// Wait for services `started` handlers
+					return this.Promise.all(startingServices).catch(err => {
+						/* istanbul ignore next */
+						this.logger.error("Unable to start all services.", err);
+						throw err;
+					});
 				})
 				.then(() => {
 					this.started = true;
+					this.servicesStarting = false;
 					this.metrics.set(METRIC$b.MOLECULER_BROKER_STARTED, 1);
 					this.broadcastLocal("$broker.started");
-					this.registry.regenerateLocalRawInfo(true);
 				})
 				.then(() => {
-					if (this.transit)
-						return this.transit.ready();
+					if (this.transit) return this.transit.ready();
 				})
 				.then(() => {
 					return this.callMiddlewareHook("started", [this]);
 				})
 				.then(() => {
-					if (utils_1.isFunction(this.options.started))
-						return this.options.started(this);
+					if (utils_1.isFunction(this.options.started)) return this.options.started(this);
 				})
 				.then(() => {
 					const duration = Date.now() - startTime;
-					this.logger.info(`✔ ServiceBroker with ${this.services.length} service(s) is started successfully in ${utils_1.humanize(duration)}.`);
+					this.logger.info(
+						`✔ ServiceBroker with ${
+						this.services.length
+					} service(s) started successfully in ${utils_1.humanize(duration)}.`
+					);
 				});
 		}
 
@@ -15537,21 +23038,33 @@
 			return this.Promise.resolve()
 				.then(() => {
 					if (this.transit) {
-						this.registry.regenerateLocalRawInfo(true);
+						this.registry.regenerateLocalRawInfo(true, true);
 						// Send empty node info in order to block incoming requests
 						return this.registry.discoverer.sendLocalNodeInfo();
 					}
 				})
 				.then(() => {
+					return this.Promise.delay(this.options.registry.stopDelay);
+				})
+				.then(() => {
+					this.stopping = true;
+
 					return this.callMiddlewareHook("stopping", [this], { reverse: true });
 				})
 				.then(() => {
 					// Call service `stopped` handlers
-					return this.Promise.all(this.services.map(svc => svc._stop.call(svc)))
-						.catch(err => {
-						/* istanbul ignore next */
+					return this.Promise.all(this.services.map(svc => svc._stop.call(svc))).catch(
+						err => {
+							/* istanbul ignore next */
 							this.logger.error("Unable to stop all services.", err);
-						});
+
+							this.broadcastLocal("$broker.error", {
+								error: err,
+								module: "broker",
+								type: constants.FAILED_STOPPING_SERVICES
+							});
+						}
+					);
 				})
 				.then(() => {
 					if (this.transit) {
@@ -15580,8 +23093,7 @@
 					return this.callMiddlewareHook("stopped", [this], { reverse: true });
 				})
 				.then(() => {
-					if (utils_1.isFunction(this.options.stopped))
-						return this.options.stopped(this);
+					if (utils_1.isFunction(this.options.stopped)) return this.options.stopped(this);
 				})
 				.catch(err => {
 					/* istanbul ignore next */
@@ -15613,28 +23125,26 @@
 		 *
 		 * @example
 		 * broker.start().then(() => broker.repl());
-		 * @returns {object}
+		 * @returns
 		 */
 		repl() {
 			let repl;
 			try {
 				repl = require$$19;
-			}
-			catch (error) {
-				console.error("The 'moleculer-repl' package is missing. Please install it with 'npm install moleculer-repl' command."); // eslint-disable-line no-console
-				this.logger.error("The 'moleculer-repl' package is missing. Please install it with 'npm install moleculer-repl' command.");
+			} catch (error) {
+				// eslint-disable-next-line no-console
+				console.error(
+					"The 'moleculer-repl' package is missing. Please install it with 'npm install moleculer-repl' command."
+				);
+				this.logger.error(
+					"The 'moleculer-repl' package is missing. Please install it with 'npm install moleculer-repl' command."
+				);
 				this.logger.debug("ERROR", error);
 				return;
 			}
 
-			if (repl)
-			{
-				let opts = null;
-				const delimiter = this.options.replDelimiter;
-				const customCommands = this.options.replCommands;
-				delimiter && (opts = { delimiter });
-				customCommands && (opts = { ...opts,customCommands });
-				return repl(this, opts);
+			if (repl) {
+				return repl(this, this.options.replOptions);
 			}
 		}
 
@@ -15657,11 +23167,11 @@
 		/**
 		 * Wrap a method with middlewares
 		 *
-		 * @param {string} method
+		 * @param {string} name
 		 * @param {Function} handler
-		 * @param {any} bindTo
-		 * @param {Object} opts
-		 * @returns {Function}
+		 * @param {any=} bindTo
+		 * @param {Object=} opts
+		 * @returns {any}
 		 *
 		 * @memberof ServiceBroker
 		 */
@@ -15672,9 +23182,9 @@
 		/**
 		 * Call a handler asynchronously in all middlewares
 		 *
-		 * @param {String} method
+		 * @param {String} name
 		 * @param {Array<any>} args
-		 * @param {Object} opts
+		 * @param {Object=} opts
 		 * @returns {Promise}
 		 *
 		 * @memberof ServiceBroker
@@ -15686,9 +23196,9 @@
 		/**
 		 * Call a handler synchronously in all middlewares
 		 *
-		 * @param {String} method
+		 * @param {String} name
 		 * @param {Array<any>} args
-		 * @param {Object} opts
+		 * @param {Object=} opts
 		 * @returns
 		 *
 		 * @memberof ServiceBroker
@@ -15721,17 +23231,20 @@
 		 * Get a custom logger for sub-modules (service, transporter, cacher, context...etc)
 		 *
 		 * @param {String} mod	Name of module
-		 * @param {Object} props	Module properties (service name, version, ...etc
-		 * @returns {ModuleLogger}
+		 * @param {Record<string, any>=} props	Module properties (service name, version, ...etc
+		 * @returns {Logger}
 		 *
 		 * @memberof ServiceBroker
 		 */
 		getLogger(mod, props) {
-			let bindings = Object.assign({
-				nodeID: this.nodeID,
-				ns: this.namespace,
-				mod
-			}, props);
+			let bindings = Object.assign(
+				{
+					nodeID: this.nodeID,
+					ns: this.namespace,
+					mod
+				},
+				props
+			);
 
 			return this.loggerFactory.getLogger(bindings);
 		}
@@ -15740,19 +23253,16 @@
 		 * Fatal error. Print the message to console and exit the process (if need)
 		 *
 		 * @param {String} message
-		 * @param {Error?} err
-		 * @param {boolean} [needExit=true]
+		 * @param {Error=} err
+		 * @param {boolean=} [needExit=true]
 		 *
 		 * @memberof ServiceBroker
 		 */
 		fatal(message, err, needExit = true) {
-			if (this.logger)
-				this.logger.fatal(message, err);
-			else
-				console.error(message, err); // eslint-disable-line no-console
+			if (this.logger) this.logger.fatal(message, err);
+			else console.error(message, err); // eslint-disable-line no-console
 
-			if (needExit)
-				_process.exit(1);
+			if (needExit) _process.exit(1);
 		}
 
 		/**
@@ -15769,13 +23279,10 @@
 
 			let serviceFiles;
 
-			if (Array.isArray(fileMask))
-				serviceFiles = fileMask.map(f => path__default.join(folder, f));
-			else
-				serviceFiles = glob__default.sync(path__default.join(folder, fileMask));
+			if (Array.isArray(fileMask)) serviceFiles = fileMask.map(f => path__default.join(folder, f));
+			else serviceFiles = globSync(folder + "/" + fileMask);
 
-			if (serviceFiles)
-				serviceFiles.forEach(filename => this.loadService(filename));
+			if (serviceFiles) serviceFiles.forEach(filename => this.loadService(filename));
 
 			return serviceFiles.length;
 		}
@@ -15783,8 +23290,8 @@
 		/**
 		 * Load a service from file
 		 *
-		 * @param {string} 		Path of service
-		 * @returns	{Service}	Loaded service
+		 * @param {string} filePath
+		 * @returns	{Service}
 		 *
 		 * @memberof ServiceBroker
 		 */
@@ -15800,25 +23307,22 @@
 
 				let svc;
 				schema = this.normalizeSchemaConstructor(schema);
-				if (Object.prototype.isPrototypeOf.call(this.ServiceFactory, schema)) {
+				if (utils_1.isInheritedClass(schema, this.ServiceFactory)) {
 					// Service implementation
+					// @ts-ignore
 					svc = new schema(this);
 
 					// If broker is started, call the started lifecycle event of service
-					if (this.started)
-						this._restartService(svc);
-
+					if (this.started || this.servicesStarting) this._restartService(svc);
 				} else if (utils_1.isFunction(schema)) {
 					// Function
 					svc = schema(this);
-					if (!(svc instanceof this.ServiceFactory)) {
+					if (!utils_1.isInheritedClass(svc, this.ServiceFactory)) {
 						svc = this.createService(svc);
 					} else {
 						// If broker is started, call the started lifecycle event of service
-						if (this.started)
-							this._restartService(svc);
+						if (this.started || this.servicesStarting) this._restartService(svc);
 					}
-
 				} else if (schema) {
 					// Schema object
 					svc = this.createService(schema);
@@ -15829,9 +23333,13 @@
 				}
 
 				return svc;
-
 			} catch (e) {
 				this.logger.error(`Failed to load service '${filePath}'`, e);
+				this.broadcastLocal("$broker.error", {
+					error: e,
+					module: "broker",
+					type: constants.FAILED_LOAD_SERVICE
+				});
 				throw e;
 			}
 		}
@@ -15839,29 +23347,26 @@
 		/**
 		 * Create a new service by schema
 		 *
-		 * @param {any} schema	Schema of service or a Service class
-		 * @param {any=} schemaMods	Modified schema
+		 * @param {ServiceSchema} schema	Schema of service or a Service class
+		 * @param {ServiceSchema=} schemaMods	Modified schema
 		 * @returns {Service}
 		 *
 		 * @memberof ServiceBroker
 		 */
 		createService(schema, schemaMods) {
+			/** @type {Service} */
 			let service;
 
 			schema = this.normalizeSchemaConstructor(schema);
 			if (Object.prototype.isPrototypeOf.call(this.ServiceFactory, schema)) {
+				// @ts-ignore
 				service = new schema(this, schemaMods);
 			} else {
-				let s = schema;
-				if (schemaMods)
-					s = this.ServiceFactory.mergeSchemas(schema, schemaMods);
-
-				service = new this.ServiceFactory(this, s);
+				service = new this.ServiceFactory(this, schema, schemaMods);
 			}
 
-			// If broker has started yet, call the started lifecycle event of service
-			if (this.started)
-				this._restartService(service);
+			// If broker has began to start its initial services yet, call the started lifecycle event of service
+			if (this.started || this.servicesStarting) this._restartService(service);
 
 			return service;
 		}
@@ -15872,11 +23377,17 @@
 		 * @param {Service} service
 		 * @returns {Promise}
 		 * @memberof ServiceBroker
-		 * @private
 		 */
 		_restartService(service) {
-			return service._start.call(service)
-				.catch(err => this.logger.error("Unable to start service.", err));
+			return service._start.call(service).catch(err => {
+				this.logger.error("Unable to start service.", err);
+
+				this.broadcastLocal("$broker.error", {
+					error: err,
+					module: "broker",
+					type: constants.FAILED_RESTART_SERVICE
+				});
+			});
 		}
 
 		/**
@@ -15893,50 +23404,67 @@
 		/**
 		 * Register a local service to Service Registry
 		 *
-		 * @param {Object} registryItem
+		 * @param {ServiceItem} registryItem
 		 * @memberof ServiceBroker
 		 */
 		registerLocalService(registryItem) {
 			this.registry.registerLocalService(registryItem);
+
+			return null;
 		}
 
 		/**
 		 * Destroy a local service
 		 *
-		 * @param {Service|string|object} service
+		 * @param {Service|string|ServiceDependency} service
 		 * @returns Promise<void>
 		 * @memberof ServiceBroker
 		 */
 		destroyService(service) {
 			let serviceName;
 			let serviceVersion;
+			/** @type {Service} */
+			let svc;
 			if (utils_1.isString(service)) {
 				serviceName = service;
-				service = this.getLocalService(service);
+				svc = this.getLocalService(service);
 			} else if (utils_1.isPlainObject(service)) {
 				serviceName = service.name;
-				serviceVersion  = service.version;
-				service = this.getLocalService(service.name, service.version);
+				serviceVersion = service.version;
+				svc = this.getLocalService(service);
+			} else {
+				svc = service;
 			}
 
-			if (!service) {
-				return this.Promise.reject(new errors.ServiceNotFoundError({ service: serviceName, version: serviceVersion }));
+			if (!svc) {
+				return this.Promise.reject(
+					new errors.ServiceNotFoundError({ service: serviceName, version: serviceVersion })
+				);
 			}
 
 			return this.Promise.resolve()
-				.then(() => service._stop())
+				.then(() => svc._stop())
 				.catch(err => {
 					/* istanbul ignore next */
-					this.logger.error(`Unable to stop '${service.fullName}' service.`, err);
+					this.logger.error(`Unable to stop '${svc.fullName}' service.`, err);
+
+					this.broadcastLocal("$broker.error", {
+						error: err,
+						module: "broker",
+						type: constants.FAILED_DESTRUCTION_SERVICE
+					});
 				})
 				.then(() => {
-					utils_1.removeFromArray(this.services, service);
-					this.registry.unregisterService(service.fullName, this.nodeID);
+					utils_1.removeFromArray(this.services, svc);
+					this.registry.unregisterService(svc.fullName, this.nodeID);
 
-					this.logger.info(`Service '${service.fullName}' is stopped.`);
+					this.logger.info(`Service '${svc.fullName}' is stopped.`);
 					this.servicesChanged(true);
 
-					this.metrics.set(METRIC$b.MOLECULER_BROKER_LOCAL_SERVICES_TOTAL, this.services.length);
+					this.metrics.set(
+						METRIC$b.MOLECULER_BROKER_LOCAL_SERVICES_TOTAL,
+						this.services.length
+					);
 				});
 		}
 
@@ -15948,22 +23476,41 @@
 		 */
 		servicesChanged(localService = false) {
 			this.broadcastLocal("$services.changed", { localService });
-
 			// Should notify remote nodes, because our service list is changed.
-			if (this.started && localService && this.transit) {
+			if (localService && this.transit) {
+				this.localServiceChanged();
+			}
+		}
+
+		/**
+		 * It's a debounced method to send INFO packets to remote nodes.
+		 */
+		localServiceChanged() {
+			if (!this.stopping) {
 				this.registry.discoverer.sendLocalNodeInfo();
 			}
 		}
 
 		/**
 		 * Register internal services
-		 * @param {Object?} opts
+		 * @param {Partial<ServiceSchema>?} opts
 		 *
 		 * @memberof ServiceBroker
 		 */
 		registerInternalServices(opts) {
 			opts = utils_1.isObject(opts) ? opts : {};
-			this.createService(internals(), opts["$node"]);
+			/** @type {import("./service").ServiceSchema} */
+			const internalsSchema = internals();
+			// If it's present any custom definition, define it as the root schema and the default one as a mixin
+			if (opts["$node"]) {
+				const definitiveSchema = opts["$node"];
+				if (!definitiveSchema.mixins) definitiveSchema.mixins = [];
+				definitiveSchema.mixins.push(internalsSchema);
+				this.createService(definitiveSchema);
+			} else {
+				// Otherwise, just use the default one
+				this.createService(internalsSchema);
+			}
 		}
 
 		/**
@@ -15973,68 +23520,118 @@
 		 * 	getLocalService("v2.posts");
 		 * 	getLocalService({ name: "posts", version: 2 });
 		 *
-		 * @param {String|ServiceSearchObj} name
-		 * @param {String|Number?} version
+		 * @param {String|ServiceDependency} name
 		 * @returns {Service}
 		 *
 		 * @memberof ServiceBroker
 		 */
-		getLocalService(name, version) {
-			if (arguments.length == 1) {
-				if (utils_1.isString(name))
-					return this.services.find(service => service.fullName == name);
-				else if (utils_1.isPlainObject(name))
-					return this.services.find(service => service.name == name.name && service.version == name.version);
-			}
-			// Deprecated
-			return this.services.find(service => service.name == name && service.version == version);
+		getLocalService(name) {
+			if (utils_1.isString(name)) return this.services.find(service => service.fullName == name);
+			else if (utils_1.isPlainObject(name))
+				return this.services.find(
+					service => service.name == name.name && service.version == name.version
+				);
 		}
 
 		/**
 		 * Wait for other services
 		 *
-		 * @param {String|Array<String>} serviceNames
-		 * @param {Number} timeout Timeout in milliseconds
-		 * @param {Number} interval Check interval in milliseconds
+		 * @param {String|Array<String>|ServiceDependency|Array<ServiceDependency>} service
+		 * @param {Number=} timeout Timeout in milliseconds
+		 * @param {Number=} interval Check interval in milliseconds
 		 * @returns {Promise}
 		 *
 		 * @memberof ServiceBroker
 		 */
-		waitForServices(serviceNames, timeout, interval, logger = this.logger) {
-			if (!Array.isArray(serviceNames))
-				serviceNames = [serviceNames];
+		waitForServices(
+			service,
+			timeout = this.options.dependencyTimeout,
+			interval = this.options.dependencyInterval,
+			logger = this.logger
+		) {
+			let serviceNames = Array.isArray(service) ? service : [service];
 
-			serviceNames = ___default.uniq(___default.compact(serviceNames.map(x => {
-				if (utils_1.isPlainObject(x) && x.name)
-					return this.ServiceFactory.getVersionedFullName(x.name, x.version);
+			serviceNames = utils_1.uniq(
+				___default.compact(
+					serviceNames.map(x => {
+						if (utils_1.isPlainObject(x) && x.name) {
+							if (Array.isArray(x.version)) {
+								return x.version.map(v =>
+									this.ServiceFactory.getVersionedFullName(x.name, v)
+								);
+							} else {
+								return this.ServiceFactory.getVersionedFullName(x.name, x.version);
+							}
+						} else if (utils_1.isString(x)) {
+							return x;
+						}
+					})
+				)
+			);
 
-				if (utils_1.isString(x))
-					return x;
-			})));
+			if (serviceNames.length === 0) return this.Promise.resolve({ services: [], statuses: [] });
 
-			if (serviceNames.length == 0)
-				return this.Promise.resolve();
-
-			logger.info(`Waiting for service(s) '${serviceNames.join(", ")}'...`);
+			logger.info(
+				`Waiting for service(s) '${serviceNames
+				.map(n => (Array.isArray(n) ? n.join(" OR ") : n))
+				.join(", ")}'...`
+			);
 
 			const startTime = Date.now();
 			return new this.Promise((resolve, reject) => {
 				const check = () => {
-					const count = serviceNames.filter(fullName => {
-						return this.registry.hasService(fullName);
+					const serviceStatuses = serviceNames.map(name => {
+						if (Array.isArray(name)) {
+							return name.map(n => ({
+								name: n,
+								available: this.registry.hasService(n)
+							}));
+						} else {
+							return {
+								name,
+								available: this.registry.hasService(name)
+							};
+						}
 					});
+					const flattenedStatuses = ___default.flatMap(serviceStatuses, s => s);
+					const names = flattenedStatuses.map(s => s.name);
+					const availableServices = flattenedStatuses.filter(s => s.available);
 
-					if (count.length == serviceNames.length) {
-						logger.info(`Service(s) '${serviceNames.join(", ")}' are available.`);
-						return resolve();
+					const isReady = serviceStatuses.every(status =>
+						Array.isArray(status) ? status.some(n => n.available) : status.available
+					);
+					if (isReady) {
+						logger.info(
+							`Service(s) '${availableServices
+							.map(s => s.name)
+							.join(", ")}' are available.`
+						);
+						return resolve({ services: names, statuses: flattenedStatuses });
 					}
 
-					logger.debug(`${count.length} of ${serviceNames.length} services are available. Waiting further...`);
+					const unavailableServices = flattenedStatuses.filter(s => !s.available);
+					logger.debug(
+						format(
+							"%d (%s) of %d services are available. %d (%s) are still unavailable. Waiting further...",
+							availableServices.length,
+							availableServices.map(s => s.name).join(", "),
+							serviceStatuses.length,
+							unavailableServices.length,
+							unavailableServices.map(s => s.name).join(", ")
+						)
+					);
 
 					if (timeout && Date.now() - startTime > timeout)
-						return reject(new errors.MoleculerServerError("Services waiting is timed out.", 500, "WAITFOR_SERVICES", { services: serviceNames }));
+						return reject(
+							new errors.MoleculerServerError(
+								"Services waiting is timed out.",
+								500,
+								"WAITFOR_SERVICES",
+								{ services: names, statuses: flattenedStatuses }
+							)
+						);
 
-					timersBrowserify.setTimeout(check, interval || this.options.dependencyInterval || 1000);
+					timersBrowserify.setTimeout(check, interval);
 				};
 
 				check();
@@ -16044,10 +23641,10 @@
 		/**
 		 * Find the next available endpoint for action
 		 *
-		 * @param {String} actionName
+		 * @param {String |ActionEndpoint} actionName
 		 * @param {Object?} opts
 		 * @param {Context?} ctx
-		 * @returns {Endpoint|Error}
+		 * @returns {ActionEndpoint|E.MoleculerRetryableError}
 		 *
 		 * @performance-critical
 		 * @memberof ServiceBroker
@@ -16065,7 +23662,6 @@
 						return new errors.ServiceNotFoundError({ action: actionName, nodeID });
 					}
 					return endpoint;
-
 				} else {
 					// Get endpoint list by action name
 					const epList = this.registry.getActionEndpoints(actionName);
@@ -16089,25 +23685,25 @@
 		/**
 		 * Call an action
 		 *
-		 * @param {String} actionName	name of action
-		 * @param {Object?} params		params of action
-		 * @param {Object?} opts		options of call (optional)
+		 * @param {String} actionName		name of action
+		 * @param {Object=} params			params of action
+		 * @param {CallingOptions=} opts	options of call (optional)
 		 * @returns {Promise}
 		 *
 		 * @performance-critical
 		 * @memberof ServiceBroker
 		 */
 		call(actionName, params, opts = {}) {
-			if (params === undefined)
-				params = {}; // Backward compatibility
+			if (params === undefined) params = {}; // Backward compatibility
 
 			// Create context
 			let ctx;
 			if (opts.ctx != null) {
-
 				const endpoint = this.findNextActionEndpoint(actionName, opts, opts.ctx);
 				if (endpoint instanceof Error) {
-					return this.Promise.reject(endpoint).catch(err => this.errorHandler(err, { actionName, params, opts }));
+					return this.Promise.reject(endpoint).catch(err =>
+						this.errorHandler(err, { actionName, params, opts })
+					);
 				}
 
 				// Reused context
@@ -16122,16 +23718,31 @@
 
 				const endpoint = this.findNextActionEndpoint(actionName, opts, ctx);
 				if (endpoint instanceof Error) {
-					return this.Promise.reject(endpoint).catch(err => this.errorHandler(err, { actionName, params, opts }));
+					return this.Promise.reject(endpoint).catch(err =>
+						this.errorHandler(err, { actionName, params, opts })
+					);
 				}
 
 				ctx.setEndpoint(endpoint);
 			}
 
-			if (ctx.endpoint.local)
-				this.logger.debug("Call action locally.", { action: ctx.action.name, requestID: ctx.requestID });
-			else
-				this.logger.debug("Call action on remote node.", { action: ctx.action.name, nodeID: ctx.nodeID, requestID: ctx.requestID });
+			if (ctx.endpoint.local) {
+				this.logger.debug("Call action locally.", {
+					action: ctx.action.name,
+					requestID: ctx.requestID
+				});
+
+				// Stream redirection
+				if (opts.stream) {
+					ctx.stream = opts.stream;
+				}
+			} else {
+				this.logger.debug("Call action on remote node.", {
+					action: ctx.action.name,
+					nodeID: ctx.nodeID,
+					requestID: ctx.requestID
+				});
+			}
 
 			//this.setCurrentContext(ctx);
 
@@ -16150,19 +23761,18 @@
 		 * built-in balancer with the "disableBalancer" option.
 		 *
 		 * @param {String} actionName	name of action
-		 * @param {Object?} params		params of action
-		 * @param {Object?} opts 		options of call (optional)
+		 * @param {Object=} params		params of action
+		 * @param {Object=} opts 		options of call (optional)
 		 * @returns {Promise}
 		 *
-		 * @private
 		 * @memberof ServiceBroker
 		 */
 		callWithoutBalancer(actionName, params, opts = {}) {
-			if (params === undefined)
-				params = {}; // Backward compatibility
+			if (params === undefined) params = {}; // Backward compatibility
 
 			let nodeID = null;
-			let endpoint = null;
+			/** @type {ActionEndpoint} */
+			let endpoint;
 			if (typeof actionName !== "string") {
 				endpoint = actionName;
 				actionName = endpoint.action.name;
@@ -16173,24 +23783,27 @@
 					endpoint = this.registry.getActionEndpointByNodeId(actionName, nodeID);
 					if (!endpoint) {
 						this.logger.warn(`Service '${actionName}' is not found on '${nodeID}' node.`);
-						return this.Promise.reject(new errors.ServiceNotFoundError({ action: actionName, nodeID })).catch(err => this.errorHandler(err, { nodeID, actionName, params, opts }));
-
+						return this.Promise.reject(
+							new errors.ServiceNotFoundError({ action: actionName, nodeID })
+						).catch(err => this.errorHandler(err, { nodeID, actionName, params, opts }));
 					}
 				} else {
 					// Get endpoint list by action name
 					const epList = this.registry.getActionEndpoints(actionName);
 					if (epList == null) {
 						this.logger.warn(`Service '${actionName}' is not registered.`);
-						return this.Promise.reject(new errors.ServiceNotFoundError({ action: actionName })).catch(err => this.errorHandler(err, { actionName, params, opts }));
-
+						return this.Promise.reject(
+							new errors.ServiceNotFoundError({ action: actionName })
+						).catch(err => this.errorHandler(err, { actionName, params, opts }));
 					}
 
 					endpoint = epList.getFirst();
 					if (endpoint == null) {
 						const errMsg = `Service '${actionName}' is not available.`;
 						this.logger.warn(errMsg);
-						return this.Promise.reject(new errors.ServiceNotAvailableError({ action: actionName })).catch(err => this.errorHandler(err, { actionName, params, opts }));
-
+						return this.Promise.reject(
+							new errors.ServiceNotAvailableError({ action: actionName })
+						).catch(err => this.errorHandler(err, { actionName, params, opts }));
 					}
 				}
 			}
@@ -16210,7 +23823,11 @@
 			}
 			ctx.nodeID = nodeID;
 
-			this.logger.debug("Call action on a node.", { action: ctx.action.name, nodeID: ctx.nodeID, requestID: ctx.requestID });
+			this.logger.debug("Call action on a node.", {
+				action: ctx.action.name,
+				nodeID: ctx.nodeID,
+				requestID: ctx.requestID
+			});
 
 			let p = endpoint.action.remoteHandler(ctx);
 
@@ -16220,6 +23837,12 @@
 			return p;
 		}
 
+		/**
+		 *
+		 * @param {string} actionName
+		 * @param {Context=} ctx
+		 * @returns
+		 */
 		_getLocalActionEndpoint(actionName, ctx) {
 			// Find action by name
 			let epList = this.registry.getActionEndpoints(actionName);
@@ -16239,79 +23862,76 @@
 		}
 
 		/**
+		 * @overload
+		 * @param {Record<string, MCallDefinition>} def
+		 * @param {MCallCallingOptions=} opts
+		 * @returns {Promise<Record<string, TResult>>}
+		 */
+		/**
+		 * @overload
+		 * @param {MCallDefinition[]} def
+		 * @param {MCallCallingOptions=} opts
+		 * @returns {Promise<TResult[]>}
+		 */
+		/**
 		 * Multiple action calls.
 		 *
-		 * @param {Array<Object>|Object} def Calling definitions.
-		 * @returns {Promise<Array<Object>|Object>}
-		 *
-		 * @example
-		 * Call `mcall` with an array:
-		 * ```js
-		 * broker.mcall([
-		 * 	{ action: "posts.find", params: { limit: 5, offset: 0 } },
-		 * 	{ action: "users.find", params: { limit: 5, sort: "username" }, opts: { timeout: 500 } }
-		 * ]).then(results => {
-		 * 	let posts = results[0];
-		 * 	let users = results[1];
-		 * })
-		 * ```
-		 *
-		 * @example
-		 * Call `mcall` with an Object:
-		 * ```js
-		 * broker.mcall({
-		 * 	posts: { action: "posts.find", params: { limit: 5, offset: 0 } },
-		 * 	users: { action: "users.find", params: { limit: 5, sort: "username" }, opts: { timeout: 500 } }
-		 * }).then(results => {
-		 * 	let posts = results.posts;
-		 * 	let users = results.users;
-		 * })
-		 * ```
-		 * @throws MoleculerServerError - If the `def` is not an `Array` and not an `Object`.
+		 * @template TResult
+		 * @param {Record<string, MCallDefinition>|MCallDefinition[]} def
+		 * @param {MCallCallingOptions=} opts
+		 * @returns {Promise<Record<string, TResult> | TResult[]>}
 		 * @memberof ServiceBroker
 		 */
-		mcall(def, opts) {
+		mcall(def, opts = {}) {
+			const { settled, ...options } = opts;
 			if (Array.isArray(def)) {
-				return this.Promise.all(def.map(item => this.call(item.action, item.params, item.options || opts)));
-
+				return /** @type {Promise<TResult[]>} */ (
+					utils_1.promiseAllControl(
+						def.map(item => this.call(item.action, item.params, item.options || options)),
+						settled,
+						this.Promise
+					)
+				);
 			} else if (utils_1.isObject(def)) {
-				let results = {};
-				let promises = Object.keys(def).map(name => {
+				/** @type {Record<string, TResult>} */
+				const results = {};
+				const promises = Object.keys(def).map(name => {
 					const item = def[name];
-					const options = item.options || opts;
-					return this.call(item.action, item.params, options).then(res => results[name] = res);
+					const callOptions = item.options || options;
+					return this.call(item.action, item.params, callOptions).then(
+						res => (results[name] = res)
+					);
 				});
 
-				let p = this.Promise.all(promises);
+				const p = utils_1.promiseAllControl(promises, settled, this.Promise);
 
 				// Pointer to Context
+				// @ts-ignore
 				p.ctx = promises.map(promise => promise.ctx);
 
 				return p.then(() => results);
 			} else {
-				return this.Promise.reject(new errors.MoleculerServerError("Invalid calling definition.", 500, "INVALID_PARAMETERS"));
+				return this.Promise.reject(
+					new errors.MoleculerServerError("Invalid calling definition.", 500, "INVALID_PARAMETERS")
+				);
 			}
 		}
-
 
 		/**
 		 * Emit an event (grouped & balanced global event)
 		 *
 		 * @param {string} eventName
-		 * @param {any?} payload
-		 * @param {Object?} opts
+		 * @param {any=} payload
+		 * @param {Object=} opts
 		 * @returns {Promise<any>}
 		 *
 		 * @memberof ServiceBroker
 		 */
 		emit(eventName, payload, opts) {
-			if (Array.isArray(opts) || utils_1.isString(opts))
-				opts = { groups: opts };
-			else if (opts == null)
-				opts = {};
+			if (Array.isArray(opts) || utils_1.isString(opts)) opts = { groups: opts };
+			else if (opts == null) opts = {};
 
-			if (opts.groups && !Array.isArray(opts.groups))
-				opts.groups = [opts.groups];
+			if (opts.groups && !Array.isArray(opts.groups)) opts.groups = [opts.groups];
 
 			const promises = [];
 
@@ -16320,29 +23940,39 @@
 			ctx.eventType = "emit";
 			ctx.eventGroups = opts.groups;
 
-			this.logger.debug(`Emit '${eventName}' event`+ (opts.groups ? ` to '${opts.groups.join(", ")}' group(s)` : "") + ".");
+			this.logger.debug(
+				`Emit '${eventName}' event` +
+					(opts.groups ? ` to '${opts.groups.join(", ")}' group(s)` : "") +
+					"."
+			);
 
 			// Call local/internal subscribers
-			if (/^\$/.test(eventName))
-				this.localBus.emit(eventName, payload);
+			if (/^\$/.test(eventName)) this.localBus.emit(eventName, payload);
 
 			if (!this.options.disableBalancer) {
-
-				const endpoints = this.registry.events.getBalancedEndpoints(eventName, opts.groups);
+				const endpoints = this.registry.events.getBalancedEndpoints(
+					eventName,
+					opts.groups,
+					ctx
+				);
 
 				// Grouping remote events (reduce the network traffic)
 				const groupedEP = {};
 
 				endpoints.forEach(([ep, group]) => {
-					if (ep.id == this.nodeID) {
+					if (ep.id === this.nodeID) {
 						// Local service, call handler
 						const newCtx = ctx.copy(ep);
-						promises.push(this.registry.events.callEventHandler(newCtx));
+						promises.push(
+							this.registry.events.callEventHandler(newCtx).catch(err => {
+								// Catch and log the error because it's a local event handler, not throwing further.
+								this.logger.error(err);
+							})
+						);
 					} else {
 						// Remote service
 						const e = groupedEP[ep.id];
-						if (e)
-							e.groups.push(group);
+						if (e) e.groups.push(group);
 						else
 							groupedEP[ep.id] = {
 								ep,
@@ -16359,48 +23989,58 @@
 						promises.push(this.transit.sendEvent(newCtx));
 					});
 				}
-
-				return this.Promise.all(promises);
-
 			} else if (this.transit) {
 				// Disabled balancer case
 				let groups = opts.groups;
 
-				if (!groups || groups.length == 0) {
+				if (!groups || groups.length === 0) {
 					// Apply to all groups
 					groups = this.getEventGroups(eventName);
 				}
 
-				if (groups.length == 0)
-					return this.Promise.resolve();
+				if (groups.length === 0) return this.Promise.resolve(true);
 
 				ctx.eventGroups = groups;
-				return this.transit.sendEvent(ctx);
+				promises.push(this.transit.sendEvent(ctx));
 			}
+
+			const p = this.Promise.allSettled(promises).then(results => {
+				const err = results.find(r => r.status == "rejected");
+				if (err) return this.Promise.reject(err.reason);
+				return true;
+			});
+
+			if (opts.throwError) {
+				return p;
+			}
+			return p.catch(() => {
+				// swallow the error. It's already logged.
+			});
 		}
 
 		/**
 		 * Broadcast an event for all local & remote services
 		 *
 		 * @param {string} eventName
-		 * @param {any?} payload
-		 * @param {Object?} opts
+		 * @param {any=} payload
+		 * @param {Object=} opts
 		 * @returns {Promise}
 		 *
 		 * @memberof ServiceBroker
 		 */
 		broadcast(eventName, payload, opts) {
-			if (Array.isArray(opts) || utils_1.isString(opts))
-				opts = { groups: opts };
-			else if (opts == null)
-				opts = {};
+			if (Array.isArray(opts) || utils_1.isString(opts)) opts = { groups: opts };
+			else if (opts == null) opts = {};
 
-			if (opts.groups && !Array.isArray(opts.groups))
-				opts.groups = [opts.groups];
+			if (opts.groups && !Array.isArray(opts.groups)) opts.groups = [opts.groups];
 
 			const promises = [];
 
-			this.logger.debug(`Broadcast '${eventName}' event`+ (opts.groups ? ` to '${opts.groups.join(", ")}' group(s)` : "") + ".");
+			this.logger.debug(
+				`Broadcast '${eventName}' event` +
+					(opts.groups ? ` to '${opts.groups.join(", ")}' group(s)` : "") +
+					"."
+			);
 
 			if (this.transit) {
 				const ctx = this.ContextFactory.create(this, null, payload, opts);
@@ -16422,62 +24062,83 @@
 					// Disabled balancer case
 					let groups = opts.groups;
 
-					if (!groups || groups.length == 0) {
+					if (!groups || groups.length === 0) {
 						// Apply to all groups
 						groups = this.getEventGroups(eventName);
 					}
 
-					if (groups.length == 0)
-						return; // Return here because balancer disabled, so we can't call the local services.
+					if (groups.length === 0) return; // Return here because balancer disabled, so we can't call the local services.
 
 					const endpoints = this.registry.events.getAllEndpoints(eventName, groups);
 
 					// Return here because balancer disabled, so we can't call the local services.
-					return this.Promise.all(endpoints.map(ep => {
+					endpoints.forEach(ep => {
 						const newCtx = ctx.copy(ep);
 						newCtx.eventGroups = groups;
-						return this.transit.sendEvent(newCtx);
-					}));
+						promises.push(this.transit.sendEvent(newCtx));
+					});
 				}
 			}
 
-			// Send to local services
-			promises.push(this.broadcastLocal(eventName, payload, opts));
+			if (!this.options.disableBalancer) {
+				// Send to local services
+				promises.push(this.broadcastLocal(eventName, payload, opts));
+			}
 
-			return this.Promise.all(promises);
+			const p = this.Promise.allSettled(promises).then(results => {
+				const err = results.find(r => r.status == "rejected");
+				if (err) return this.Promise.reject(err.reason);
+				return true;
+			});
+
+			if (opts.throwError) {
+				return p;
+			}
+			return p.catch(() => {
+				// swallow the error. It's already logged.
+			});
 		}
 
 		/**
 		 * Broadcast an event for all local services
 		 *
 		 * @param {string} eventName
-		 * @param {any?} payload
-		 * @param {Object?} groups
+		 * @param {any=} payload
+		 * @param {Object=} opts
 		 * @returns
 		 *
 		 * @memberof ServiceBroker
 		 */
 		broadcastLocal(eventName, payload, opts) {
-			if (Array.isArray(opts) || utils_1.isString(opts))
-				opts = { groups: opts };
-			else if (opts == null)
-				opts = {};
+			if (Array.isArray(opts) || utils_1.isString(opts)) opts = { groups: opts };
+			else if (opts == null) opts = {};
 
-			if (opts.groups && !Array.isArray(opts.groups))
-				opts.groups = [opts.groups];
+			if (opts.groups && !Array.isArray(opts.groups)) opts.groups = [opts.groups];
 
-			this.logger.debug(`Broadcast '${eventName}' local event`+ (opts.groups ? ` to '${opts.groups.join(", ")}' group(s)` : "") + ".");
+			this.logger.debug(
+				`Broadcast '${eventName}' local event` +
+					(opts.groups ? ` to '${opts.groups.join(", ")}' group(s)` : "") +
+					"."
+			);
 
 			// Call internal subscribers
-			if (/^\$/.test(eventName))
-				this.localBus.emit(eventName, payload);
+			if (/^\$/.test(eventName)) this.localBus.emit(eventName, payload);
 
 			const ctx = this.ContextFactory.create(this, null, payload, opts);
 			ctx.eventName = eventName;
 			ctx.eventType = "broadcastLocal";
 			ctx.eventGroups = opts.groups;
 
-			return this.emitLocalServices(ctx);
+			const p = this.emitLocalServices(ctx);
+
+			if (opts.throwError) {
+				return p;
+			}
+
+			return p.catch(err => {
+				// Catch and log the error because it's a local event handler, not throwing further.
+				this.logger.error(err);
+			});
 		}
 
 		/**
@@ -16493,7 +24154,6 @@
 				if (utils_1.isString(nodeID)) {
 					// Ping a single node
 					return new this.Promise(resolve => {
-
 						const timer = timersBrowserify.setTimeout(() => {
 							this.localBus.off("$node.pong", handler);
 							resolve(null);
@@ -16511,22 +24171,21 @@
 
 						this.transit.sendPing(nodeID);
 					});
-
 				} else {
 					const pongs = {};
 					let nodes = nodeID;
 					if (!nodes) {
-						nodes = this.registry.getNodeList({ onlyAvailable: true })
+						nodes = this.registry
+							.getNodeList({ onlyAvailable: true })
 							.filter(node => node.id != this.nodeID)
 							.map(node => node.id);
 					}
 
-					nodes.forEach(id => pongs[id] = null);
+					nodes.forEach(id => (pongs[id] = null));
 					const processing = new Set(nodes);
 
 					// Ping multiple nodes
 					return new this.Promise(resolve => {
-
 						const timer = timersBrowserify.setTimeout(() => {
 							this.localBus.off("$node.pong", handler);
 							resolve(pongs);
@@ -16536,7 +24195,7 @@
 							pongs[pong.nodeID] = pong;
 							processing.delete(pong.nodeID);
 
-							if (processing.size == 0) {
+							if (processing.size === 0) {
 								clearTimeout(timer);
 								this.localBus.off("$node.pong", handler);
 								resolve(pongs);
@@ -16556,17 +24215,17 @@
 		/**
 		 * Get local node health status
 		 *
-		 * @returns {Promise}
+		 * @returns {NodeHealthStatus}
 		 * @memberof ServiceBroker
 		 */
 		getHealthStatus() {
-			return health.getHealthStatus(this);
+			return health.getHealthStatus();
 		}
 
 		/**
 		 * Get local node info.
 		 *
-		 * @returns
+		 * @returns {NodeRawInfo}
 		 * @memberof ServiceBroker
 		 */
 		getLocalNodeInfo() {
@@ -16609,7 +24268,7 @@
 		 * or from `broadcastLocal`
 		 *
 		 * @param {Context} ctx
-		 * @returns
+		 * @returns {Promise<any>}
 		 * @memberof ServiceBroker
 		 */
 		emitLocalServices(ctx) {
@@ -16652,35 +24311,23 @@
 		 * @returns {String} uuid
 		 */
 		generateUid() {
-			if (this.options.uidGenerator)
-				return this.options.uidGenerator.call(this, this);
+			if (this.options.uidGenerator) return this.options.uidGenerator.call(this, this);
 
 			return utils_1.generateToken();
 		}
 
-
 		/**
-		 * Get the Constructor name of any object if it exists
-		 * @param {any} obj
-		 * @returns {string}
-		 *
+		 * Only for backward compatibility
 		 */
 		getConstructorName(obj) {
-			let target = obj.prototype;
-			if (target && target.constructor && target.constructor.name){
-				return target.constructor.name;
-			}
-			if (obj.constructor && obj.constructor.name){
-				return obj.constructor.name;
-			}
-			return undefined;
+			return utils_1.getConstructorName(obj);
 		}
 
 		/**
 		 * Ensure the service schema will be prototype of ServiceFactory;
 		 *
-		 * @param {any} schema
-		 * @returns {string}
+		 * @param {ServiceSchema} schema
+		 * @returns {ServiceSchema}
 		 *
 		 */
 		normalizeSchemaConstructor(schema) {
@@ -16690,22 +24337,22 @@
 			// Sometimes the schame was loaded from another node_module or is a object copy.
 			// Then we will check if the constructor name is the same, asume that is a derivate object
 			// and adjust the prototype of the schema.
-			let serviceName = this.getConstructorName(this.ServiceFactory);
-			let target = this.getConstructorName(schema);
-			if (serviceName === target){
+			let serviceName = utils_1.getConstructorName(this.ServiceFactory);
+			let target = utils_1.getConstructorName(schema);
+			if (serviceName === target) {
 				Object.setPrototypeOf(schema, this.ServiceFactory);
 				return schema;
 			}
 			// Depending how the schema was create the correct constructor name (from base class) will be locate on __proto__.
-			target = this.getConstructorName(schema.__proto__);
-			if (serviceName === target){
-				Object.setPrototypeOf(schema.__proto__, this.ServiceFactory);
+			target = utils_1.getConstructorName(Object.getPrototypeOf(schema));
+			if (serviceName === target) {
+				Object.setPrototypeOf(Object.getPrototypeOf(schema), this.ServiceFactory);
 				return schema;
 			}
 			// This is just to handle some idiosyncrasies from Jest.
-			if (schema._isMockFunction){
-				target = this.getConstructorName(schema.prototype.__proto__);
-				if (serviceName === target){
+			if (schema._isMockFunction) {
+				target = utils_1.getConstructorName(Object.getPrototypeOf(schema.prototype));
+				if (serviceName === target) {
 					Object.setPrototypeOf(schema, this.ServiceFactory);
 					return schema;
 				}
@@ -16717,14 +24364,19 @@
 	/**
 	 * Version of Moleculer
 	 */
-	ServiceBroker.MOLECULER_VERSION = require$$7.version;
+	ServiceBroker.MOLECULER_VERSION = require$$8.version;
 	ServiceBroker.prototype.MOLECULER_VERSION = ServiceBroker.MOLECULER_VERSION;
 
 	/**
 	 * Version of Protocol
 	 */
-	ServiceBroker.PROTOCOL_VERSION = "4";
+	ServiceBroker.PROTOCOL_VERSION = "5";
 	ServiceBroker.prototype.PROTOCOL_VERSION = ServiceBroker.PROTOCOL_VERSION;
+
+	/**
+	 * Internal middlewares (order)
+	 */
+	ServiceBroker.INTERNAL_MIDDLEWARES = INTERNAL_MIDDLEWARES;
 
 	/**
 	 * Default configuration
@@ -16740,6 +24392,12 @@
 		CIRCUIT_OPEN
 	} = constants;
 
+	/**
+	 * !!! PLEASE NOTE !!!
+	 *
+	 * !! If you update this file, don't forget to update the same in the index.mjs file.
+	 */
+
 	var moleculer = {
 		ServiceBroker: serviceBroker,
 		Loggers: loggers,
@@ -16752,11 +24410,12 @@
 		Serializers: serializers,
 		Strategies: strategies,
 		Validators: validators,
-		Validator: fastest, // deprecated
 		TracerExporters: exporters,
 		MetricTypes: types,
 		MetricReporters: reporters,
 		METRIC: constants$1,
+
+		Transit: transit,
 
 		Registry: registry$2,
 		Discoverers: discoverers,
@@ -16774,7 +24433,8 @@
 		CIRCUIT_OPEN,
 
 		MOLECULER_VERSION: serviceBroker.MOLECULER_VERSION,
-		PROTOCOL_VERSION: serviceBroker.PROTOCOL_VERSION
+		PROTOCOL_VERSION: serviceBroker.PROTOCOL_VERSION,
+		INTERNAL_MIDDLEWARES: serviceBroker.INTERNAL_MIDDLEWARES
 	};
 
 	var src = moleculer;

@@ -14,7 +14,10 @@ const moleculerModules = (paths, namespace = '') => {
 
 const builtInModules = [
   'moleculer',
-  'moleculer-repl'
+  'moleculer-repl',
+  'eventemitter2',
+  'lru-cache',
+  'fastest-validator'
 ]
 
 const transporters = moleculerModules([
@@ -24,7 +27,6 @@ const transporters = moleculerModules([
   './mqtt',
   './nats',
   './redis',
-  './stan',
   './tcp'
 ], 'transporters')
 
@@ -42,12 +44,9 @@ const strategies = moleculerModules([
 ], 'strategies')
 
 const serializers = moleculerModules([
-  // serializers
-  './avro',
   './msgpack',
   './notepack',
-  './protobuf',
-  './thrift'
+  './cbor'
 ], 'serializers')
 
 const MetricReporters = moleculerModules([
@@ -68,7 +67,9 @@ const TracingExporters = moleculerModules([
 const Middlewares = moleculerModules([
   './hot-reload',
   './transmit/compression',
-  './transmit/encryption'
+  './transmit/encryption',
+  './debugging/action-logger',
+  './debugging/transit-logger'
 ], 'middlewares')
 
 const Loggers = moleculerModules([
@@ -76,6 +77,7 @@ const Loggers = moleculerModules([
   './datadog',
   './debug',
   './file',
+  './formatted',
   './log4js',
   './pino',
   './winston'
@@ -101,6 +103,9 @@ aliasModules = aliasResolve([
 
 aliasModules['./cpu-usage'] = normalizePath(path.resolve('src/cpu-usage.js'))
 // aliasModules['./logger'] = normalizePath(path.resolve('src/logger.js'))
+
+// Force lru-cache to use the top-level v7 (Rollup 2.x can't parse v11's private class fields)
+aliasModules['lru-cache'] = normalizePath(path.resolve('node_modules/lru-cache/index.js'))
 
 // console.log('Alias modules', aliasModules)
 

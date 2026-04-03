@@ -54,6 +54,8 @@ const config = async () => {
         'gc-stats': 'null',
         'event-loop-stats': 'null',
         kleur: `require("${normalizePath(path.resolve('src/kleur.js'))}")`,
+        perf_hooks: `require("${normalizePath(path.resolve('src/shims/perf_hooks.js'))}")`,
+        glob: 'null',
         delimiters: ['require("', '")']
       }),
       // For some reason injecting `process` breaks the sourcemap so we have to replace the `process` keyword.
@@ -67,7 +69,7 @@ const config = async () => {
       json(),
       resolve({
         preferBuiltins: true,
-        resolveOnly: ['moleculer']
+        resolveOnly: ['moleculer', 'eventemitter2', 'lru-cache', 'fastest-validator']
       }),
       commonjs({
         requireReturnsDefault: 'auto'

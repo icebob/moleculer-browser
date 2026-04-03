@@ -25,7 +25,10 @@
   "dependencies": {
     "browser-process-hrtime": "^1.0.0",
     "cpus": "^1.0.3",
-    "moleculer": "^0.14.10",
+    "eventemitter2": "^6.4.9",
+    "fastest-validator": "^1.19.1",
+    "lru-cache": "^7.18.3",
+    "moleculer": "^0.15.0",
     "process": "^0.11.10",
     "raf-perf": "^1.2.0",
     "timers-browserify": "^2.0.11"
